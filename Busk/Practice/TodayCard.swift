@@ -40,7 +40,10 @@ struct TodayCard: View {
         return "\(day.makes) made · \(Self.percent(rate))"
     }
 
-    static func percent(_ rate: Double) -> String { "\(Int((rate * 100).rounded()))%" }
+    static func percent(_ rate: Double) -> String { "\(points(rate))%" }
+    static func points(_ rate: Double) -> Int { Int((rate * 100).rounded()) }
+    /// Change in whole percentage points, matching the two percents shown.
+    static func pointsChange(from a: Double, to b: Double) -> Int { points(b) - points(a) }
 }
 
 struct GoalRing: View {

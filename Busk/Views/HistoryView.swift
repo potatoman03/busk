@@ -50,7 +50,7 @@ struct HistoryView: View {
         return HStack {
             Text(name)
             Spacer()
-            Text("\(shots) shots" + (makes.isEmpty ? "" : " · \(makes.reduce(0, +)) made"))
+            Text("\(shots) shot\(shots == 1 ? "" : "s")" + (makes.isEmpty ? "" : " · \(makes.reduce(0, +)) made"))
                 .monospacedDigit()
         }
         .accessibilityElement(children: .combine)

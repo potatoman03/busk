@@ -184,6 +184,14 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(status.label.contains("how am i doing"), status.label)
         snapshot("09-voice-how-am-i-doing")
 
+        app.buttons["simulateVoice-make"].tap()
+        XCTAssertTrue(app.staticTexts["makeCount"].waitForExistence(timeout: 5), "\"made it\" marks the last shot")
+        snapshot("09b-voice-made-it")
+        sleep(2) // voice commands within 1.5 s of the last one are ignored as echoes
+        app.buttons["simulateVoice-miss"].tap()
+        XCTAssertTrue(status.label.contains("missed it"), status.label)
+
+        sleep(2)
         app.buttons["simulateVoice-end"].tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         XCTAssertGreaterThanOrEqual(Int(app.staticTexts["summaryShotCount"].label) ?? 0, 2)

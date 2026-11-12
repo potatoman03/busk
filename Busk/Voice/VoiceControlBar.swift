@@ -30,19 +30,27 @@ struct VoiceControlBar: View {
                     .background(.ultraThinMaterial, in: Capsule())
                     .accessibilityIdentifier("voiceStatus")
                 if voice.state == .simulated {
-                    HStack(spacing: 6) {
-                        ForEach(commands, id: \.self) { command in
-                            Button("“\(command.example.capitalizedFirst)”") { voice.inject(command.example) }
-                                .font(.caption2.bold())
-                                .buttonStyle(.bordered)
-                                .accessibilityIdentifier("simulateVoice-\(command.rawValue)")
+                    ViewThatFits {
+                        HStack(spacing: 6) { buttons(commands, voice) }
+                        VStack(spacing: 6) {
+                            HStack(spacing: 6) { buttons(Array(commands.prefix(2)), voice) }
+                            HStack(spacing: 6) { buttons(Array(commands.dropFirst(2)), voice) }
                         }
                     }
                 }
     }
 
+    private func buttons(_ commands: [VoiceCommand], _ voice: VoiceControl) -> some View {
+        ForEach(commands, id: \.self) { command in
+            Button("“\(command.example.capitalizedFirst)”") { voice.inject(command.example) }
+                .font(.caption2.bold())
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("simulateVoice-\(command.rawValue)")
+        }
+    }
+
     private func statusText(_ voice: VoiceControl) -> String {
-        let hint = "Say " + commands.map { "“\($0.example)”" }.joined(separator: " or ")
+        let hint = "Say " + commands.prefix(2).map { "“\($0.example)”" }.joined(separator: " or ")
         switch voice.state {
         case .off: return ""
         case .listening: return voice.lastHeard.map { "Heard “\($0)”" } ?? hint

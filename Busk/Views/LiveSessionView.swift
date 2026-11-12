@@ -161,7 +161,7 @@ struct LiveSessionView: View {
                             session.markLastShot(made: shot.made == made ? nil : made)
                         }
                     }
-                    VoiceControlBar(commands: [.status, .end], compact: compact)
+                    VoiceControlBar(commands: [.status, .make, .miss, .end], compact: compact)
         }
     }
 

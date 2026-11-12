@@ -125,7 +125,7 @@ struct PracticeProgressView: View {
                     Text("Make rate").font(.headline)
                     Spacer()
                     if let first = days.first?.makeRate, let last = days.last?.makeRate, days.count > 1 {
-                        Change(delta: Int(((last - first) * 100).rounded()), unit: " pts")
+                        Change(delta: TodayCard.pointsChange(from: first, to: last), unit: " pts")
                     }
                 }
                 Chart(days) { day in
@@ -151,12 +151,12 @@ struct PracticeProgressView: View {
                 Text("Your first \(then.shots) shots against your latest \(now.shots)").font(.caption).foregroundStyle(.secondary)
                 compareRow("Form score", then: "\(then.averageScore)", now: "\(now.averageScore)", delta: now.averageScore - then.averageScore)
                 if let a = then.makeRate, let b = now.makeRate {
-                    compareRow("Make rate", then: TodayCard.percent(a), now: TodayCard.percent(b), delta: Int(((b - a) * 100).rounded()))
+                    compareRow("Make rate", then: TodayCard.percent(a), now: TodayCard.percent(b), delta: TodayCard.pointsChange(from: a, to: b))
                 }
                 ForEach(FormArea.allCases.filter { then.goodRate[$0] != nil && now.goodRate[$0] != nil }) { area in
                     let a = then.goodRate[area] ?? 0, b = now.goodRate[area] ?? 0
                     compareRow(area.title, then: TodayCard.percent(a), now: TodayCard.percent(b),
-                               delta: Int(((b - a) * 100).rounded()), symbol: area.symbol)
+                               delta: TodayCard.pointsChange(from: a, to: b), symbol: area.symbol)
                 }
                 Text("Areas show the share of shots graded good.").font(.caption2).foregroundStyle(.secondary)
             }
@@ -182,7 +182,7 @@ struct PracticeProgressView: View {
                 compareRow("Form score", then: "\(x)", now: "\(y)", delta: y - x)
             }
             if let x = a.makeRate, let y = b.makeRate {
-                compareRow("Make rate", then: TodayCard.percent(x), now: TodayCard.percent(y), delta: Int(((y - x) * 100).rounded()))
+                compareRow("Make rate", then: TodayCard.percent(x), now: TodayCard.percent(y), delta: TodayCard.pointsChange(from: x, to: y))
             }
         }
         .accessibilityIdentifier("weekCompare")
