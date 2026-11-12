@@ -75,11 +75,12 @@ def fetch(clip: Clip, cache: Path, log) -> Path:
     if not orig.exists() or _sha1(orig) != src["sha1"]:
         log(f"fetching {clip.id} ({src['license']}, {src['credit']}) from {src['page']}")
         download(src["url"], orig, src["sha1"])
-    mp4 = d / f"{src['sha1']}.mp4"
+    mp4 = d / f"{src['sha1']}.720p30.mp4"
     if not mp4.exists():
         import imageio_ffmpeg
         tmp = d / f"{src['sha1']}.tmp.mp4"
         subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-y", "-loglevel", "error", "-i", str(orig), "-an",
+                        "-vf", "scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,fps=30",
                         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "veryfast", "-crf", "18", str(tmp)],
                        check=True)
         tmp.replace(mp4)
