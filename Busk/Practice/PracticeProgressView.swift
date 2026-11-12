@@ -158,7 +158,7 @@ struct PracticeProgressView: View {
                     compareRow(area.title, then: TodayCard.percent(a), now: TodayCard.percent(b),
                                delta: TodayCard.pointsChange(from: a, to: b), symbol: area.symbol)
                 }
-                Text("Make rate counts shots marked Made or Missed. Areas show the share of shots graded good.").font(.caption2).foregroundStyle(.secondary)
+                Text("Make rate counts shots marked Made or Missed, or every shot in a session you counted as a whole. Areas show the share of shots graded good.").font(.caption2).foregroundStyle(.secondary)
             }
             .accessibilityIdentifier("improvementCard")
         }
