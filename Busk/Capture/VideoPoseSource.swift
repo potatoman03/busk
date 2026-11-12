@@ -76,6 +76,7 @@ final class VideoPoseSource: PoseSource {
 
         let wallStart = Date()
         var last: TimeInterval = 0
+        var lastDrawn: TimeInterval?
         while running, let sample = output.copyNextSampleBuffer() {
             guard let pixels = CMSampleBufferGetImageBuffer(sample) else { continue }
             let t = CMSampleBufferGetPresentationTimeStamp(sample).seconds
@@ -83,7 +84,9 @@ final class VideoPoseSource: PoseSource {
             let joints = pose(at: t, pixels: pixels, orientation: orientation)
             if !joints.isEmpty { lastJoints = joints }
             let behind = Date().timeIntervalSince(wallStart) - t > Self.maxLag
-            let image = behind ? nil : displayImage(pixels, orientation: orientation)
+            let draw = Self.shouldDraw(at: t, behind: behind, lastDrawn: lastDrawn)
+            if draw { lastDrawn = t }
+            let image = draw ? displayImage(pixels, orientation: orientation) : nil
             let wait = t - Date().timeIntervalSince(wallStart)
             if wait > 0 { Thread.sleep(forTimeInterval: wait) }
             let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect)
@@ -106,6 +109,13 @@ final class VideoPoseSource: PoseSource {
 
     /// Frames this far behind real time skip drawing (pose still goes through) so playback keeps up.
     private static let maxLag: TimeInterval = 0.1
+    /// Even when live Vision keeps playback behind on every frame, the picture still updates this often.
+    static let minDrawInterval: TimeInterval = 0.2
+
+    static func shouldDraw(at t: TimeInterval, behind: Bool, lastDrawn: TimeInterval?) -> Bool {
+        guard behind, let lastDrawn else { return true }
+        return t - lastDrawn >= minDrawInterval
+    }
     /// Longest side of the background image; full-size CoreImage renders are too slow to keep up in the simulator.
     private static let displayMaxSide: CGFloat = 720
 

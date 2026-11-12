@@ -64,4 +64,11 @@ final class ReplayPoseSourceTests: XCTestCase {
         status.write(to: url)
         XCTAssertEqual(try JSONDecoder().decode(ReplayStatus.self, from: Data(contentsOf: url)), status)
     }
+
+    func testVideoKeepsDrawingWhenLiveVisionKeepsPlaybackBehind() {
+        XCTAssertTrue(VideoPoseSource.shouldDraw(at: 0, behind: true, lastDrawn: nil))
+        XCTAssertTrue(VideoPoseSource.shouldDraw(at: 0.05, behind: false, lastDrawn: 0))
+        XCTAssertFalse(VideoPoseSource.shouldDraw(at: 0.1, behind: true, lastDrawn: 0))
+        XCTAssertTrue(VideoPoseSource.shouldDraw(at: 0.2, behind: true, lastDrawn: 0))
+    }
 }
