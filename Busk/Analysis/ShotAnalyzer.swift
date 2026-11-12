@@ -277,8 +277,13 @@ final class ShotAnalyzer {
                 let up = crossing(s0 - 1, s0, level0) ?? samples[s0].t
                 let down = crossing(s1, s1 + 1, level1) ?? samples[s1].t
                 releaseTiming = (samples[rel].t - apex) / max((down - up) / 2, dt)
-                let takeoff = samples[..<s0].last { $0.ankle != nil } ?? samples[firstFoot]
-                let settled = samples.last { $0.ankle != nil && $0.t <= samples[s1].t + 0.6 } ?? samples[lastFoot]
+                // Drift compares the stance before any foot lift and after the feet are back down, which can be well
+                // outside the air time on a clip whose feet creep in the frame.
+                var g0 = top, g1 = top
+                while g0 > 0, let f = feet[g0 - 1], f > feet[firstFoot]! + 0.012 { g0 -= 1 }
+                while g1 < n - 1, let f = feet[g1 + 1], f > feet[lastFoot]! + 0.012 { g1 += 1 }
+                let takeoff = samples[..<g0].last { $0.ankle != nil } ?? samples[firstFoot]
+                let settled = samples.last { $0.ankle != nil && $0.t <= samples[g1].t + 0.6 } ?? samples[lastFoot]
                 if let a0 = takeoff.ankle, let a1 = settled.ankle {
                     var d = Double(abs(a1.x - a0.x)) / H
                     if view == .front, let h0 = takeoff.span, let h1 = settled.span, h1 > 0 {
@@ -290,8 +295,8 @@ final class ShotAnalyzer {
                             let lengths = s.compactMap { x in x.root.map { Geometry.distance(x.shoulder, $0) } }.sorted()
                             return lengths.isEmpty ? nil : lengths[lengths.count / 2]
                         }
-                        let after = samples.indices.filter { samples[$0].t >= samples[s1].t + 0.35 && samples[$0].t <= samples[s1].t + 0.65 }
-                        if let t0 = torso(samples[max(0, s0 - 4)..<s0]), let first = after.first, let last = after.last,
+                        let after = samples.indices.filter { samples[$0].t >= samples[g1].t + 0.35 && samples[$0].t <= samples[g1].t + 0.65 }
+                        if let t0 = torso(samples[max(0, g0 - 4)..<g0]), let first = after.first, let last = after.last,
                            let t1 = torso(samples[first...last]), t1 > 0 {
                             d = max(d, abs(1 - t0 / t1) * 3.1)
                         }
