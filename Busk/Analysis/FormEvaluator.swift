@@ -98,25 +98,27 @@ struct ShotResult: Codable, Equatable, Identifiable, Sendable {
 
 struct FormEvaluator {
     /// One check: `ok` and `bad` are the lines where a measurement turns from good to OK and from OK to needs work.
+    /// Each measurement has its own scale, so the flaw to fix first is the one furthest past `bad` as a share of the way
+    /// to `worst`, a clearly severe value (set from how flaws rank on random held-out shooters).
     struct Limit {
-        var ok: Double, bad: Double
+        var ok: Double, bad: Double, worst: Double
         /// Larger values are worse when `bad > ok`.
         func grade(_ v: Double) -> Grade {
             bad > ok ? (v > bad ? .needsWork : v > ok ? .ok : .good) : (v < bad ? .needsWork : v < ok ? .ok : .good)
         }
-        func severity(_ v: Double) -> Double { max(0, (v - bad) / (bad - ok)) }
+        func severity(_ v: Double) -> Double { max(0, (v - bad) / (worst - bad)) }
     }
 
     struct Thresholds {
-        var setPoint = Limit(ok: 0.06, bad: 0.0)
-        var releaseTiming = Limit(ok: 0.20, bad: 0.30)
-        var drift = Limit(ok: 0.11, bad: 0.16)
-        var hitch = Limit(ok: 0.22, bad: 0.30)
-        var elbow = Limit(ok: 0.055, bad: 0.075)
-        var guideHand = Limit(ok: 0.025, bad: 0.035)
-        var armAngle = Limit(ok: 64, bad: 59)
-        var legDrive = Limit(ok: 0.028, bad: 0.016)
-        var followThrough = Limit(ok: 0.40, bad: 0.25)
+        var setPoint = Limit(ok: 0.06, bad: 0.0, worst: -0.06)
+        var releaseTiming = Limit(ok: 0.20, bad: 0.30, worst: 0.55)
+        var drift = Limit(ok: 0.11, bad: 0.16, worst: 0.24)
+        var hitch = Limit(ok: 0.22, bad: 0.30, worst: 0.54)
+        var elbow = Limit(ok: 0.055, bad: 0.075, worst: 0.085)
+        var guideHand = Limit(ok: 0.025, bad: 0.035, worst: 0.042)
+        var armAngle = Limit(ok: 64, bad: 59, worst: 55)
+        var legDrive = Limit(ok: 0.028, bad: 0.016, worst: 0.004)
+        var followThrough = Limit(ok: 0.40, bad: 0.25, worst: 0.19)
     }
 
     var thresholds = Thresholds()
