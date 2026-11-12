@@ -78,7 +78,16 @@ struct HomeView: View {
             .navigationDestination(for: HomeRoute.self) { _ in HistoryView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .fullScreenCover(item: $setup) { SetupFlowView(autoStart: $0.autoStart) }
-            .safeAreaInset(edge: .bottom) { VoiceControlBar(commands: [.start]).padding(.bottom, 4) }
+            .safeAreaInset(edge: .bottom) {
+                if let voice, voice.state != .off {
+                    // Opaque so the list never shows through the bar.
+                    VoiceControlBar(commands: [.start])
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10).padding(.bottom, 4)
+                        .background(Color(red: 0.03, green: 0.015, blue: 0.01).ignoresSafeArea(edges: .bottom))
+                        .overlay(alignment: .top) { Divider() }
+                }
+            }
         }
         .onChange(of: voice?.event) { _, event in
             // "Start session" from home skips setup and goes live with the saved camera angle and hand.

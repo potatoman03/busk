@@ -30,11 +30,11 @@ struct BuskApp: App {
                     ReplaySessionView(video: video, label: AppEnvironment.replayLabel)
                 } else {
                     HomeView()
-                        .environment(voiceControl)
-                        .task(id: voiceCommands) {
-                            if voiceCommands { await voiceControl.start() } else { voiceControl.stop() }
-                        }
                 }
+            }
+            .environment(voiceControl)
+            .task(id: voiceCommands) {
+                if voiceCommands { await voiceControl.start() } else { voiceControl.stop() }
             }
             .tint(Theme.orange)
             .preferredColorScheme(.dark)
