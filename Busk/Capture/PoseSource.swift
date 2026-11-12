@@ -32,10 +32,11 @@ final class DemoPoseSource: PoseSource {
     private var clock: TimeInterval = 0
     private var styleIndex = 0
     private let leadIn: Double
+    private let walkIn: Bool
     private var wallStart: Date?
 
     init(handedness: Handedness = .right, view: CameraView = .side, styles: [ShotSimulator.Style]? = nil, gap: Double = 0.8,
-         leadIn: Double = 0.5) {
+         leadIn: Double = 0.5, walkIn: Bool = false) {
         var sim = ShotSimulator()
         sim.handedness = handedness
         sim.view = view
@@ -43,11 +44,13 @@ final class DemoPoseSource: PoseSource {
         self.styles = styles ?? ShotSimulator.Style.demoRotation(for: view)
         self.gap = gap
         self.leadIn = leadIn
+        self.walkIn = walkIn
     }
 
     func start() {
         stop()
         queue = simulator.idleFrames(seconds: leadIn, start: clock)
+        if walkIn && clock == 0 { queue = badlyFramed() + simulator.idleFrames(seconds: leadIn, start: 6) }
         wallStart = Date().addingTimeInterval(-clock)
         timer = Timer.scheduledTimer(withTimeInterval: 1 / simulator.fps, repeats: true) { [weak self] _ in
             self?.tick()
@@ -57,6 +60,26 @@ final class DemoPoseSource: PoseSource {
     func stop() {
         timer?.invalidate()
         timer = nil
+    }
+
+    /// Six seconds of a shooter finding their spot: off to the side, then too close, then feet out of the picture.
+    /// Joints that leave the picture are dropped, as Vision would.
+    private func badlyFramed() -> [PoseFrame] {
+        let moves: [(CGPoint) -> CGPoint] = [
+            { CGPoint(x: $0.x + 0.42, y: $0.y) },
+            { CGPoint(x: 0.5 + ($0.x - 0.5) * 1.8, y: 0.5 + ($0.y - 0.5) * 1.8) },
+            { CGPoint(x: $0.x, y: $0.y + 0.2) },
+        ]
+        return moves.enumerated().flatMap { step, move in
+            simulator.idleFrames(seconds: 2, start: Double(step) * 2).map { frame in
+                var f = frame
+                f.joints = frame.joints.compactMapValues { p in
+                    let q = move(p)
+                    return (0...1).contains(q.x) && (0...1).contains(q.y) ? q : nil
+                }
+                return f
+            }
+        }
     }
 
     /// Emits every frame that is due, so a busy main thread delays frames but never slows the replay clock.

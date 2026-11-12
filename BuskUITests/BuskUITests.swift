@@ -63,6 +63,21 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
     }
 
+    func testFramingCheckBeforeFirstShot() {
+        relaunch(["-ui-testing", "-demo-walk-in"])
+        app.buttons["startButton"].tap()
+        XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+        app.buttons["goLiveButton"].tap()
+        let check = app.descendants(matching: .any)["framingCheck"]
+        XCTAssertTrue(check.waitForExistence(timeout: 5))
+        snapshot("framing-check")
+        let banner = app.staticTexts["cueBanner"]
+        XCTAssertFalse(banner.label.hasPrefix("Got you"), banner.label)
+        expectation(for: NSPredicate(format: "label BEGINSWITH 'Got you'"), evaluatedWith: banner)
+        waitForExpectations(timeout: 15)
+        XCTAssertFalse(check.exists)
+    }
+
     func testFullShootingSession() {
         app.buttons["startButton"].tap()
         XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))

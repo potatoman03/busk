@@ -135,7 +135,8 @@ struct SetupFlowView: View {
         defer { starting = false }
         let source: PoseSource
         if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
-            source = DemoPoseSource(handedness: handedness, view: cameraView, leadIn: AppEnvironment.demoIdle ? 120 : 0.5)
+            source = DemoPoseSource(handedness: handedness, view: cameraView, leadIn: AppEnvironment.demoIdle ? 120 : 0.5,
+                                    walkIn: AppEnvironment.demoWalkIn)
         } else {
             guard await CameraPoseSource.requestAccess() else {
                 cameraDenied = true
