@@ -9,6 +9,7 @@ struct ReplaySessionView: View {
     let label: String?
     @State private var session: CoachSession?
     @State private var error: String?
+    @State private var replayed: ReplayStatus?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -22,6 +23,12 @@ struct ReplaySessionView: View {
                 Pill(text: "Benchmark clip: \(label)", systemImage: "film")
                     .padding(.top, 116)
                     .accessibilityIdentifier("replayClipLabel")
+            }
+            if let replayed {
+                Pill(text: "Replayed \(replayed.framesPlayed)/\(replayed.frames) frames · \(replayed.shots) shot\(replayed.shots == 1 ? "" : "s")",
+                     systemImage: "checkmark.circle.fill")
+                    .padding(.top, 152)
+                    .accessibilityIdentifier("replayComplete")
             }
         }
         .task { load() }
@@ -54,6 +61,16 @@ struct ReplaySessionView: View {
             let source = try ReplayPoseSource(contentsOf: URL(fileURLWithPath: path))
             let s = CoachSession(cameraView: source.clip.view, handedness: source.clip.handedness, source: source,
                                  voiceEnabled: false)
+            var status = ReplayStatus(label: label, path: path, frames: source.clip.frames.count)
+            status.write()
+            source.onFinished = { [weak source] in
+                status.finished = true
+                status.framesPlayed = source?.framesPlayed ?? 0
+                status.shots = s.shots.count
+                status.cues = s.spokenLog.map(\.text)
+                status.write()
+                replayed = status
+            }
             session = s
             s.start()
         } catch {

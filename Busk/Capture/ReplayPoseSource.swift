@@ -24,6 +24,10 @@ final class ReplayPoseSource: PoseSource {
 
     private var index = 0
     private var timer: Timer?
+    /// Called once on the main thread after every clip frame (and the hold) has gone through the session.
+    var onFinished: (() -> Void)?
+    /// Clip frames delivered so far (the hold frames are not counted).
+    private(set) var framesPlayed = 0
     /// Frames to keep showing the last pose after the clip ends, so a follow-through still in progress can finish.
     private var holdFrames: Int { Int(clip.fps * 1.5) }
 
@@ -64,6 +68,7 @@ final class ReplayPoseSource: PoseSource {
     func start() {
         stop()
         index = 0
+        framesPlayed = 0
         timer = Timer.scheduledTimer(withTimeInterval: 1 / clip.fps, repeats: true) { [weak self] _ in
             self?.tick()
         }
@@ -75,9 +80,15 @@ final class ReplayPoseSource: PoseSource {
     }
 
     private func tick() {
-        guard index < clip.frames.count + holdFrames else { return stop() }
+        guard index < clip.frames.count + holdFrames else {
+            stop()
+            onFinished?()
+            onFinished = nil
+            return
+        }
         let joints = clip.frames[min(index, clip.frames.count - 1)]
         onFrame?(PoseFrame(timestamp: Double(index) / clip.fps, joints: joints))
+        if index < clip.frames.count { framesPlayed = index + 1 }
         index += 1
     }
 }
