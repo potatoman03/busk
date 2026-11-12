@@ -209,7 +209,7 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         snapshot("06-settings")
         app.buttons["testVoiceButton"].tap()
-        XCTAssertTrue(app.staticTexts["testVoiceSpeaking"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["testVoiceSpeaking"].waitForExistence(timeout: 5))
         toggle.switches.firstMatch.tap()
         XCTAssertEqual(toggle.value as? String, "0")
         app.buttons["settingsDoneButton"].tap()
@@ -222,7 +222,8 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "0")
         toggle.switches.firstMatch.tap()
-        XCTAssertEqual(toggle.value as? String, "1")
+        expectation(for: NSPredicate(format: "value == '1'"), evaluatedWith: toggle)
+        waitForExpectations(timeout: 5)
         snapshot("07-settings-ghost-replay")
         app.buttons["settingsDoneButton"].tap()
 

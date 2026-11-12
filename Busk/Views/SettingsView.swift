@@ -23,7 +23,7 @@ struct SettingsView: View {
                         CoachVoice.preview.say("Tuck your elbow under the ball")
                         speaking = true
                         Task {
-                            try? await Task.sleep(for: .seconds(2.5))
+                            try? await Task.sleep(for: .seconds(4))
                             speaking = false
                         }
                     } label: {
