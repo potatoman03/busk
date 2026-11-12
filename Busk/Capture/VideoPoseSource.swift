@@ -80,20 +80,32 @@ final class VideoPoseSource: PoseSource {
             last = t
             let joints = pose(at: t, pixels: pixels, orientation: orientation)
             if !joints.isEmpty { lastJoints = joints }
-            let image = ciContext.createCGImage(CIImage(cvPixelBuffer: pixels).oriented(orientation),
-                                                from: CIImage(cvPixelBuffer: pixels).oriented(orientation).extent)
+            let behind = Date().timeIntervalSince(wallStart) - t > Self.maxLag
+            let image = behind ? nil : displayImage(pixels, orientation: orientation)
             let wait = t - Date().timeIntervalSince(wallStart)
             if wait > 0 { Thread.sleep(forTimeInterval: wait) }
             let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect)
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running else { return }
-                self.currentImage = image
+                if let image { self.currentImage = image }
                 self.onFrame?(frame)
             }
         }
         reader.cancelReading()
         holdLastPose(after: offset + last, wallStart: wallStart, clipEnd: last)
         return last + Self.holdSeconds
+    }
+
+    /// Frames this far behind real time skip drawing (pose still goes through) so playback keeps up.
+    private static let maxLag: TimeInterval = 0.1
+    /// Longest side of the background image; full-size CoreImage renders are too slow to keep up in the simulator.
+    private static let displayMaxSide: CGFloat = 720
+
+    private func displayImage(_ pixels: CVPixelBuffer, orientation: CGImagePropertyOrientation) -> CGImage? {
+        let oriented = CIImage(cvPixelBuffer: pixels).oriented(orientation)
+        let scale = min(1, Self.displayMaxSide / max(oriented.extent.width, oriented.extent.height))
+        let scaled = oriented.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        return ciContext.createCGImage(scaled, from: scaled.extent)
     }
 
     /// Keeps the final pose on screen briefly so a follow-through still in progress when the clip ends can finish.
