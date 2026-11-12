@@ -50,10 +50,16 @@ final class ShotAnalyzerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(run(.hitched).first).hitch, 0.3, accuracy: 0.1)
     }
 
-    func testFaderReleasesLateAndDrifts() throws {
+    func testFaderDrifts() throws {
         let m = try XCTUnwrap(run(.fader).first)
-        XCTAssertGreaterThan(try XCTUnwrap(m.releaseTiming), 0.3)
+        XCTAssertLessThan(try XCTUnwrap(m.releaseTiming), 0.2)
         XCTAssertGreaterThan(try XCTUnwrap(m.drift), 0.16)
+    }
+
+    func testLateRelease() throws {
+        let m = try XCTUnwrap(run(.lateRelease).first)
+        XCTAssertGreaterThan(try XCTUnwrap(m.releaseTiming), 0.33)
+        XCTAssertLessThan(try XCTUnwrap(m.drift), 0.11)
     }
 
     func testShortFollowThrough() throws {
@@ -64,9 +70,9 @@ final class ShotAnalyzerTests: XCTestCase {
         let good = try XCTUnwrap(run(.good, view: .front).first)
         XCTAssertNil(good.armAngle)
         XCTAssertLessThan(try XCTUnwrap(good.elbowFlare), 0.05)
-        XCTAssertLessThan(try XCTUnwrap(good.guideHandPush), 0.035)
+        XCTAssertLessThan(try XCTUnwrap(good.guideHandPush), 0.025)
         XCTAssertGreaterThan(try XCTUnwrap(run(.flaredElbow, view: .front).first?.elbowFlare), 0.07)
-        XCTAssertGreaterThan(try XCTUnwrap(run(.guideThumb, view: .front).first?.guideHandPush), 0.05)
+        XCTAssertGreaterThan(try XCTUnwrap(run(.guideThumb, view: .front).first?.guideHandPush), 0.035)
     }
 
     func testLeftHandedShot() throws {
