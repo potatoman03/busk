@@ -24,6 +24,11 @@ final class SessionRecord {
         self.makes = makes
     }
 
+    func update(duration: TimeInterval, shots: [ShotResult]) {
+        self.duration = duration
+        shotsData = (try? JSONEncoder().encode(shots)) ?? Data()
+    }
+
     var shots: [ShotResult] { (try? JSONDecoder().decode([ShotResult].self, from: shotsData)) ?? [] }
     var view: CameraView { CameraView(rawValue: viewRaw) ?? .side }
     var summary: SessionSummary { SessionSummary(shots: shots, makes: makes) }

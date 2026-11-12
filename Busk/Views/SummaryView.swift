@@ -7,6 +7,7 @@ struct SummaryView: View {
         SummaryContent(record: record)
             .navigationTitle("Session")
             .navigationBarTitleDisplayMode(.inline)
+            .opaqueNavigationBar()
     }
 }
 
@@ -14,6 +15,9 @@ struct SummaryContent: View {
     @Bindable var record: SessionRecord
     @Query(sort: \SessionRecord.date) private var records: [SessionRecord]
     @AppStorage(SettingsKey.dailyShotGoal) private var goal = PracticeGoal.defaultShots
+    @Environment(\.dynamicTypeSize) private var typeSize
+    private var large: Bool { typeSize.isAccessibilitySize }
+    private var summary: SessionSummary { record.summary }
 
     var body: some View {
         let summary = record.summary
@@ -22,7 +26,7 @@ struct SummaryContent: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 12) {
-                    stat("\(summary.count)", "shots", id: "summaryShotCount")
+                    stat("\(summary.count)", summary.count == 1 ? "shot" : "shots", id: "summaryShotCount")
                     stat(summary.makes.map(String.init) ?? "–", "made", color: .green, id: "summaryMakes")
                     stat("\(summary.averageScore)", "avg form", color: Theme.color(forScore: summary.averageScore), id: "summaryAverage")
                 }
@@ -42,12 +46,21 @@ struct SummaryContent: View {
                         Spacer()
                         if previous != nil { Text("last session → now").font(.caption).foregroundStyle(.secondary) }
                     }
+                    if !unmeasured.isEmpty {
+                        Text("Not measured: " + unmeasured.map(\.title).joined(separator: ", "))
+                            .font(.footnote).foregroundStyle(.secondary)
+                            .accessibilityIdentifier("summaryUnmeasured")
+                    }
                     ForEach(summary.areaBreakdown, id: \.area) { row in
                         VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Image(systemName: row.area.symbol).foregroundStyle(Theme.orange).frame(width: 22)
-                                Text(row.area.title)
-                                Spacer()
+                            let layout = large ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2)) : AnyLayout(HStackLayout())
+                            layout {
+                                Label {
+                                    Text(row.area.title)
+                                } icon: {
+                                    Image(systemName: row.area.symbol).foregroundStyle(Theme.orange)
+                                }
+                                if !large { Spacer() }
                                 if let before = lastRates[row.area] {
                                     Text("\(TodayCard.percent(before)) →").monospacedDigit().foregroundStyle(.secondary)
                                         .accessibilityIdentifier("areaLastSession")
@@ -62,22 +75,61 @@ struct SummaryContent: View {
                 Card {
                     Text("Shots").font(.headline)
                     ForEach(Array(summary.shots.enumerated()), id: \.element.id) { i, shot in
-                        HStack {
-                            Text("#\(i + 1)").monospacedDigit().foregroundStyle(.secondary).frame(width: 34, alignment: .leading)
-                            Text(shot.cue).lineLimit(2)
-                            Spacer()
-                            Text("\(shot.score)").bold().monospacedDigit().foregroundStyle(Theme.color(forScore: shot.score))
+                        NavigationLink {
+                            ShotDetailView(shot: shot, number: i + 1)
+                        } label: {
+                            shotRow(shot, number: i + 1)
                         }
-                        .font(.subheadline)
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("shotRow-\(i + 1)")
                     }
                 }
-                Text((record.isDemo ? "Demo session · " : "") + "best shot \(summary.bestScore) · \(record.durationText) · "
-                     + record.date.formatted(date: .abbreviated, time: .shortened))
+                Text(footer)
                     .font(.footnote).foregroundStyle(.secondary)
             }
             .padding(20)
         }
         .background(Theme.court.ignoresSafeArea())
+        .opaqueNavigationBar()
+    }
+
+    /// Areas no shot was graded on: the front-view checks when filmed side on, or anything tracking lost.
+    private var unmeasured: [FormArea] {
+        let measured = Set(summary.areaBreakdown.map(\.area))
+        return FormArea.allCases.filter { !measured.contains($0) }
+    }
+
+    @ViewBuilder private func shotRow(_ shot: ShotResult, number: Int) -> some View {
+        let label = Text("#\(number)").monospacedDigit().foregroundStyle(.secondary)
+        let score = Text("\(shot.score)").bold().monospacedDigit().foregroundStyle(Theme.color(forScore: shot.score))
+        let chevron = Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
+        Group {
+            if large {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack { label; Spacer(); score; chevron }
+                    Text(shot.cue).multilineTextAlignment(.leading)
+                }
+            } else {
+                HStack {
+                    label.frame(minWidth: 34, alignment: .leading)
+                    Text(shot.cue).lineLimit(2).multilineTextAlignment(.leading)
+                    Spacer()
+                    score
+                    chevron
+                }
+            }
+        }
+        .font(.subheadline)
+        .contentShape(Rectangle())
+    }
+
+    private var footer: String {
+        var parts = ["best shot \(summary.bestScore)", record.date.formatted(date: .abbreviated, time: .shortened)]
+        if record.duration >= 1 {
+            parts.append(Duration.seconds(record.duration).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .abbreviated, maximumUnitCount: 2)))
+        }
+        if record.isDemo { parts.insert("Demo session", at: 0) }
+        return parts.joined(separator: " · ")
     }
 
     /// Busk can't see the ball, so makes are logged by the player: live Made/Missed taps, voice, or here afterwards.
@@ -158,8 +210,9 @@ struct SummaryContent: View {
     private func stat(_ value: String, _ label: String, color: Color = .primary, id: String) -> some View {
         VStack(spacing: 2) {
             Text(value).font(.largeTitle.bold().monospacedDigit()).foregroundStyle(color)
+                .lineLimit(1).minimumScaleFactor(0.5)
                 .accessibilityIdentifier(id)
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Text(label).font(.caption).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

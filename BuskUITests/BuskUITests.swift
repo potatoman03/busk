@@ -35,11 +35,12 @@ final class BuskUITests: XCTestCase {
     }
 
     func testHomeScreen() {
-        XCTAssertTrue(app.navigationBars["Busk"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["startButton"].exists)
         XCTAssertTrue(app.buttons["settingsButton"].exists)
         XCTAssertTrue(app.buttons["historyButton"].exists)
         XCTAssertTrue(app.staticTexts["Elbow"].exists)
+        XCTAssertTrue(app.staticTexts["Legs"].exists)
         snapshot("01-home")
     }
 
@@ -150,6 +151,10 @@ final class BuskUITests: XCTestCase {
         app.collectionViews["historyList"].buttons["historyRow"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         snapshot("05b-history-summary")
+        app.buttons["shotRow-1"].firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Shot 1"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["shotDetailScore"].exists)
+        snapshot("05c-shot-detail")
     }
 
     /// Hands-free flow: the simulator has no microphone, so the on-screen voice buttons inject each phrase into the
@@ -248,6 +253,9 @@ final class BuskUITests: XCTestCase {
         app.buttons["goLiveButton"].tap()
         XCTAssertTrue(app.buttons["endSessionButton"].waitForExistence(timeout: 5))
         app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.alerts["No shots tracked"].waitForExistence(timeout: 5))
+        snapshot("08-no-shots-alert")
+        app.alerts.buttons["OK"].tap()
         XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["lastSessionCard"].exists)
     }
@@ -269,6 +277,8 @@ final class BuskUITests: XCTestCase {
         let toggle = app.switches["voiceSetting"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         snapshot("06-settings")
+        app.buttons["testVoiceButton"].tap()
+        XCTAssertTrue(app.staticTexts["testVoiceSpeaking"].waitForExistence(timeout: 5))
         toggle.switches.firstMatch.tap()
         XCTAssertEqual(toggle.value as? String, "0")
         app.buttons["settingsDoneButton"].tap()
@@ -281,7 +291,8 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "0")
         toggle.switches.firstMatch.tap()
-        XCTAssertEqual(toggle.value as? String, "1")
+        expectation(for: NSPredicate(format: "value == '1'"), evaluatedWith: toggle)
+        waitForExpectations(timeout: 5)
         snapshot("07-settings-ghost-replay")
         app.buttons["settingsDoneButton"].tap()
 

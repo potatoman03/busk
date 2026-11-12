@@ -31,6 +31,7 @@ struct HistoryView: View {
         }
         .background(Theme.court.ignoresSafeArea())
         .navigationTitle("History")
+        .opaqueNavigationBar()
     }
 
     private var days: [(day: Date, sessions: [SessionRecord])] {

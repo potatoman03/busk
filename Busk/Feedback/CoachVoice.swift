@@ -26,6 +26,12 @@ final class CoachVoice: NSObject {
         try? session.setActive(true)
     }
 
+    /// Lets music the cues ducked come back up once a session is over.
+    static func deactivateAudioSession() {
+        guard !keepsMicrophoneOpen else { return }
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
     /// `force` speaks even when the coach is muted, for answers the player asked for.
     func say(_ text: String, interrupt: Bool = true, force: Bool = false) {
         spoken.append(text)
@@ -33,8 +39,9 @@ final class CoachVoice: NSObject {
         if interrupt && synth.isSpeaking { synth.stopSpeaking(at: .word) }
         let u = AVSpeechUtterance(string: text)
         u.rate = rate
-        u.voice = AVSpeechSynthesisVoice(language: Locale.current.identifier.hasPrefix("en") ? Locale.current.identifier : "en-US")
-            ?? AVSpeechSynthesisVoice(language: "en-US")
+        // The user's own English accent (en-GB, en-AU...) when they have one; cues are written in English.
+        let code = AVSpeechSynthesisVoice.currentLanguageCode()
+        u.voice = AVSpeechSynthesisVoice(language: code.hasPrefix("en") ? code : "en-US") ?? AVSpeechSynthesisVoice(language: "en-US")
         synth.speak(u)
     }
 

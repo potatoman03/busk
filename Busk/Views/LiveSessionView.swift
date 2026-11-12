@@ -7,13 +7,19 @@ struct LiveSessionView: View {
     /// Extra status pills (e.g. the replay clip label) shown under the phase pill, so they never cover the cue.
     var badges: AnyView? = nil
     @Environment(\.modelContext) private var modelContext
-    @State private var saved: SessionRecord?
+    @State private var ended = false
+    @State private var noShots = false
+    /// Height of the portrait cue, card and voice bar, so a drawn skeleton sits above them instead of under them.
+    @State private var feedbackHeight: CGFloat = 0
+    /// Saved as soon as the app leaves the foreground, so a session's shots survive iOS closing the app.
+    @State private var record: SessionRecord?
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
-        if let saved {
+        if ended, let record {
             NavigationStack {
-                SummaryContent(record: saved)
+                SummaryContent(record: record)
                     .navigationTitle("Session summary")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -27,10 +33,13 @@ struct LiveSessionView: View {
         }
     }
 
-    private var skeleton: some View {
-        SkeletonOverlay(pose: (session.source as? VideoPoseSource)?.currentImagePose ?? session.latestPose, handedness: session.handedness,
-                        aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
-                        phase: session.phase, fill: session.source is CameraPoseSource)
+    private func skeleton(landscape: Bool) -> some View {
+        // Benchmark clips are landscape with no picture behind them: in portrait, crop to the shooter instead of
+        // fitting the whole wide frame, which leaves a tiny skeleton.
+        let fill = session.source is CameraPoseSource || (session.source is ReplayPoseSource && !landscape)
+        return SkeletonOverlay(pose: (session.source as? VideoPoseSource)?.currentImagePose ?? session.latestPose,
+                               handedness: session.handedness, aspectRatio: session.source.aspectRatio,
+                               centerX: session.source.displayCenterX, phase: session.phase, fill: fill)
     }
 
     private var live: some View {
@@ -48,7 +57,7 @@ struct LiveSessionView: View {
                     if let image = video.currentImage {
                         // The skeleton is drawn on the picture itself so both share one frame in every orientation.
                         Image(decorative: image, scale: 1).resizable().scaledToFit()
-                            .overlay { skeleton }
+                            .overlay { skeleton(landscape: landscape) }
                             .padding(.trailing, poseInset).ignoresSafeArea()
                     }
                     if video.visionUnavailable {
@@ -61,10 +70,12 @@ struct LiveSessionView: View {
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
-                if (session.source as? VideoPoseSource)?.currentImage == nil {
-                    skeleton
+                // The ghost replay draws its own skeletons; the live one would show through and around the panel.
+                if (session.source as? VideoPoseSource)?.currentImage == nil, session.replay == nil {
+                    skeleton(landscape: landscape)
                         .padding(.trailing, poseInset)
-                        .ignoresSafeArea()
+                        .padding(.bottom, landscape || session.source is CameraPoseSource ? 0 : feedbackHeight)
+                        .ignoresSafeArea(edges: landscape || session.source is CameraPoseSource ? .all : [.top, .horizontal])
                 }
                 VStack(spacing: 12) {
                     topBar(landscape: landscape)
@@ -85,15 +96,38 @@ struct LiveSessionView: View {
                     } else {
                         replayPanel
                         feedback(compact: false)
+                            .onGeometryChange(for: CGFloat.self) { $0.size.height + 12 } action: { feedbackHeight = $0 }
                     }
                 }
                 .padding()
             }
         }
         .statusBarHidden()
-        .onDisappear { session.stop() }
+        .alert("No shots tracked", isPresented: $noShots) {
+            Button("OK", action: onClose)
+        } message: {
+            Text("Busk didn't see a full shot. Keep your whole body in frame, head to feet, with the phone 3-4 m away.")
+        }
+        // The phone sits on a tripod while you shoot, so the screen must not lock mid-session.
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
+            session.stop()
+            voice?.clearHeard()
+        }
+        // Saved after every shot, so a crash or iOS closing the app never loses the session.
+        .onChange(of: session.shots.count) { _, _ in save() }
+        .onChange(of: scenePhase) { _, phase in
+            guard !ended else { return }
+            if phase == .background {
+                save()
+                session.pause()
+            } else if phase == .active {
+                session.resume()
+            }
+        }
         .onChange(of: voice?.event) { _, event in
-            guard saved == nil else { return }
+            guard !ended else { return }
             switch event?.command {
             case .end: endSession()
             case .status: session.speakStatus()
@@ -106,16 +140,26 @@ struct LiveSessionView: View {
 
     private func endSession() {
         session.stop()
-        if !session.shots.isEmpty {
-            let record = SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
-                                       view: session.cameraView, handedness: session.handedness,
-                                       isDemo: session.isDemo, shots: session.shots)
-            modelContext.insert(record)
-            try? modelContext.save()
-            saved = record
+        save()
+        if record != nil {
+            ended = true
         } else {
-            onClose()
+            noShots = true
         }
+    }
+
+    private func save() {
+        guard !session.shots.isEmpty else { return }
+        let duration = session.activeDuration
+        if let record {
+            record.update(duration: duration, shots: session.shots)
+        } else {
+            let new = SessionRecord(date: session.startDate, duration: duration, view: session.cameraView,
+                                    handedness: session.handedness, isDemo: session.isDemo, shots: session.shots)
+            modelContext.insert(new)
+            record = new
+        }
+        try? modelContext.save()
     }
 
     @ViewBuilder private var replayPanel: some View {
@@ -187,7 +231,7 @@ struct LiveSessionView: View {
             VStack(spacing: 0) {
                 Text("\(session.shots.count)").font(.title2.bold().monospacedDigit())
                     .accessibilityIdentifier("shotCount")
-                Text("shots").font(.caption2)
+                Text(session.shots.count == 1 ? "shot" : "shots").font(.caption2)
             }
             .padding(.horizontal, 12).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -229,6 +273,8 @@ struct LiveSessionView: View {
             .multilineTextAlignment(.center)
             .minimumScaleFactor(0.7)
             .fixedSize(horizontal: false, vertical: true)
+            // Swap the words outright: a crossfade draws the old and new cue on top of each other.
+            .contentTransition(.identity)
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
