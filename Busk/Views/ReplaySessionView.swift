@@ -27,28 +27,29 @@ struct ReplaySessionView: View {
     private var replay: some View {
         ZStack(alignment: .top) {
             if let session {
-                LiveSessionView(session: session) {
+                LiveSessionView(session: session, onClose: {
                     session.stop()
                     closed = true
-                }
+                }, badges: AnyView(badges))
             } else {
                 Theme.court.ignoresSafeArea()
                 Text(error ?? "Loading clip").foregroundStyle(.secondary).padding(.top, 200)
             }
-            if let label {
-                Pill(text: "Benchmark clip: \(label)", systemImage: "film")
-                    .padding(.top, 116)
-                    .accessibilityIdentifier("replayClipLabel")
-            }
-            if let replayed {
-                Pill(text: "Replayed \(replayed.framesPlayed)/\(replayed.frames) frames · \(replayed.shots) shot\(replayed.shots == 1 ? "" : "s")",
-                     systemImage: "checkmark.circle.fill")
-                    .padding(.top, 152)
-                    .accessibilityIdentifier("replayComplete")
-            }
         }
         .task { load() }
         .onChange(of: session?.shots.count ?? 0) { report() }
+    }
+
+    @ViewBuilder private var badges: some View {
+        if let label {
+            Pill(text: "Benchmark clip: \(label)", systemImage: "film")
+                .accessibilityIdentifier("replayClipLabel")
+        }
+        if let replayed {
+            Pill(text: "Replayed \(replayed.framesPlayed)/\(replayed.frames) frames · \(replayed.shots) shot\(replayed.shots == 1 ? "" : "s")",
+                 systemImage: "checkmark.circle.fill")
+                .accessibilityIdentifier("replayComplete")
+        }
     }
 
     init(path: String, label: String?) {

@@ -4,6 +4,8 @@ import SwiftUI
 struct LiveSessionView: View {
     @Bindable var session: CoachSession
     var onClose: () -> Void
+    /// Extra status pills (e.g. the replay clip label) shown under the phase pill, so they never cover the cue.
+    var badges: AnyView? = nil
     @Environment(\.modelContext) private var modelContext
     @State private var ended = false
 
@@ -56,10 +58,15 @@ struct LiveSessionView: View {
                     .padding(.trailing, poseInset)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
-                    topBar
+                    topBar(showBadges: !landscape)
                     if landscape {
-                        HStack(spacing: 16) {
-                            replayPanel
+                        HStack(alignment: .top, spacing: 16) {
+                            // Badges share the left column with the ghost replay, so they never add height above the cue column.
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let badges { badges }
+                                replayPanel
+                            }
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
                                 feedback(compact: true)
@@ -96,6 +103,8 @@ struct LiveSessionView: View {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
                             .font(.caption.monospaced())
+                            .lineLimit(compact ? 2 : 1)
+                            .fixedSize(horizontal: false, vertical: compact)
                             .padding(.horizontal, 10).padding(.vertical, 4)
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
@@ -103,7 +112,7 @@ struct LiveSessionView: View {
                     if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
     }
 
-    private var topBar: some View {
+    private func topBar(showBadges: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
             Button {
@@ -147,6 +156,7 @@ struct LiveSessionView: View {
         }
             Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
                 .accessibilityIdentifier("phaseLabel")
+            if showBadges, let badges { badges }
         }
     }
 
