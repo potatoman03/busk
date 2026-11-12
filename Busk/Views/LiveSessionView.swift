@@ -26,6 +26,10 @@ struct LiveSessionView: View {
 
     private var live: some View {
         GeometryReader { geo in
+            let landscape = geo.size.width > geo.size.height
+            let hudWidth = landscape ? min(380, geo.size.width * 0.45) : 0
+            // In landscape the cue and form card sit in a right-hand column so they never cover the shooter.
+            let poseInset = session.source is CameraPoseSource ? 0 : hudWidth
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let camera = session.source as? CameraPoseSource {
@@ -33,7 +37,8 @@ struct LiveSessionView: View {
                 } else if let video = session.source as? VideoPoseSource {
                     Theme.court.ignoresSafeArea()
                     if let image = video.currentImage {
-                        Image(decorative: image, scale: 1).resizable().scaledToFit().ignoresSafeArea()
+                        Image(decorative: image, scale: 1).resizable().scaledToFit()
+                            .padding(.trailing, poseInset).ignoresSafeArea()
                     }
                     if video.visionUnavailable {
                         Text("Vision body pose isn't available here. Run scripts/vision-keypoints.swift on the clip to make a keypoints file.")
@@ -48,10 +53,35 @@ struct LiveSessionView: View {
                 SkeletonOverlay(pose: session.latestPose, handedness: session.handedness,
                                 aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
                                 phase: session.phase, fill: session.source is CameraPoseSource)
+                    .padding(.trailing, poseInset)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
                     topBar
-                    Spacer()
+                    if landscape {
+                        HStack {
+                            Spacer(minLength: 0)
+                            VStack(spacing: 12) {
+                                Spacer(minLength: 0)
+                                feedback
+                            }
+                            .frame(width: hudWidth)
+                        }
+                    } else {
+                        Spacer()
+                        feedback
+                    }
+                }
+                .padding()
+            }
+            .onChange(of: geo.size, initial: true) { _, size in
+                (session.source as? CameraPoseSource)?.setRotation(size.width > size.height ? 0 : 90)
+            }
+        }
+        .statusBarHidden()
+        .onDisappear { session.stop() }
+    }
+
+    @ViewBuilder private var feedback: some View {
                     banner
                     if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
@@ -62,15 +92,6 @@ struct LiveSessionView: View {
                             .accessibilityIdentifier("lastSpokenCue")
                     }
                     if let shot = session.lastShot { ShotCard(shot: shot) }
-                }
-                .padding()
-            }
-            .onChange(of: geo.size, initial: true) { _, size in
-                (session.source as? CameraPoseSource)?.setRotation(size.width > size.height ? 0 : 90)
-            }
-        }
-        .statusBarHidden()
-        .onDisappear { session.stop() }
     }
 
     private var topBar: some View {
