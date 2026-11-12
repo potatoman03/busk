@@ -41,7 +41,7 @@ if let kpPath = opts["keypoints"] {
     poseSource = "benchmark-keypoints"
 } else {
     guard let video = opts["video"] else { fail("--video is required") }
-    do { frames = try VideoPoses.read(URL(fileURLWithPath: video), handedness: handedness) } catch { fail("\(error)") }
+    do { frames = try VideoPoses.read(URL(fileURLWithPath: video), handedness: handedness,live: opts["live-tracking"] == "1") } catch { fail("\(error)") }
     poseSource = "vision"
 }
 
@@ -55,7 +55,8 @@ func inferView(_ frames: [PoseFrame]) -> CameraView? {
     }.sorted()
     guard !ratios.isEmpty else { return nil }
     let median = ratios[ratios.count / 2]
-    return median > 0.75 ? .front : median < 0.3 ? .side : nil
+    // Only clear-cut clips: a three-quarter angle reads anywhere from 0.25 to 0.65, so those stay unknown (pass --view).
+    return median > 0.75 ? .front : median < 0.2 ? .side : nil
 }
 let cameraView = view ?? inferView(frames)
 

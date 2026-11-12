@@ -6,7 +6,7 @@ import Vision
 
 /// Reads a video file frame by frame and runs Apple Vision body-pose detection on each frame.
 enum VideoPoses {
-    static func read(_ url: URL, handedness: Handedness) throws -> [PoseFrame] {
+    static func read(_ url: URL, handedness: Handedness, live: Bool = false) throws -> [PoseFrame] {
         let asset = AVURLAsset(url: url)
         guard let track = asset.tracks(withMediaType: .video).first else { throw Failure("no video track in \(url.path)") }
         let reader = try AVAssetReader(asset: asset)
@@ -43,7 +43,11 @@ enum VideoPoses {
             }
             candidates.append((t, people.filter { $0.count >= 4 }))
         }
-        let frames = followShooter(candidates, handedness: handedness).map { PoseFrame(timestamp: $0.t, joints: $0.joints, aspect: aspect) }
+        let tracker = ShooterTracker()
+        let followed = live
+            ? candidates.compactMap { c in tracker.select(c.people).map { (t: c.t, joints: $0) } }
+            : followShooter(candidates, handedness: handedness)
+        let frames = followed.map { PoseFrame(timestamp: $0.t, joints: $0.joints, aspect: aspect) }
         if reader.status == .failed { throw Failure("decode failed: \(reader.error?.localizedDescription ?? "")") }
         return frames
     }

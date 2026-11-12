@@ -15,6 +15,7 @@ let package = Package(
                 "Busk/Analysis/ShotAnalyzer.swift",
                 "Busk/Analysis/FormEvaluator.swift",
                 "Busk/Capture/VisionPose.swift",
+                    "Busk/Capture/ShooterTracker.swift",
                 "Tools/busk-analyze",
             ]
         ),

@@ -15,7 +15,7 @@ enum Grade: Int, Codable, Comparable, Sendable {
 /// The form areas Busk coaches. Each matches one flaw in the shooting-feedback benchmark taxonomy.
 /// Declaration order breaks ties when two areas are equally far off.
 enum FormArea: String, Codable, CaseIterable, Identifiable, Sendable {
-    case setPoint, releaseTiming, balance, rhythm, elbow, guideHand, arc, legs, followThrough
+    case setPoint, balance, releaseTiming, rhythm, elbow, guideHand, arc, legs, followThrough
     var id: String { rawValue }
     var priority: Int { FormArea.allCases.firstIndex(of: self) ?? 0 }
     var title: String {
