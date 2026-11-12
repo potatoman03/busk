@@ -106,7 +106,7 @@ struct SummaryContent: View {
         Group {
             if large {
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack { label; Spacer(); score; chevron }
+                    HStack { label; Spacer(); MadeMark(made: shot.made); score; chevron }
                     Text(shot.cue).multilineTextAlignment(.leading)
                 }
             } else {
@@ -114,6 +114,7 @@ struct SummaryContent: View {
                     label.frame(minWidth: 34, alignment: .leading)
                     Text(shot.cue).lineLimit(2).multilineTextAlignment(.leading)
                     Spacer()
+                    MadeMark(made: shot.made)
                     score
                     chevron
                 }

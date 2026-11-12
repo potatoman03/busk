@@ -14,6 +14,13 @@ struct ShotDetailView: View {
                             .foregroundStyle(Theme.color(forScore: shot.score))
                             .accessibilityIdentifier("shotDetailScore")
                         Text("form").foregroundStyle(.secondary)
+                        Spacer()
+                        if let made = shot.made {
+                            Label(made ? "Made" : "Missed", systemImage: made ? "checkmark.circle.fill" : "xmark.circle.fill")
+                                .font(.headline)
+                                .foregroundStyle(made ? .green : .secondary)
+                                .accessibilityIdentifier("shotDetailMade")
+                        }
                     }
                     Text(shot.cue).font(.title3.bold())
                     let missing = FormArea.allCases.filter { a in !shot.areas.contains { $0.area == a } }
@@ -45,5 +52,19 @@ struct ShotDetailView: View {
         .navigationTitle("Shot \(number)")
         .navigationBarTitleDisplayMode(.inline)
         .opaqueNavigationBar()
+    }
+}
+
+/// A shot's Made or Missed mark, so the player can check the make count shot by shot. Nothing when it wasn't marked.
+struct MadeMark: View {
+    let made: Bool?
+
+    var body: some View {
+        if let made {
+            Image(systemName: made ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .foregroundStyle(made ? .green : .secondary)
+                .accessibilityLabel(made ? "Made" : "Missed")
+                .accessibilityIdentifier(made ? "shotMade" : "shotMissed")
+        }
     }
 }
