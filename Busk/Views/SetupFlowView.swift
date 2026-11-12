@@ -8,6 +8,7 @@ struct SetupFlowView: View {
     @AppStorage(SettingsKey.voiceEnabled) private var voiceEnabled = true
     @State private var session: CoachSession?
     @State private var cameraDenied = false
+    @State private var starting = false
     @State private var finished: SessionSummary?
     @Environment(VoiceControl.self) private var voice: VoiceControl?
     /// Go live straight away (the player said "start session" on the home screen).
@@ -101,7 +102,9 @@ struct SetupFlowView: View {
     }
 
     private func begin() async {
-        guard session == nil else { return }
+        guard session == nil, !starting else { return }
+        starting = true
+        defer { starting = false }
         let source: PoseSource
         if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
             source = DemoPoseSource(handedness: handedness, view: cameraView, leadIn: AppEnvironment.demoIdle ? 120 : 0.5)
