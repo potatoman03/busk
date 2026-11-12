@@ -118,7 +118,8 @@ struct FormEvaluator {
         var guideHand = Limit(ok: 0.025, bad: 0.035, worst: 0.042)
         var armAngle = Limit(ok: 64, bad: 59, worst: 55)
         var legDrive = Limit(ok: 0.028, bad: 0.016, worst: 0.004)
-        var followThrough = Limit(ok: 0.40, bad: 0.25, worst: 0.19)
+        // Pose tracking reads any hold shorter than ~0.13 s as ~0.13 s, so that is as bad as it can look.
+        var followThrough = Limit(ok: 0.40, bad: 0.25, worst: 0.13)
     }
 
     var thresholds = Thresholds()
