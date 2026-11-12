@@ -77,23 +77,30 @@ checks every label against its rule), the camera views it can be seen from, and 
 has the regexes that recognise someone naming the flaw and someone giving its fix. A flaw only counts for a
 view where it is visible: elbow flare and guide-hand push are front-view only, a flat arc is side-view only.
 
-| flaw | coaching priority | views | labeled when | right advice |
-|---|---|---|---|---|
-| `no_leg_drive` | 2 | side/front | knee bend < 25° | Bend your knees and drive up through your legs |
-| `low_set_point` | 1 | side/front | set point < 0.86 x height | Set the ball above your forehead, don't push from the chest |
-| `elbow_flare` | 3 | front | elbow flare > 20° | Tuck your shooting elbow under the ball |
-| `flat_arc` | 4 | side | release angle < 40° | Put more arc on it (45-50°) |
-| `no_follow_through` | 4 | side/front | follow-through held < 0.15 s | Snap your wrist and hold your follow-through |
-| `guide_hand_interference` | 3 | front | guide hand pushes | Guide hand on the side, let it come off |
-| `releasing_on_the_way_down` | 3 | side/front | release after 30% of the descent | Release at the top of your jump |
-| `hitch_at_set_point` | 1 | side/front | pause at set > 0.25 s | One smooth motion, don't stop at the set point |
-| `off_balance_drift` | 2 | side/front | drift > 0.3 m | Jump straight up, land where you took off |
+| flaw | coaching priority | views | labeled when | clearly bad | right advice |
+|---|---|---|---|---|---|
+| `no_leg_drive` | 2 | side/front | knee bend < 25° | < 20 | Bend your knees and drive up through your legs |
+| `low_set_point` | 1 | side/front | set point < 0.86 x height | < 0.81 | Set the ball above your forehead, don't push from the chest |
+| `elbow_flare` | 3 | front | elbow flare > 20° | > 26 | Tuck your shooting elbow under the ball |
+| `flat_arc` | 4 | side | release angle < 40° | < 36 | Put more arc on it (45-50°) |
+| `no_follow_through` | 4 | side/front | follow-through held < 0.15 s | < 0.09 | Snap your wrist and hold your follow-through |
+| `guide_hand_interference` | 3 | front | guide hand pushes | > 1 | Guide hand on the side, let it come off |
+| `releasing_on_the_way_down` | 3 | side/front | release after 30% of the descent | > 0.45 | Release at the top of your jump |
+| `hitch_at_set_point` | 1 | side/front | pause at set > 0.25 s | > 0.38 | One smooth motion, don't stop at the set point |
+| `off_balance_drift` | 2 | side/front | drift > 0.3 m | > 0.42 | Jump straight up, land where you took off |
 
-**Primary flaw**: the one a coach fixes first, by one fixed `coaching_priority` order in
-[`taxonomy.json`](taxonomy.json), the same for every tier, set and held-out seed. 1 is where the ball starts and
-that it moves in one motion (set point, hitch), 2 the base (legs, balance), 3 the release (timing, elbow, guide
-hand), 4 the finish (arc, follow-through). How far past its threshold a flaw is (its margin, from the model
-parameters) only breaks ties within a rank; real clips without parameters fall back to the labeled severity.
+**Primary flaw**: the one a coach fixes first. Every tier, set and held-out seed uses the same rule from
+[`taxonomy.json`](taxonomy.json):
+
+1. Clearly bad flaws come before marginal ones. A flaw is marginal between its label threshold (`label_rule.value`)
+   and its `label_rule.bad` line, and clearly bad past `bad`. A marginal flaw never outranks a clearly bad one,
+   whatever its rank.
+2. Then the fixed `coaching_priority` order: 1 is where the ball starts and that it moves in one motion (set point,
+   hitch), 2 the base (legs, balance), 3 the release (timing, elbow, guide hand), 4 the finish (arc, follow-through).
+3. How far past its threshold a flaw is (its margin, from the model parameters) only breaks ties within a rank.
+
+Held-out flaws are drawn past `bad`, so all of them are clearly bad. Real clips have no parameters, so they count
+as clearly bad and fall back to the labelled severity.
 
 **Score per clip** (0-100), defined in `busk_bench/scoring.py`:
 

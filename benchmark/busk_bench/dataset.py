@@ -63,11 +63,14 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def coaching_order(tax: Taxonomy, margins: dict | None = None):
-    """Sort key for labeled flaws: coaching priority, then margin past the threshold, then labeled severity."""
+def coaching_order(tax: Taxonomy, labels: dict | None = None):
+    """Sort key for labeled flaws: clearly bad before marginal, then coaching priority, then margin, then severity.
+
+    `labels` maps flaw id to its `heldout.label` entry; flaws without one (real clips) count as clearly bad."""
     order = {fid: i for i, fid in enumerate(tax.flaws)}
-    margins = margins or {}
-    return lambda f: (tax.flaws[f["id"]].coaching_priority, -margins.get(f["id"], 0), -f["severity"], order[f["id"]])
+    labels = labels or {}
+    return lambda f: (not labels.get(f["id"], {}).get("clear", True), tax.flaws[f["id"]].coaching_priority,
+                      -labels.get(f["id"], {}).get("margin", 0), -f["severity"], order[f["id"]])
 
 
 def load_taxonomy(path: Path = TAXONOMY_PATH) -> Taxonomy:
@@ -94,10 +97,10 @@ def load_clips(tax: Taxonomy, path: Path = CLIPS_PATH) -> tuple[list[Clip], str,
         for f in a["flaws"]:
             if f["id"] not in tax.flaws:
                 raise ValueError(f"{a['id']}: unknown flaw {f['id']}")
-        margins = {f["id"]: f["margin"] for f in label(a["params"], heldout_cfg, tax)}
+        labels = {f["id"]: f for f in label(a["params"], heldout_cfg, tax)}
         for view in a["views"]:
             obs = [f for f in a["flaws"] if view in tax.flaws[f["id"]].views]
-            obs.sort(key=coaching_order(tax, margins))
+            obs.sort(key=coaching_order(tax, labels))
             clips.append(Clip(
                 id=f"{a['id']}__{view}", archetype=a["id"], tier=a["tier"], view=view,
                 handedness=a.get("handedness", "right"), description=a["description"],
