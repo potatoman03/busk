@@ -11,7 +11,7 @@ final class CameraPoseSource: NSObject, PoseSource {
     let session = AVCaptureSession()
     private let output = AVCaptureVideoDataOutput()
     private let videoQueue = DispatchQueue(label: "busk.camera", qos: .userInitiated)
-    private let request = VNDetectHumanBodyPoseRequest()
+    private let detector = VisionPoseDetector()
     private var configured = false
     private var rotationAngle: CGFloat = 90
 
@@ -83,10 +83,8 @@ extension CameraPoseSource: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let w = CGFloat(CVPixelBufferGetWidth(pixelBuffer)), h = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
         let ts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
-        try? handler.perform([request])
-        guard let observation = (request.results ?? []).max(by: { area($0) < area($1) }) else { return }
-        let frame = PoseFrame(timestamp: ts, joints: Self.joints(from: observation))
+        guard let joints = detector.joints(in: pixelBuffer) else { return }
+        let frame = PoseFrame(timestamp: ts, joints: joints)
         let ratio = h > 0 ? w / h : aspectRatio
         DispatchQueue.main.async { [weak self] in
             self?.aspectRatio = ratio
@@ -94,29 +92,4 @@ extension CameraPoseSource: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 
-    private func area(_ o: VNHumanBodyPoseObservation) -> CGFloat {
-        guard let pts = try? o.recognizedPoints(.all).values.filter({ $0.confidence > 0.3 }), !pts.isEmpty else { return 0 }
-        let xs = pts.map(\.location.x), ys = pts.map(\.location.y)
-        return (xs.max()! - xs.min()!) * (ys.max()! - ys.min()!)
-    }
-
-    static let mapping: [VNHumanBodyPoseObservation.JointName: Joint] = [
-        .nose: .nose, .neck: .neck,
-        .leftShoulder: .leftShoulder, .rightShoulder: .rightShoulder,
-        .leftElbow: .leftElbow, .rightElbow: .rightElbow,
-        .leftWrist: .leftWrist, .rightWrist: .rightWrist,
-        .leftHip: .leftHip, .rightHip: .rightHip,
-        .leftKnee: .leftKnee, .rightKnee: .rightKnee,
-        .leftAnkle: .leftAnkle, .rightAnkle: .rightAnkle,
-    ]
-
-    static func joints(from o: VNHumanBodyPoseObservation) -> [Joint: CGPoint] {
-        guard let points = try? o.recognizedPoints(.all) else { return [:] }
-        var out: [Joint: CGPoint] = [:]
-        for (name, joint) in mapping {
-            guard let p = points[name], p.confidence > 0.3 else { continue }
-            out[joint] = CGPoint(x: p.location.x, y: 1 - p.location.y)
-        }
-        return out
-    }
 }

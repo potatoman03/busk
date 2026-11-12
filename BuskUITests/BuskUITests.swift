@@ -36,15 +36,25 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["demoBadge"].waitForExistence(timeout: 5) || app.otherElements["demoBadge"].exists)
         let count = app.staticTexts["shotCount"]
         XCTAssertTrue(count.waitForExistence(timeout: 5))
-        let twoShots = NSPredicate(format: "label == '2'")
+        let twoShots = NSPredicate(format: "label.integerValue >= 2")
         expectation(for: twoShots, evaluatedWith: count)
-        waitForExpectations(timeout: 20)
+        waitForExpectations(timeout: 45)
         XCTAssertTrue(app.staticTexts["lastShotScore"].exists)
         XCTAssertTrue(app.staticTexts["cueBanner"].exists)
+        let spoken = app.staticTexts["lastSpokenCue"]
+        XCTAssertTrue(spoken.exists)
+        XCTAssertTrue(spoken.label.contains(app.staticTexts["cueBanner"].label), spoken.label)
         snapshot("03-live")
 
-        app.buttons["endSessionButton"].tap()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let end = app.buttons["endSessionButton"]
+        XCTAssertTrue(end.waitForExistence(timeout: 5))
+        snapshot("03b-live-landscape")
+
+        end.tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
+        XCUIDevice.shared.orientation = .portrait
         XCTAssertGreaterThanOrEqual(Int(app.staticTexts["summaryShotCount"].label) ?? 0, 2)
         snapshot("04-summary")
         app.buttons["summaryDoneButton"].tap()
@@ -54,6 +64,9 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
         XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
         snapshot("05-history")
+        app.collectionViews["historyList"].cells.firstMatch.tap()
+        XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
+        snapshot("05b-history-summary")
     }
 
     func testEndingWithoutShotsReturnsHome() {

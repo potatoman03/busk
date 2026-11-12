@@ -30,16 +30,30 @@ struct LiveSessionView: View {
                 Color.black.ignoresSafeArea()
                 if let camera = session.source as? CameraPoseSource {
                     CameraPreview(source: camera).ignoresSafeArea()
+                } else if let video = session.source as? VideoPoseSource {
+                    Theme.court.ignoresSafeArea()
+                    if let image = video.currentImage {
+                        Image(decorative: image, scale: 1).resizable().scaledToFit().ignoresSafeArea()
+                    }
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
                 SkeletonOverlay(pose: session.latestPose, handedness: session.handedness,
-                                aspectRatio: session.source.aspectRatio, phase: session.phase)
+                                aspectRatio: session.source.aspectRatio, phase: session.phase,
+                                fill: session.source is CameraPoseSource)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
                     topBar
                     Spacer()
                     banner
+                    if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
+                        Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
+                              systemImage: cue.muted ? "speaker.slash" : "waveform")
+                            .font(.caption.monospaced())
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(.ultraThinMaterial, in: Capsule())
+                            .accessibilityIdentifier("lastSpokenCue")
+                    }
                     if let shot = session.lastShot { ShotCard(shot: shot) }
                 }
                 .padding()

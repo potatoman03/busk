@@ -92,7 +92,9 @@ struct SetupFlowView: View {
 
     private func begin() async {
         let source: PoseSource
-        if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
+        if let video = AppEnvironment.videoURL {
+            source = VideoPoseSource(url: video)
+        } else if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
             source = DemoPoseSource(handedness: handedness)
         } else {
             guard await CameraPoseSource.requestAccess() else {

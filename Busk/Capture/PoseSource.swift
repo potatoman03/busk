@@ -25,6 +25,7 @@ final class DemoPoseSource: PoseSource {
     private var timer: Timer?
     private var clock: TimeInterval = 0
     private var styleIndex = 0
+    private var wallStart: Date?
 
     init(handedness: Handedness = .right, styles: [ShotSimulator.Style] = ShotSimulator.Style.demoRotation, gap: Double = 0.8) {
         var sim = ShotSimulator()
@@ -37,6 +38,7 @@ final class DemoPoseSource: PoseSource {
     func start() {
         stop()
         queue = simulator.idleFrames(seconds: 0.5, start: clock)
+        wallStart = Date().addingTimeInterval(-clock)
         timer = Timer.scheduledTimer(withTimeInterval: 1 / simulator.fps, repeats: true) { [weak self] _ in
             self?.tick()
         }
@@ -47,7 +49,13 @@ final class DemoPoseSource: PoseSource {
         timer = nil
     }
 
+    /// Emits every frame that is due, so a busy main thread delays frames but never slows the replay clock.
     private func tick() {
+        let now = Date().timeIntervalSince(wallStart ?? Date())
+        repeat { emitNext() } while clock <= now
+    }
+
+    private func emitNext() {
         if queue.isEmpty {
             let style = styles[styleIndex % styles.count]
             styleIndex += 1
