@@ -60,12 +60,12 @@ struct LiveSessionView: View {
                 VStack(spacing: 12) {
                     topBar(showBadges: !landscape)
                     if landscape {
-                        HStack(alignment: .top) {
-                            // Side column for badges, so they never add height above the cue column.
+                        HStack(alignment: .top, spacing: 16) {
+                            // Badges share the left column with the ghost replay, so they never add height above the cue column.
                             VStack(alignment: .leading, spacing: 8) {
                                 if let badges { badges }
+                                replayPanel
                             }
-                            Spacer(minLength: 0)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
                                 feedback(compact: true)
@@ -73,7 +73,7 @@ struct LiveSessionView: View {
                             .frame(width: hudWidth)
                         }
                     } else {
-                        Spacer()
+                        replayPanel
                         feedback(compact: false)
                     }
                 }
@@ -82,6 +82,16 @@ struct LiveSessionView: View {
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
+    }
+
+    @ViewBuilder private var replayPanel: some View {
+        if let replay = session.replay {
+            GhostReplayView(replay: replay, handedness: session.handedness) { session.dismissReplay(replay.id) }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+        } else {
+            Spacer(minLength: 0)
+        }
     }
 
     @ViewBuilder private func feedback(compact: Bool) -> some View {

@@ -146,4 +146,43 @@ final class BuskUITests: XCTestCase {
         app.buttons["settingsDoneButton"].tap()
         XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
     }
+
+    func testGhostReplayAfterEachShot() {
+        app.buttons["settingsButton"].tap()
+        let toggle = app.switches["ghostReplaySetting"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        XCTAssertEqual(toggle.value as? String, "0")
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "1")
+        snapshot("07-settings-ghost-replay")
+        app.buttons["settingsDoneButton"].tap()
+
+        app.buttons["startButton"].tap()
+        XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+        app.segmentedControls["cameraViewPicker"].buttons["Side on"].tap()
+        app.buttons["goLiveButton"].tap()
+        let count = app.staticTexts["shotCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label.integerValue >= 2"), evaluatedWith: count)
+        waitForExpectations(timeout: 60)
+        let legend = app.descendants(matching: .any)["ghostReplayLegend"]
+        XCTAssertTrue(legend.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Best'")).firstMatch.waitForExistence(timeout: 10))
+        snapshot("08-ghost-replay")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        XCTAssertTrue(app.descendants(matching: .any)["ghostReplayLegend"].waitForExistence(timeout: 10))
+        snapshot("08b-ghost-replay-landscape")
+    }
+
+    func testGhostReplayIsOffByDefault() {
+        app.buttons["startButton"].tap()
+        app.buttons["goLiveButton"].tap()
+        let count = app.staticTexts["shotCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label.integerValue >= 1"), evaluatedWith: count)
+        waitForExpectations(timeout: 60)
+        XCTAssertFalse(app.descendants(matching: .any)["ghostReplayLegend"].exists)
+    }
 }
