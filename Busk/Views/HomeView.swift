@@ -85,10 +85,18 @@ struct HomeView: View {
             }
             .background(Theme.court.ignoresSafeArea())
             .navigationTitle("Busk")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // "Busk" stays the back-button title; the header below is the only heading on screen.
+                ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink(value: HomeRoute.history) {
-                        Image(systemName: "clock.arrow.circlepath")
+                        // The toolbar draws a Label as its icon alone; spell it out so History is findable.
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock.arrow.circlepath")
+                            Text("History")
+                        }
+                        .fixedSize()
                     }
                     .accessibilityLabel("History")
                     .accessibilityIdentifier("historyButton")
@@ -112,16 +120,7 @@ struct HomeView: View {
                 }
             }
             .fullScreenCover(item: $setup) { SetupFlowView(autoStart: $0.autoStart) }
-            .safeAreaInset(edge: .bottom) {
-                if let voice, voice.state != .off {
-                    // Opaque so the list never shows through the bar.
-                    VoiceControlBar(commands: [.start])
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 10).padding(.bottom, 4)
-                        .background(Color(red: 0.03, green: 0.015, blue: 0.01).ignoresSafeArea(edges: .bottom))
-                        .overlay(alignment: .top) { Divider() }
-                }
-            }
+            .safeAreaInset(edge: .bottom) { VoiceDock(commands: [.start]) }
         }
         .onChange(of: voice?.event) { _, event in
             // "Start session" from home skips setup and goes live with the saved camera angle and hand.
@@ -180,7 +179,7 @@ struct SessionRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(record.date, format: .dateTime.weekday().month().day().hour().minute()).font(.headline)
-                Text("\(s.count) shots" + (s.topFocus.map { " · focus: \($0.title.lowercased())" } ?? ""))
+                Text("\(s.count) \(s.count == 1 ? "shot" : "shots")" + (s.topFocus.map { " · focus: \($0.title.lowercased())" } ?? ""))
                     .font(.subheadline).foregroundStyle(.secondary)
             }
             Spacer()

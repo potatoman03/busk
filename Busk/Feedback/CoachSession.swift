@@ -44,10 +44,16 @@ final class CoachSession {
     @ObservationIgnored private var lastAdviceSpoken: (text: String, time: TimeInterval)?
     @ObservationIgnored private var statusUntil = Date.distantPast
     @ObservationIgnored private var best: (clip: ShotClip, number: Int, score: Int)?
+    @ObservationIgnored private var pausedAt: Date?
+    @ObservationIgnored private var pausedTotal: TimeInterval = 0
 
+    /// Every camera angle grades more areas than this; fewer means tracking lost part of the body mid-shot.
+    static let fullCheckAreas = 5
     var lastShot: ShotResult? { shots.last }
     var summary: SessionSummary { SessionSummary(shots: shots, focus: focus) }
     var isDemo: Bool { source.isDemo }
+    /// Time spent shooting, not counting time the app was in the background.
+    var activeDuration: TimeInterval { (pausedAt ?? Date()).timeIntervalSince(startDate) - pausedTotal }
 
     init(cameraView: CameraView, handedness: Handedness, source: PoseSource, voiceEnabled: Bool,
          ghostReplayEnabled: Bool = UserDefaults.standard.bool(forKey: SettingsKey.ghostReplay),
@@ -75,6 +81,22 @@ final class CoachSession {
         source.stop()
         source.onFrame = nil
         voice.stop()
+        CoachVoice.deactivateAudioSession()
+    }
+
+    /// The app went to the background. The camera stops by itself; the demo shooter has to be told.
+    func pause() {
+        guard pausedAt == nil else { return }
+        pausedAt = Date()
+        if isDemo { source.stop() }
+        voice.stop()
+    }
+
+    func resume() {
+        guard let pausedAt else { return }
+        pausedTotal += Date().timeIntervalSince(pausedAt)
+        self.pausedAt = nil
+        if isDemo { source.start() }
     }
 
     func handle(_ frame: PoseFrame) {
@@ -86,11 +108,22 @@ final class CoachSession {
         } else if frame.timestamp - lastSeen > 0.5 {
             latestPose = frame.joints.isEmpty ? nil : frame
         }
-        if visible != bodyVisible { bodyVisible = visible }
+        if visible != bodyVisible {
+            bodyVisible = visible
+            if announcedVisible && shots.isEmpty {
+                bannerText = visible ? (focus.map { "Got you. Focus on your \($0.title.lowercased()). Shoot when ready" }
+                    ?? "Got you. Shoot when ready") : "Step into frame"
+            }
+        }
         if !announcedVisible && shots.isEmpty { checkFraming(frame) }
 
         if let metrics = analyzer.process(frame) {
-            let result = evaluator.evaluate(metrics)
+            var result = evaluator.evaluate(metrics)
+            if result.focus == nil && result.areas.count < Self.fullCheckAreas {
+                result.cue = "I only saw part of that shot. Keep your whole body in frame"
+            } else if shots.isEmpty && result.focus == nil {
+                result.cue = "Clean first shot. Keep that form"
+            }
             if let json = try? JSONEncoder().encode(metrics), let text = String(data: json, encoding: .utf8) {
                 Self.log.notice("shot #\(self.shots.count + 1, privacy: .public) metrics: \(text, privacy: .public)")
             }

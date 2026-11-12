@@ -105,12 +105,16 @@ struct SetupFlowView: View {
                     Button {
                         Task { await begin() }
                     } label: {
-                        Text(AppEnvironment.forceDemo ? "Start demo session" : "Go live")
+                        HStack(spacing: 10) {
+                            if starting { ProgressView().tint(.white) }
+                            Text(AppEnvironment.forceDemo ? "Start demo session" : "Go live")
+                        }
                             .font(.title3.bold())
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(starting)
                     .accessibilityIdentifier("goLiveButton")
                     if AppEnvironment.forceDemo {
                         Text("No camera here, so a demo shooter will take shots for you.")
@@ -120,7 +124,7 @@ struct SetupFlowView: View {
                 .padding(20)
             }
             .background(Theme.court.ignoresSafeArea())
-            .safeAreaInset(edge: .bottom) { VoiceControlBar(commands: [.start]).padding(.bottom, 4) }
+            .safeAreaInset(edge: .bottom) { VoiceDock(commands: [.start]) }
             .navigationTitle("Set up")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

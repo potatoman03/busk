@@ -84,7 +84,12 @@ final class DemoPoseSource: PoseSource {
 
     /// Emits every frame that is due, so a busy main thread delays frames but never slows the replay clock.
     private func tick() {
-        let now = Date().timeIntervalSince(wallStart ?? Date())
+        var now = Date().timeIntervalSince(wallStart ?? Date())
+        // After a long stall (the app was in the background) carry on from here instead of replaying every missed shot.
+        if now - clock > 0.5 {
+            wallStart = Date().addingTimeInterval(-clock)
+            now = clock
+        }
         repeat { emitNext() } while clock <= now
     }
 
