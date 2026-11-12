@@ -213,7 +213,7 @@ struct SessionRow: View {
                     .font(.subheadline).foregroundStyle(.secondary)
                 if let focus = record.focus {
                     Text("Focus set: \(focus.title.lowercased())").font(.caption).foregroundStyle(.secondary)
-                } else if let focus = s.topFocus {
+                } else if !record.isDemo || AppEnvironment.demoCountsForPlan, let focus = s.topFocus {
                     Text("Focus: \(focus.title.lowercased())").font(.caption).foregroundStyle(.secondary)
                 }
             }
