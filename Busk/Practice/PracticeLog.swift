@@ -4,10 +4,11 @@ import Foundation
 struct PracticeEntry: Sendable {
     var date: Date
     var shots: [ShotResult]
-    /// Shots that went in, when the player logged them.
+    /// The player's make count for the whole session; nil falls back to the shots marked Made or Missed.
     var makes: Int?
 
     var scores: [Int] { shots.map(\.score) }
+    var summary: SessionSummary { SessionSummary(shots: shots, makes: makes) }
 }
 
 /// Totals for one calendar day.
@@ -16,7 +17,7 @@ struct PracticeDay: Identifiable, Equatable, Sendable {
     var sessions = 0
     var shots = 0
     var makes = 0
-    /// Shots from sessions where makes were logged, the base for the make rate.
+    /// Shots the makes are out of (marked shots, or whole sessions counted on the summary), the base for the make rate.
     var trackedShots = 0
     var scoreTotal = 0
 
@@ -51,9 +52,10 @@ struct PracticeLog: Sendable {
             d.sessions += 1
             d.shots += e.shots.count
             d.scoreTotal += e.scores.reduce(0, +)
-            if let makes = e.makes {
+            let summary = e.summary
+            if let makes = summary.makes {
                 d.makes += makes
-                d.trackedShots += e.shots.count
+                d.trackedShots += summary.attempts
             }
             days[key] = d
         }
@@ -98,7 +100,7 @@ struct PracticeLog: Sendable {
     }
 
     var totalShots: Int { entries.reduce(0) { $0 + $1.shots.count } }
-    var totalMakes: Int { entries.reduce(0) { $0 + ($1.makes ?? 0) } }
+    var totalMakes: Int { entries.reduce(0) { $0 + ($1.summary.makes ?? 0) } }
     var practiceDays: Int { days.count }
 
     /// Days in the last `count` (ending today) that reached the shot goal.
@@ -121,13 +123,20 @@ struct PracticeLog: Sendable {
             guard !results.isEmpty else { continue }
             goodRate[area] = Double(results.filter { $0.grade == .good }.count) / Double(results.count)
         }
-        // Makes are logged per session, so a stretch's make rate comes from the sessions it draws on.
-        var seen = Set<Date>(), makes = 0, tracked = 0
-        for (_, e) in shots where seen.insert(e.date).inserted {
-            if let m = e.makes { makes += m; tracked += e.shots.count }
+        // Over just these shots: each marked shot counts as marked, and a session counted as a whole lends its make rate
+        // to each of its shots. Unmarked shots are left out.
+        var makes = 0.0, tracked = 0
+        for (shot, e) in shots {
+            if let whole = e.makes {
+                makes += Double(whole) / Double(e.shots.count)
+                tracked += 1
+            } else if let made = shot.made {
+                makes += made ? 1 : 0
+                tracked += 1
+            }
         }
         return PracticeStretch(shots: shots.count, averageScore: average,
-                               makeRate: tracked > 0 ? Double(makes) / Double(tracked) : nil, goodRate: goodRate)
+                               makeRate: tracked > 0 ? makes / Double(tracked) : nil, goodRate: goodRate)
     }
 
     /// The last 7 days against the 7 before them.

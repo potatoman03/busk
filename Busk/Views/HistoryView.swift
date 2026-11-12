@@ -46,7 +46,7 @@ struct HistoryView: View {
             : calendar.isDateInYesterday(day) ? "Yesterday"
             : day.formatted(.dateTime.weekday(.wide).month().day())
         let shots = sessions.reduce(0) { $0 + $1.shots.count }
-        let makes = sessions.compactMap(\.makes)
+        let makes = sessions.compactMap(\.summary.makes)
         return HStack {
             Text(name)
             Spacer()

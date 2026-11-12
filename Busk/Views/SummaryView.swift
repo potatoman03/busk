@@ -86,17 +86,29 @@ struct SummaryContent: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Makes").font(.headline)
-                    Text(summary.makeRate.map { "\(TodayCard.percent($0)) of \(summary.count) shot\(summary.count == 1 ? "" : "s") went in" }
-                         ?? "How many went in? Count them here.")
+                    Text(makeRateLine(summary))
                         .font(.subheadline).foregroundStyle(.secondary)
                         .accessibilityIdentifier("summaryMakeRate")
+                    if summary.makes != nil, summary.unmarked > 0 {
+                        Text("\(summary.unmarked) not marked, so left out. Use − or + to count the whole session.")
+                            .font(.caption).foregroundStyle(.secondary)
+                            .accessibilityIdentifier("summaryUnmarked")
+                    }
                 }
                 Spacer()
-                Stepper("Makes", value: Binding(get: { record.makes ?? 0 }, set: { record.makes = $0 }), in: 0...max(summary.count, record.makes ?? 0))
+                // Stepping counts makes for the whole session, starting from the live marks.
+                Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 }),
+                        in: 0...max(summary.count, summary.makes ?? 0))
                     .labelsHidden()
                     .accessibilityIdentifier("makesStepper")
             }
         }
+    }
+
+    private func makeRateLine(_ summary: SessionSummary) -> String {
+        guard let rate = summary.makeRate else { return "How many went in? Count them here." }
+        let n = summary.attempts
+        return "\(TodayCard.percent(rate)) of \(n) \(summary.countedWhole ? "" : "marked ")shot\(n == 1 ? "" : "s") went in"
     }
 
     /// Where this session leaves today's goal and how it compares with earlier sessions.

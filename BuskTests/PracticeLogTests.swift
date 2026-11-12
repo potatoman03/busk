@@ -54,11 +54,25 @@ final class PracticeLogTests: XCTestCase {
         XCTAssertLessThan(then.averageScore, latest.averageScore)
         XCTAssertEqual(then.goodRate[.elbow], 0)
         XCTAssertEqual(latest.goodRate[.elbow], 1)
-        XCTAssertEqual(then.makeRate, 0.3)
-        XCTAssertEqual(latest.makeRate, 0.5)
+        XCTAssertEqual(try XCTUnwrap(then.makeRate), 0.3, accuracy: 1e-9)
+        XCTAssertEqual(try XCTUnwrap(latest.makeRate), 0.5, accuracy: 1e-9)
         XCTAssertEqual(log.focus(lastShots: 60), .elbow)
         XCTAssertNil(PracticeLog(entries: [entry(daysAgo: 0, shots: shots(40))], now: now, calendar: calendar).improvement(),
                      "one session is nothing to compare")
+    }
+
+    func testLatestMakeRateIsOverThoseShotsAndSkipsUnmarked() {
+        let missed = shots(40).map { var s = $0; s.made = false; return s }
+        let made = shots(20).map { var s = $0; s.made = true; return s }
+        let log = PracticeLog(entries: [entry(daysAgo: 3, shots: missed), entry(daysAgo: 0, shots: made + shots(5))],
+                              now: now, calendar: calendar)
+        let (then, latest) = try! XCTUnwrap(log.improvement())
+        XCTAssertEqual(then.makeRate, 0)
+        // Latest 30: 5 missed from the older session, 20 made and 5 never marked.
+        XCTAssertEqual(try XCTUnwrap(latest.makeRate), 0.8, accuracy: 1e-9)
+        XCTAssertEqual(log.today.makes, 20)
+        XCTAssertEqual(log.today.trackedShots, 20)
+        XCTAssertEqual(log.today.makeRate, 1)
     }
 
     func testWeekOverWeek() {
@@ -79,9 +93,14 @@ final class PracticeLogTests: XCTestCase {
         marked[2].made = true
         let summary = SessionSummary(shots: marked)
         XCTAssertEqual(summary.makes, 2)
-        XCTAssertEqual(summary.makeRate, 0.5)
-        XCTAssertEqual(SessionSummary(shots: marked, makes: 3).makes, 3, "a logged total wins over the marks")
-        XCTAssertTrue(summary.spokenStatus.contains("2 of 4 went in."), summary.spokenStatus)
+        XCTAssertEqual(summary.attempts, 3)
+        XCTAssertEqual(summary.unmarked, 1)
+        XCTAssertEqual(try XCTUnwrap(summary.makeRate), 2.0 / 3, accuracy: 1e-9, "the unmarked shot isn't a miss")
+        let whole = SessionSummary(shots: marked, makes: 3)
+        XCTAssertEqual(whole.makes, 3, "a count for the whole session wins over the marks")
+        XCTAssertEqual(whole.makeRate, 0.75)
+        XCTAssertEqual(whole.unmarked, 0)
+        XCTAssertTrue(summary.spokenStatus.contains("2 of 3 went in."), summary.spokenStatus)
         XCTAssertNil(VoiceCommandParser.command(in: summary.spokenStatus))
     }
 }

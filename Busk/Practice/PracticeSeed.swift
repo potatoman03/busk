@@ -16,7 +16,6 @@ enum PracticeSeed {
             let progress = days > 1 ? 1 - Double(back) / Double(days - 1) : 1
             let count = back == 0 ? 24 : Int.random(in: 30...65, using: &rng)
             var shots: [ShotResult] = []
-            var makes = 0
             for i in 0..<count {
                 let sloppy = Double.random(in: 0...1, using: &rng) > progress * 0.8
                 let metrics = ShotMetrics(view: .front,
@@ -27,11 +26,11 @@ enum PracticeSeed {
                                           legDrive: 0.04, releaseTiming: 0, hitch: 0, drift: 0.02, guideHandPush: 0.01)
                 var shot = evaluator.evaluate(metrics)
                 shot.date = start.addingTimeInterval(Double(i) * 20)
+                shot.made = Double.random(in: 0...1, using: &rng) < 0.28 + 0.22 * progress
                 shots.append(shot)
-                if Double.random(in: 0...1, using: &rng) < 0.28 + 0.22 * progress { makes += 1 }
             }
             context.insert(SessionRecord(date: start, duration: Double(count) * 20, view: .front, handedness: .right,
-                                         isDemo: false, shots: shots, makes: makes))
+                                         isDemo: false, shots: shots))
         }
         try? context.save()
     }

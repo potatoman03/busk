@@ -9,7 +9,8 @@ final class SessionRecord {
     var handednessRaw: String
     var isDemo: Bool
     var shotsData: Data
-    /// Shots that went in, when the player logged them (live Made/Missed taps, voice, or the summary).
+    /// Shots that went in, when the player counted the whole session on the summary. Nil falls back to the shots marked
+    /// Made or Missed live.
     var makes: Int?
 
     init(date: Date, duration: TimeInterval, view: CameraView, handedness: Handedness, isDemo: Bool, shots: [ShotResult],
@@ -20,7 +21,7 @@ final class SessionRecord {
         self.handednessRaw = handedness.rawValue
         self.isDemo = isDemo
         self.shotsData = (try? JSONEncoder().encode(shots)) ?? Data()
-        self.makes = makes ?? SessionSummary(shots: shots).makes
+        self.makes = makes
     }
 
     var shots: [ShotResult] { (try? JSONDecoder().decode([ShotResult].self, from: shotsData)) ?? [] }
@@ -43,12 +44,20 @@ struct SessionSummary {
         loggedMakes = makes
     }
 
-    /// Shots that went in: the logged total, else the shots marked made, else nil when nothing was logged.
+    /// Shots that went in: the player's count for the whole session, else the shots marked made, else nil when nothing
+    /// was logged.
     var makes: Int? {
         if let loggedMakes { return loggedMakes }
-        return shots.contains { $0.made != nil } ? shots.filter { $0.made == true }.count : nil
+        return marked > 0 ? shots.filter { $0.made == true }.count : nil
     }
-    var makeRate: Double? { makes.flatMap { count > 0 ? Double($0) / Double(count) : nil } }
+    /// Whether makes are the player's count for the whole session rather than per-shot marks.
+    var countedWhole: Bool { loggedMakes != nil }
+    var marked: Int { shots.filter { $0.made != nil }.count }
+    /// Shots the makes are out of: every shot for a whole-session count, else only the marked ones, so a shot nobody
+    /// marked isn't a miss.
+    var attempts: Int { countedWhole ? count : marked }
+    var unmarked: Int { count - attempts }
+    var makeRate: Double? { makes.flatMap { attempts > 0 ? Double($0) / Double(attempts) : nil } }
 
     var count: Int { shots.count }
     var averageScore: Int {
@@ -71,7 +80,7 @@ struct SessionSummary {
     var spokenStatus: String {
         guard count > 0 else { return "No shots yet. Shoot when you're ready." }
         var parts = ["\(count) \(count == 1 ? "shot" : "shots"), average form \(averageScore), best \(bestScore)."]
-        if let makes { parts.append("\(makes) of \(count) went in.") }
+        if let makes { parts.append("\(makes) of \(attempts) went in.") }
         if count >= 4 {
             let recent = shots.suffix(3).map(\.score)
             let recentAverage = Int((Double(recent.reduce(0, +)) / Double(recent.count)).rounded())
