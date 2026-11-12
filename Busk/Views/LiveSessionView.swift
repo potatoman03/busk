@@ -59,8 +59,8 @@ struct LiveSessionView: View {
                 VStack(spacing: 12) {
                     topBar
                     if landscape {
-                        HStack {
-                            Spacer(minLength: 0)
+                        HStack(spacing: 16) {
+                            replayPanel
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
                                 feedback(compact: true)
@@ -68,7 +68,7 @@ struct LiveSessionView: View {
                             .frame(width: hudWidth)
                         }
                     } else {
-                        Spacer()
+                        replayPanel
                         feedback(compact: false)
                     }
                 }
@@ -97,6 +97,16 @@ struct LiveSessionView: View {
             ended = true
         } else {
             onClose()
+        }
+    }
+
+    @ViewBuilder private var replayPanel: some View {
+        if let replay = session.replay {
+            GhostReplayView(replay: replay, handedness: session.handedness) { session.dismissReplay(replay.id) }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+        } else {
+            Spacer(minLength: 0)
         }
     }
 
