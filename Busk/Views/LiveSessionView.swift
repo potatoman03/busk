@@ -27,6 +27,12 @@ struct LiveSessionView: View {
         }
     }
 
+    private var skeleton: some View {
+        SkeletonOverlay(pose: (session.source as? VideoPoseSource)?.currentImagePose ?? session.latestPose, handedness: session.handedness,
+                        aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
+                        phase: session.phase, fill: session.source is CameraPoseSource)
+    }
+
     private var live: some View {
         GeometryReader { geo in
             let landscape = geo.size.width > geo.size.height
@@ -40,7 +46,9 @@ struct LiveSessionView: View {
                 } else if let video = session.source as? VideoPoseSource {
                     Theme.court.ignoresSafeArea()
                     if let image = video.currentImage {
+                        // The skeleton is drawn on the picture itself so both share one frame in every orientation.
                         Image(decorative: image, scale: 1).resizable().scaledToFit()
+                            .overlay { skeleton }
                             .padding(.trailing, poseInset).ignoresSafeArea()
                     }
                     if video.visionUnavailable {
@@ -53,11 +61,11 @@ struct LiveSessionView: View {
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
-                SkeletonOverlay(pose: (session.source as? VideoPoseSource)?.currentImagePose ?? session.latestPose, handedness: session.handedness,
-                                aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
-                                phase: session.phase, fill: session.source is CameraPoseSource)
-                    .padding(.trailing, poseInset)
-                    .ignoresSafeArea()
+                if (session.source as? VideoPoseSource)?.currentImage == nil {
+                    skeleton
+                        .padding(.trailing, poseInset)
+                        .ignoresSafeArea()
+                }
                 VStack(spacing: 12) {
                     topBar(landscape: landscape)
                     if landscape {
