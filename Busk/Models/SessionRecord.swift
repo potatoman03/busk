@@ -29,6 +29,13 @@ final class SessionRecord {
         shotsData = (try? JSONEncoder().encode(shots)) ?? Data()
     }
 
+    func mark(shot index: Int, made: Bool?) {
+        var shots = shots
+        guard shots.indices.contains(index) else { return }
+        shots[index].made = made
+        shotsData = (try? JSONEncoder().encode(shots)) ?? Data()
+    }
+
     var shots: [ShotResult] { (try? JSONDecoder().decode([ShotResult].self, from: shotsData)) ?? [] }
     var view: CameraView { CameraView(rawValue: viewRaw) ?? .side }
     var summary: SessionSummary { SessionSummary(shots: shots, makes: makes) }
