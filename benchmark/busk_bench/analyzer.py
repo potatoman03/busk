@@ -55,6 +55,7 @@ def run_clip(argv, clip, video: Path, keypoints: Path | None, out_path: Path, ti
         out = json.loads(out_path.read_text())
     except (OSError, ValueError) as e:
         return "invalid_output", None, f"{e}\n{tail}", dt
-    if not isinstance(out, dict) or not isinstance(out.get("shots", []), list):
-        return "invalid_output", None, "output must be an object with a `shots` list", dt
+    if not isinstance(out, dict) or not isinstance(out.get("shots", []), list) or \
+            not all(isinstance(s, dict) for s in out.get("shots", [])):
+        return "invalid_output", None, "output must be an object with a `shots` list of objects", dt
     return "ok", out, tail, dt
