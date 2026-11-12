@@ -10,6 +10,9 @@ struct ReplaySessionView: View {
     @State private var session: CoachSession?
     @State private var error: String?
     @State private var replayed: ReplayStatus?
+    /// Written on load, after every coached shot and when a keypoint clip finishes, so the benchmark's simulator
+    /// capture can wait for busk's coaching instead of guessing how long the simulator takes.
+    @State private var status: ReplayStatus?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -32,6 +35,7 @@ struct ReplaySessionView: View {
             }
         }
         .task { load() }
+        .onChange(of: session?.shots.count ?? 0) { report() }
     }
 
     init(path: String, label: String?) {
@@ -52,6 +56,8 @@ struct ReplaySessionView: View {
                 cameraView: CameraView(rawValue: defaults.string(forKey: SettingsKey.cameraView) ?? "") ?? .side,
                 handedness: Handedness(rawValue: defaults.string(forKey: SettingsKey.handedness) ?? "") ?? .right,
                 source: VideoPoseSource(url: video), voiceEnabled: defaults.object(forKey: SettingsKey.voiceEnabled) as? Bool ?? true)
+            status = ReplayStatus(label: label, path: video.path, frames: 0)
+            status?.write()
             session = s
             s.start()
             return
@@ -61,14 +67,12 @@ struct ReplaySessionView: View {
             let source = try ReplayPoseSource(contentsOf: URL(fileURLWithPath: path))
             let s = CoachSession(cameraView: source.clip.view, handedness: source.clip.handedness, source: source,
                                  voiceEnabled: UserDefaults.standard.object(forKey: SettingsKey.voiceEnabled) as? Bool ?? true)
-            var status = ReplayStatus(label: label, path: path, frames: source.clip.frames.count)
-            status.write()
+            status = ReplayStatus(label: label, path: path, frames: source.clip.frames.count)
+            status?.write()
             source.onFinished = { [weak source] in
-                status.finished = true
-                status.framesPlayed = source?.framesPlayed ?? 0
-                status.shots = s.shots.count
-                status.cues = s.spokenLog.map(\.text)
-                status.write()
+                status?.finished = true
+                status?.framesPlayed = source?.framesPlayed ?? 0
+                report()
                 replayed = status
             }
             session = s
@@ -76,5 +80,12 @@ struct ReplaySessionView: View {
         } catch {
             self.error = "Cannot read \(path): \(error.localizedDescription)"
         }
+    }
+
+    private func report() {
+        guard let session, status != nil else { return }
+        status?.shots = session.shots.count
+        status?.cues = session.spokenLog.map(\.text)
+        status?.write()
     }
 }

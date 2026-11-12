@@ -25,7 +25,7 @@ headless: clips are rendered deterministically on first use and cached in `bench
 | `--no-keypoints` | give the analyzer only the video, so it must run its own pose detection |
 | `--baseline FILE` | compare against a previous results file; exit 1 on regression |
 | `--require-analyzer` | exit 2 if the analyzer is missing or fails on any clip |
-| `--capture-simulator` | macOS: record the booted iOS Simulator for the whole run and take a screenshot after each clip (`--visual-dir`, `--simulator`) |
+| `--capture-simulator` | macOS: record the booted iOS Simulator for the whole run and take a screenshot once busk has coached each clip (`--visual-dir`, `--simulator`) |
 | `--require-visuals` | exit 3 unless the simulator recording was captured |
 
 ## Analyzer contract (for the busk app team)
@@ -143,11 +143,19 @@ the analyzer has been fitted to the pinned shooters).
 
 Every run that counts needs screenshots and a recording of busk analysing the benchmark's clips. On a Mac
 with busk installed in a booted simulator, add `--capture-simulator --require-visuals`. The run records
-`results/visual/simulator.mp4` and, for every clip with keypoints, relaunches busk with
-`-replay-keypoints <clip>.keypoints.json -replay-label <clip id>`. busk then plays that clip through its live
-session (the same `ShotAnalyzer` and `FormEvaluator`), shows the cue and form card it gives, and the run
-screenshots it. Paths are listed under `run.visual_evidence` and in each clip's `screenshot`. Attach them to
-the PR or report. Real clips have no keypoints, so they are not replayed.
+`results/visual/simulator.mp4` and relaunches busk on every clip: rendered clips with
+`-replay-keypoints <clip>.keypoints.json -replay-label <clip id>`, real clips with `-videoPath <clip>.mp4
+-cameraView <view> -handedness <hand>` and a pose sidecar written by `busk-analyze --save-keypoints` (the
+simulator has no Vision body pose model). busk then plays that clip through its live session (the same
+`ShotAnalyzer` and `FormEvaluator`) and shows the cue and form card it gives.
+
+The simulator plays clips several times slower than real time, so the run doesn't wait a fixed time: busk writes
+its replay status (`-replay-status PATH`) after every coached shot, and the run screenshots once busk has coached
+the clip (a rendered clip has also finished playing). A clip busk hasn't coached within
+max(30 s, 8x the clip length) is logged as an in-app miss and listed under `run.visual_evidence.in_app_misses`;
+each clip's `in_app` records the outcome (`coached`, `no_shot`, `timeout`), the wait and busk's cues.
+Screenshot paths are listed under `run.visual_evidence` and in each clip's `screenshot`. Attach them to the PR or
+report.
 
 The capture picks the booted simulator that has busk (`com.potatoman03.busk`); `--simulator NAME|UDID` picks
 one explicitly. With `--require-visuals` the run exits 3 unless busk analysed at least one clip and was still
