@@ -65,7 +65,9 @@ struct LiveSessionView: View {
                                 feedback(compact: true)
                             }
                             .frame(width: hudWidth)
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                         }
+                        .frame(maxHeight: .infinity)
                     } else {
                         replayPanel
                         feedback(compact: false)
