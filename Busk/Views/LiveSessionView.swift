@@ -187,11 +187,14 @@ struct LiveSessionView: View {
 struct Pill: View {
     let text: String
     let systemImage: String
+    /// Long labels shorten in the middle instead of widening the layout.
+    var truncates = false
     var body: some View {
         Label(text, systemImage: systemImage)
             .font(.caption.bold())
             .lineLimit(1)
-            .fixedSize()
+            .truncationMode(.middle)
+            .fixedSize(horizontal: !truncates, vertical: true)
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: Capsule())
     }
