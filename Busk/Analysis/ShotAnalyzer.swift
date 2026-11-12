@@ -221,11 +221,15 @@ final class ShotAnalyzer {
         }
         let set = samples[setIdx]
         var setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
-        if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 {
+        if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 || speed[setIdx] > 0.5 {
             // From the front, a ball carried up toward the camera without stopping hides the set point, so the slowest
-            // frame is the bottom of the dip. The ball is loaded where the elbow bends most with the wrist above it.
+            // frame is the bottom of the dip, or a hand that only slowed on the way up (still moving half a body height a
+            // second) in a one-motion shot. The ball is loaded where the elbow bends most with the wrist above it,
+            // once the forearm is within 45° of upright: tipped further, it is still turning over on the way up.
             let bend = { (i: Int) in Geometry.angle(samples[i].shoulder, samples[i].elbow, samples[i].wrist) }
-            if let loaded = (setIdx..<rel).filter({ samples[$0].wrist.y < samples[$0].elbow.y }).min(by: { bend($0) < bend($1) }) {
+            let above = (setIdx..<rel).filter { samples[$0].wrist.y < samples[$0].elbow.y }
+            let upright = above.filter { abs(samples[$0].elbow.x - samples[$0].wrist.x) <= samples[$0].elbow.y - samples[$0].wrist.y }
+            if let loaded = (upright.isEmpty ? above : upright).min(by: { bend($0) < bend($1) }) {
                 setPointHeight = max(setPointHeight, lift(loaded))
             }
         }
