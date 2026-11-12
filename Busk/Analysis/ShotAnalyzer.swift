@@ -255,8 +255,9 @@ final class ShotAnalyzer {
         let atSet = [setFrame, setFrame - 1, setFrame + 1, setFrame - 2, setFrame + 2].first { $0 >= 0 && $0 < rel && samples[$0].ball != nil }
         let carried = (setIdx..<rel).prefix { speed[$0] < 1 }.compactMap(ballLift).max()
         // A ball that never stops on its way up (a one-motion shot, or a hand that speeds up before the ball does)
-        // is set where its climb slows the most; a chest push holds it still at the chest.
-        let paused = (setIdx..<rel - 1).compactMap { i in ballLift(i).flatMap { a in ballLift(i + 1).map { (a, $0 - a) } } }.min { $0.1 < $1.1 }?.0
+        // is set where its climb slows the most, below a body height a second; a chest push holds it still at the chest.
+        let paused = (setIdx..<rel - 1).compactMap { i in ballLift(i).flatMap { a in ballLift(i + 1).map { (a, $0 - a) } } }
+            .filter { $0.1 < 1 * dt }.min { $0.1 < $1.1 }?.0
         if let height = [atSet.flatMap(ballLift), carried, paused].compactMap({ $0 }).max() {
             setPointHeight = height
         }
