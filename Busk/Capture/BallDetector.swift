@@ -61,26 +61,32 @@ final class BallDetector {
                        format: .RGBA8, colorSpace: nil)
 
         // Skin or a tan wall touching the ball can pass the loosest orange test and merge with it into one bigger,
-        // off-centre blob: stricter saturation splits them, and the roundest, best-sized blob of any pass wins.
-        let blobs = Self.saturations.flatMap { Self.blobs(Self.orangeMask(rgba, width: w, height: h, saturation: $0), width: w, height: h) }
+        // off-centre blob: stricter saturation splits them off, so where a stricter pass still finds a ball inside a
+        // looser blob, the stricter one is the ball. A hand or forearm across the ball leaves a gap in it that pulls
+        // the blob's mean off centre, but not its outline: the ball's centre is the middle of the blob's extent.
         let expected = r0 * s
         let toImage = { (x: CGFloat, y: CGFloat) in CGPoint(x: area.minX + x / s, y: area.minY + y / s) }
-        var best: (score: Double, ball: Ball)?
-        for b in blobs {
-            let bw = CGFloat(b.maxX - b.minX + 1), bh = CGFloat(b.maxY - b.minY + 1)
-            let radius = max(bw, bh) / 2
-            let size = Double(radius / expected)
-            let fill = Double(b.count) / (Double.pi * Double(radius * radius))
-            guard size >= 0.45, size <= 2, fill >= 0.35, min(bw, bh) / max(bw, bh) >= 0.45 else { continue }
-            let center = toImage(CGFloat(b.sumX) / CGFloat(b.count) + 0.5, CGFloat(b.sumY) / CGFloat(b.count) + 0.5)
-            let reach = hands.map { Double(Geometry.distance($0, center) / r0) }.min()!
-            guard reach <= 3 else { continue }
-            var score = abs(log(size)) + 0.4 * reach - fill
-            if let recent { score += 0.3 * Double(Geometry.distance(recent, center) / r0) }
-            if best.map({ score < $0.score }) ?? true {
-                best = (score, Ball(center: CGPoint(x: center.x / W, y: center.y / H), radius: radius / s / H))
+        var found: [(pass: Int, box: CGRect, score: Double, ball: Ball)] = []
+        for (pass, saturation) in Self.saturations.enumerated() {
+            for b in Self.blobs(Self.orangeMask(rgba, width: w, height: h, saturation: saturation), width: w, height: h) {
+                let (x0, x1, y0, y1) = Self.extent(of: b, width: w)
+                let bw = CGFloat(x1 - x0 + 1), bh = CGFloat(y1 - y0 + 1)
+                let radius = max(bw, bh) / 2
+                let size = Double(radius / expected)
+                let fill = Double(b.count) / (Double.pi * Double(radius * radius))
+                guard size >= 0.45, size <= 2, fill >= 0.35, min(bw, bh) / max(bw, bh) >= 0.45 else { continue }
+                let center = toImage(CGFloat(x0 + x1 + 1) / 2, CGFloat(y0 + y1 + 1) / 2)
+                let reach = hands.map { Double(Geometry.distance($0, center) / r0) }.min()!
+                guard reach <= 3 else { continue }
+                var score = abs(log(size)) + 0.4 * reach - fill
+                if let recent { score += 0.3 * Double(Geometry.distance(recent, center) / r0) }
+                let box = CGRect(origin: toImage(CGFloat(x0), CGFloat(y0)), size: CGSize(width: bw / s, height: bh / s))
+                found.append((pass, box, score, Ball(center: CGPoint(x: center.x / W, y: center.y / H), radius: radius / s / H)))
             }
         }
+        let best = found
+            .filter { loose in !found.contains { $0.pass > loose.pass && loose.box.contains(px($0.ball.center)) } }
+            .min { $0.score < $1.score }
         if let ball = best?.ball { last = (ball, t) }
         return best?.ball
     }
@@ -101,7 +107,24 @@ final class BallDetector {
         return mask
     }
 
-    struct Blob { var count = 0, sumX = 0, sumY = 0, minX = Int.max, minY = Int.max, maxX = Int.min, maxY = Int.min }
+    struct Blob {
+        var count = 0, sumX = 0, sumY = 0, minX = Int.max, minY = Int.max, maxX = Int.min, maxY = Int.min
+        var pixels: [Int] = []
+    }
+
+    /// The blob's extent without the rows and columns where only a few stray pixels reach out of it: compression
+    /// speckle in skin or a wall next to the ball can pass the orange test and join the ball across the one-pixel
+    /// gap, stretching the box (and the centre taken from it) towards the head or the hands.
+    static func extent(of b: Blob, width w: Int) -> (minX: Int, maxX: Int, minY: Int, maxY: Int) {
+        var rows: [Int: Int] = [:], cols: [Int: Int] = [:]
+        for i in b.pixels { rows[i / w, default: 0] += 1; cols[i % w, default: 0] += 1 }
+        let span = { (counts: [Int: Int], lo: Int, hi: Int) -> (Int, Int) in
+            let solid = counts.filter { 4 * $0.value >= counts.values.max()! }.keys
+            return (solid.min() ?? lo, solid.max() ?? hi)
+        }
+        let (x0, x1) = span(cols, b.minX, b.maxX), (y0, y1) = span(rows, b.minY, b.maxY)
+        return (x0, x1, y0, y1)
+    }
 
     /// Connected orange regions. Neighbours are joined across a one-pixel gap, so the seams don't split the ball.
     static func blobs(_ mask: [Bool], width w: Int, height h: Int) -> [Blob] {
@@ -115,7 +138,7 @@ final class BallDetector {
             stack.append(start)
             while let i = stack.popLast() {
                 let x = i % w, y = i / w
-                blob.count += 1; blob.sumX += x; blob.sumY += y
+                blob.count += 1; blob.sumX += x; blob.sumY += y; blob.pixels.append(i)
                 blob.minX = min(blob.minX, x); blob.maxX = max(blob.maxX, x)
                 blob.minY = min(blob.minY, y); blob.maxY = max(blob.maxY, y)
                 for dy in -2...2 {
