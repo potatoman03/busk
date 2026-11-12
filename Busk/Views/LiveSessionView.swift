@@ -58,9 +58,13 @@ struct LiveSessionView: View {
                     .padding(.trailing, poseInset)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
-                    topBar
+                    topBar(showBadges: !landscape)
                     if landscape {
-                        HStack {
+                        HStack(alignment: .top) {
+                            // Side column for badges, so they never add height above the cue column.
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let badges { badges }
+                            }
                             Spacer(minLength: 0)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
@@ -87,6 +91,7 @@ struct LiveSessionView: View {
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
                             .font(.caption.monospaced())
                             .lineLimit(compact ? 2 : 1)
+                            .fixedSize(horizontal: false, vertical: compact)
                             .padding(.horizontal, 10).padding(.vertical, 4)
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
@@ -94,7 +99,7 @@ struct LiveSessionView: View {
                     if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
     }
 
-    private var topBar: some View {
+    private func topBar(showBadges: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
             Button {
@@ -138,7 +143,7 @@ struct LiveSessionView: View {
         }
             Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
                 .accessibilityIdentifier("phaseLabel")
-            if let badges { badges }
+            if showBadges, let badges { badges }
         }
     }
 
