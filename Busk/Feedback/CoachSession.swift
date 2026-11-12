@@ -29,6 +29,7 @@ final class CoachSession {
     @ObservationIgnored private var lastSeen: TimeInterval = 0
     @ObservationIgnored private var lastFrameTime: TimeInterval = 0
     @ObservationIgnored private var announcedVisible = false
+    @ObservationIgnored private var statusUntil = Date.distantPast
 
     var lastShot: ShotResult? { shots.last }
     var summary: SessionSummary { SessionSummary(shots: shots) }
@@ -95,10 +96,17 @@ final class CoachSession {
 
     /// Answers "how am I doing": a spoken summary of the session so far, even when the coach is muted.
     func speakStatus() {
-        speak(summary.spokenStatus, force: true)
+        let text = summary.spokenStatus
+        statusUntil = Date().addingTimeInterval(max(2, Double(text.split(separator: " ").count) * 0.4))
+        speak(text, force: true)
     }
 
     private func speak(_ text: String, force: Bool = false) {
+        // Shot cues don't talk over (or cut off) the answer to "how am I doing"; the banner and shot card still update.
+        if !force && Date() < statusUntil {
+            Self.log.notice("skipped cue during status answer: \(text, privacy: .public)")
+            return
+        }
         let cue = SpokenCue(text: text, muted: !voiceEnabled && !force)
         spokenLog.append(cue)
         Self.log.notice("\(cue.muted ? "muted" : "spoken", privacy: .public) cue #\(self.spokenLog.count, privacy: .public): \(text, privacy: .public)")
