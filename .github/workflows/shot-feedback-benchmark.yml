@@ -44,7 +44,11 @@ jobs:
           fi
       - name: Run benchmark
         id: bench
-        run: benchmark/run.sh --baseline "$BASELINE" --report benchmark/results/compare.json
+        run: benchmark/run.sh --require-analyzer --baseline "$BASELINE" --report benchmark/results/compare.json
+      - name: Fresh held-out draw (informational)
+        if: always()
+        continue-on-error: true
+        run: benchmark/run.sh --set heldout --heldout-seed "$GITHUB_RUN_ID" --out benchmark/results/fresh_heldout.json
       - name: Job summary
         if: always()
         run: |
@@ -57,6 +61,12 @@ jobs:
           s = d["summary"]
           print("analyzer:", d["run"]["analyzer_status"], " overall:", s["overall_score"])
           print("tiers:", {t: v["score"] for t, v in s["tiers"].items()})
+          print("sets:", d.get("set_scores"), " generalization gap:", d.get("generalization_gap"))
+          try:
+              f = json.load(open("benchmark/results/fresh_heldout.json"))
+              print("fresh held-out draw", f["benchmark"]["dataset_version"], ":", f["summary"]["overall_score"])
+          except OSError:
+              pass
           print("weakest advice:", [(w["flaw"], w["advice_rate"]) for w in d["weakest"]["flaws_by_advice"]])
           PY
             [ -f benchmark/results/compare.json ] && cat benchmark/results/compare.json
@@ -69,3 +79,4 @@ jobs:
           path: |
             benchmark/results/latest.json
             benchmark/results/compare.json
+            benchmark/results/fresh_heldout.json

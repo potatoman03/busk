@@ -10,6 +10,7 @@ sys.path.insert(0, str(BENCH))
 from busk_bench.analyzer import resolve_command, run_clip  # noqa: E402
 from busk_bench.cli import compare_docs  # noqa: E402
 from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
+from busk_bench.heldout import load_heldout_clips  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
 from busk_bench.visual import pick_device, replay_seconds  # noqa: E402
@@ -46,6 +47,48 @@ class Labels(unittest.TestCase):
         side = next(c for c in CLIPS if c.id == "beginner_chest_push__side")
         self.assertNotIn("elbow_flare", [f["id"] for f in side.observable])
         self.assertIn("elbow_flare", [f["id"] for f in side.flaws])
+
+
+class Heldout(unittest.TestCase):
+    CLIPS, VERSION, SHA = load_heldout_clips(TAX)
+
+    def test_labels_follow_taxonomy_rules(self):
+        for c in self.CLIPS:
+            p = ShotParams.from_dict(c.params)
+            want = {fid for fid, f in TAX.flaws.items()
+                    if OPS[f.label_rule["op"]](p.value(f.label_rule["param"]), f.label_rule["value"])}
+            self.assertEqual({f["id"] for f in c.flaws}, want, c.id)
+            self.assertEqual(c.set, "heldout")
+
+    def test_no_shooter_sits_on_a_threshold(self):
+        gap = {"knee_bend_deg": 5, "set_height": 0.04, "elbow_flare_deg": 5, "release_angle_deg": 4,
+               "follow_hold_s": 0.06, "guide_push": 0.5, "release_timing": 0.15, "hitch_s": 0.13, "drift_m": 0.12}
+        for c in self.CLIPS:
+            p = ShotParams.from_dict(c.params)
+            for f in TAX.flaws.values():
+                r = f.label_rule
+                self.assertGreaterEqual(abs(p.value(r["param"]) - r["value"]), gap[r["param"]] - 1e-9, (c.id, f.id))
+
+    def test_pinned_seed_is_deterministic_and_seeds_differ(self):
+        again, _, sha = load_heldout_clips(TAX)
+        self.assertEqual([c.spec() for c in again], [c.spec() for c in self.CLIPS])
+        self.assertEqual(sha, self.SHA)
+        other, version, other_sha = load_heldout_clips(TAX, seed=1)
+        self.assertNotEqual([c.params for c in other], [c.params for c in self.CLIPS])
+        self.assertNotEqual(other_sha, self.SHA)
+        self.assertTrue(version.endswith("-s1"))
+
+    def test_covers_every_flaw_and_clean_form_in_both_views(self):
+        for view in ("side", "front"):
+            clips = [c for c in self.CLIPS if c.view == view]
+            seen = {f["id"] for c in clips for f in c.observable}
+            self.assertEqual(seen, {fid for fid, f in TAX.flaws.items() if view in f.views}, view)
+            self.assertTrue(any(not c.flaws for c in clips))
+        self.assertTrue(any(c.handedness == "left" for c in self.CLIPS))
+
+    def test_perfect_feedback_scores_100(self):
+        for c in self.CLIPS:
+            self.assertEqual(score_clip(c, perfect(c), TAX)["score"], 100.0, c.id)
 
 
 class Scoring(unittest.TestCase):
@@ -115,6 +158,11 @@ class Compare(unittest.TestCase):
     def test_same_run_is_clean(self):
         self.assertEqual(compare_docs(self._doc(1.0), self._doc(1.0))["regressions"], [])
 
+    def test_held_out_set_drop_is_a_regression(self):
+        old, new = self._doc(1.0), self._doc(1.0)
+        old["set_scores"], new["set_scores"] = {"synthetic": 98.0, "heldout": 85.0}, {"synthetic": 98.0, "heldout": 82.0}
+        self.assertEqual(compare_docs(old, new)["regressions"], ["heldout set dropped 3.0 (limit 2.0)"])
+
     def test_changed_dataset_is_not_comparable(self):
         new = self._doc(0.5)
         new["benchmark"]["dataset_sha256"] = "other"
@@ -130,6 +178,14 @@ class Contract(unittest.TestCase):
             argv = [sys.executable, "-c", f"open({str(out)!r}, 'w').write('{{\"shots\": [42]}}')"]
             status, parsed, _, _ = run_clip(argv, CLIPS[0], Path(d) / "v.mp4", None, out, 30, Path(d))
             self.assertEqual((status, parsed), ("invalid_output", None))
+
+    def test_labelled_view_is_passed(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "out.json"
+            code = (f"import sys, json; a = sys.argv; json.dump({{'shots': [{{'feedback': [a[a.index('--view') + 1]]}}]}}, "
+                    f"open({str(out)!r}, 'w'))")
+            status, parsed, _, _ = run_clip([sys.executable, "-c", code], CLIPS[1], Path(d) / "v.mp4", None, out, 30, Path(d))
+            self.assertEqual((status, parsed["shots"][0]["feedback"]), ("ok", [CLIPS[1].view]))
 
     def test_missing_analyzer(self):
         with tempfile.TemporaryDirectory() as d:

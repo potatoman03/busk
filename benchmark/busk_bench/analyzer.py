@@ -37,7 +37,8 @@ def prebuild(argv: list[str], source: str, repo_root: Path, log) -> str | None:
 
 def run_clip(argv, clip, video: Path, keypoints: Path | None, out_path: Path, timeout: float, cwd: Path):
     out_path.unlink(missing_ok=True)
-    cmd = list(argv) + ["--video", str(video), "--handedness", clip.handedness, "--output", str(out_path)]
+    cmd = list(argv) + ["--video", str(video), "--handedness", clip.handedness, "--view", clip.view,
+                       "--output", str(out_path)]
     if keypoints is not None:
         cmd += ["--keypoints", str(keypoints)]
     t0 = time.monotonic()

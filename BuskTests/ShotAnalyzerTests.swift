@@ -50,10 +50,16 @@ final class ShotAnalyzerTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(run(.hitched).first).hitch, 0.3, accuracy: 0.1)
     }
 
-    func testFaderReleasesLateAndDrifts() throws {
+    func testFaderDrifts() throws {
         let m = try XCTUnwrap(run(.fader).first)
-        XCTAssertGreaterThan(try XCTUnwrap(m.releaseTiming), 0.3)
+        XCTAssertLessThan(try XCTUnwrap(m.releaseTiming), 0.2)
         XCTAssertGreaterThan(try XCTUnwrap(m.drift), 0.16)
+    }
+
+    func testLateRelease() throws {
+        let m = try XCTUnwrap(run(.lateRelease).first)
+        XCTAssertGreaterThan(try XCTUnwrap(m.releaseTiming), 0.33)
+        XCTAssertLessThan(try XCTUnwrap(m.drift), 0.11)
     }
 
     func testShortFollowThrough() throws {
@@ -64,9 +70,9 @@ final class ShotAnalyzerTests: XCTestCase {
         let good = try XCTUnwrap(run(.good, view: .front).first)
         XCTAssertNil(good.armAngle)
         XCTAssertLessThan(try XCTUnwrap(good.elbowFlare), 0.05)
-        XCTAssertLessThan(try XCTUnwrap(good.guideHandPush), 0.035)
+        XCTAssertLessThan(try XCTUnwrap(good.guideHandPush), 0.025)
         XCTAssertGreaterThan(try XCTUnwrap(run(.flaredElbow, view: .front).first?.elbowFlare), 0.07)
-        XCTAssertGreaterThan(try XCTUnwrap(run(.guideThumb, view: .front).first?.guideHandPush), 0.05)
+        XCTAssertGreaterThan(try XCTUnwrap(run(.guideThumb, view: .front).first?.guideHandPush), 0.035)
     }
 
     func testLeftHandedShot() throws {
@@ -94,6 +100,23 @@ final class ShotAnalyzerTests: XCTestCase {
             return f
         }
         XCTAssertTrue(frames.compactMap { analyzer.process($0) }.isEmpty)
+    }
+
+    func testLoopedClipMeasuresTheSameEachTime() {
+        let sim = ShotSimulator()
+        let analyzer = ShotAnalyzer(handedness: .right, view: .front)
+        let shot = sim.frames(for: .good, start: 0)
+        let still = Array(repeating: shot.last!, count: 45)
+        var frames: [PoseFrame] = []
+        var offset = 0.0
+        for _ in 0..<3 {
+            for (i, f) in (shot + still).enumerated() { var f = f; f.timestamp = offset + Double(i) / sim.fps; frames.append(f) }
+            offset = frames.last!.timestamp + 1
+        }
+        let shots = frames.compactMap { analyzer.process($0) }
+        XCTAssertEqual(shots.count, 3)
+        XCTAssertEqual(Set(shots.map { $0.elbowFlare }).count, 1)
+        XCTAssertEqual(Set(shots.map { $0.setPointHeight }).count, 1)
     }
 
     func testConsecutiveShots() {

@@ -76,6 +76,10 @@ final class BuskUITests: XCTestCase {
     }
 
     func testEndingWithoutShotsReturnsHome() {
+        // On a slow runner the demo shooter can land a shot before End is tapped, so keep it idle.
+        app.terminate()
+        app.launchArguments = ["-ui-testing", "-demo-idle"]
+        app.launch()
         app.buttons["startButton"].tap()
         app.buttons["goLiveButton"].tap()
         XCTAssertTrue(app.buttons["endSessionButton"].waitForExistence(timeout: 5))
