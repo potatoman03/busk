@@ -65,6 +65,9 @@ final class BallDetector {
         // looser blob, the stricter one is the ball. A hand or forearm across the ball leaves a gap in it that pulls
         // the blob's mean off centre, but not its outline: the ball's centre is the middle of the blob's extent.
         let expected = r0 * s
+        // A ball keeps its size from frame to frame: a blob much bigger than the one just followed has merged with skin
+        // or the shirt next to it, and its box is off the ball.
+        let followed = last.flatMap { t - $0.t >= 0 && t - $0.t < 0.25 ? $0.ball.radius * H * s : nil }
         let toImage = { (x: CGFloat, y: CGFloat) in CGPoint(x: area.minX + x / s, y: area.minY + y / s) }
         var found: [(pass: Int, box: CGRect, score: Double, ball: Ball)] = []
         for (pass, saturation) in Self.saturations.enumerated() {
@@ -75,6 +78,7 @@ final class BallDetector {
                 let size = Double(radius / expected)
                 let fill = Double(b.count) / (Double.pi * Double(radius * radius))
                 guard size >= 0.45, size <= 2, fill >= 0.35, min(bw, bh) / max(bw, bh) >= 0.45 else { continue }
+                if let followed, radius > 1.3 * followed { continue }
                 let center = toImage(CGFloat(x0 + x1 + 1) / 2, CGFloat(y0 + y1 + 1) / 2)
                 let reach = hands.map { Double(Geometry.distance($0, center) / r0) }.min()!
                 guard reach <= 3 else { continue }
