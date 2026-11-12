@@ -66,6 +66,7 @@ struct LiveSessionView: View {
                                 if let badges { badges }
                                 replayPanel
                             }
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
                                 feedback(compact: true)
