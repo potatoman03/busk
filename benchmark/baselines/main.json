@@ -591,11 +591,11 @@
     ]
   },
   "set_scores": {
-    "synthetic": 98.6,
-    "heldout": 82.1,
+    "synthetic": 98.5714,
+    "heldout": 82.1458,
     "real": 87.5
   },
-  "generalization_gap": 16.5,
+  "generalization_gap": 16.4,
   "clips": [
     {
       "score": 100.0,

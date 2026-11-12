@@ -193,7 +193,7 @@ is marked not comparable.
 
 `set_scores` reports each set and `generalization_gap` is the synthetic score minus the held-out score.
 
-Native `busk-analyze` (main, pinned seed): synthetic 98.6, held-out 82.1, real 87.5 (gap +16.5); fresh seeds
+Native `busk-analyze` (main, pinned seed): synthetic 98.6, held-out 82.1, real 87.5 (gap +16.4); fresh seeds
 1 to 3 score 88.5, 89.6, 89.7 on held-out. Simulating a regression by dropping busk's `hitch_at_set_point`
 cue drops held-out 2.2 and fails the comparison.
 

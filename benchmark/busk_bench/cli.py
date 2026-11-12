@@ -166,7 +166,7 @@ def cmd_run(a):
     sets = {}
     for c in clips:
         sets.setdefault(c.set, []).append(results[c.id]["score"])
-    agg["set_scores"] = {k: round(sum(v) / len(v), 1) for k, v in sets.items()}
+    agg["set_scores"] = {k: round(sum(v) / len(v), 4) for k, v in sets.items()}
     if "synthetic" in sets and "heldout" in sets:
         # Core clips the analyzer was tuned on minus clips it has never seen: a widening gap means overfitting.
         agg["generalization_gap"] = round(agg["set_scores"]["synthetic"] - agg["set_scores"]["heldout"], 1)
