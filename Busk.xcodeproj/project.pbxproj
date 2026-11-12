@@ -21,6 +21,7 @@
 		39D6CC34C5C8704880FFEB43 /* CameraPoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632628D1BE8604194782A543 /* CameraPoseSource.swift */; };
 		40A84D80C988479FECC68305 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF434FA39404A1A61C286B7 /* SettingsView.swift */; };
 		40ACA244A20FDC6CC47B72F1 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF8BAA5075D0438F943C610 /* SessionRecord.swift */; };
+		5C55C0F6B56C5440C313EA0B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */; };
 		6EADCFDB1FA1C35165DE78D8 /* ShooterTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C546EF77059F8216B42B15C /* ShooterTracker.swift */; };
 		7BAFAFED8EF0B38E5F6B7FB5 /* SkeletonOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4259846F864FD15E04404A69 /* SkeletonOverlay.swift */; };
 		7BCB8D86A49B61B9C1598F59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F85A461764938FFD9187B340 /* Assets.xcassets */; };
@@ -91,6 +92,7 @@
 		C387F68209C9B4B01916BED0 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		C3B912433003821C359BC2EC /* BuskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuskApp.swift; sourceTree = "<group>"; };
 		CEF434FA39404A1A61C286B7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DAF5D4BBAA797440073B1B52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DDA323BF296563705A809843 /* CoachSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachSession.swift; sourceTree = "<group>"; };
 		EC06A4C9D17F8E3CC8D2A210 /* FormEvaluatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormEvaluatorTests.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			children = (
 				F85A461764938FFD9187B340 /* Assets.xcassets */,
 				DAF5D4BBAA797440073B1B52 /* Info.plist */,
+				D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -339,6 +342,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BCB8D86A49B61B9C1598F59 /* Assets.xcassets in Resources */,
+				5C55C0F6B56C5440C313EA0B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

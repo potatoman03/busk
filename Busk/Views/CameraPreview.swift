@@ -8,10 +8,11 @@ struct CameraPreview: UIViewRepresentable {
         override class var layerClass: AnyClass { AVCaptureVideoPreviewLayer.self }
         var previewLayer: AVCaptureVideoPreviewLayer { layer as! AVCaptureVideoPreviewLayer }
 
+        weak var source: CameraPoseSource?
+
         override func layoutSubviews() {
             super.layoutSubviews()
-            let angle: CGFloat = bounds.width > bounds.height ? 0 : 90
-            if let c = previewLayer.connection, c.isVideoRotationAngleSupported(angle) { c.videoRotationAngle = angle }
+            if let angle = source?.previewRotationAngle { CameraPoseSource.apply(angle, to: previewLayer.connection) }
         }
     }
 
@@ -19,6 +20,8 @@ struct CameraPreview: UIViewRepresentable {
         let v = PreviewView()
         v.previewLayer.session = source.session
         v.previewLayer.videoGravity = .resizeAspectFill
+        v.source = source
+        source.followRotation(of: v.previewLayer)
         return v
     }
 
