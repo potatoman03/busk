@@ -79,6 +79,9 @@ final class CoachSession {
 
         if let metrics = analyzer.process(frame) {
             let result = evaluator.evaluate(metrics)
+            if let json = try? JSONEncoder().encode(metrics), let text = String(data: json, encoding: .utf8) {
+                Self.log.notice("shot #\(self.shots.count + 1, privacy: .public) metrics: \(text, privacy: .public)")
+            }
             shots.append(result)
             bannerText = result.cue
             speak(result.cue)

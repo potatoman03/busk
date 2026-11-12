@@ -110,24 +110,37 @@ final class ShotAnalyzer {
     private struct Sample {
         var t: TimeInterval
         var shoulder: CGPoint, elbow: CGPoint, wrist: CGPoint, head: CGPoint
-        var guide: CGPoint?, root: CGPoint?, ankle: CGPoint?
+        var guide: CGPoint?, guideShoulder: CGPoint?, root: CGPoint?, ankle: CGPoint?
         var span: Double? // nose-to-ankle height
     }
 
     private func measure(release rt: TimeInterval) -> ShotMetrics? {
-        let guideSide: Handedness = handedness == .right ? .left : .right
-        let samples: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
-            guard let s = f.point(handedness.shoulder), let e = f.point(handedness.elbow), let w = f.point(handedness.wrist),
+        // Facing the camera, Vision sometimes swaps left and right for a frame. Trust the shoulder order most frames show.
+        let order = { (f: PoseFrame) -> CGFloat? in
+            guard let r = f.point(.rightShoulder), let l = f.point(.leftShoulder), abs(r.x - l.x) > 0.01 else { return nil }
+            return r.x - l.x
+        }
+        let usual = view == .front ? history.compactMap(order).reduce(0) { $0 + ($1 > 0 ? 1 : -1) } : 0
+        let all: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
+            let flipped = usual != 0 && order(f).map { ($0 > 0) != (usual > 0) } == true
+            let hand: Handedness = flipped ? (handedness == .right ? .left : .right) : handedness
+            let guideSide: Handedness = hand == .right ? .left : .right
+            guard let s = f.point(hand.shoulder), let e = f.point(hand.elbow), let w = f.point(hand.wrist),
                   let head = f.point(.nose) ?? f.point(.neck) else { return nil }
             let ankles = [f.point(.leftAnkle), f.point(.rightAnkle)].compactMap { $0 }
             let ankle = ankles.isEmpty ? nil : CGPoint(x: ankles.map(\.x).reduce(0, +) / CGFloat(ankles.count),
                                                        y: ankles.map(\.y).reduce(0, +) / CGFloat(ankles.count))
-            return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist),
+            return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist), guideShoulder: f.point(guideSide.shoulder),
                           root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) })
         }
+        // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
+        // would otherwise mix in a pose from somewhere else).
+        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.3 && all[$0].t <= rt } ?? 0
+        let samples = Array(all[cut...])
         guard samples.count >= 8 else { return nil }
         let n = samples.count
-        let dt = max((samples[n - 1].t - samples[0].t) / Double(n - 1), 1.0 / 120)
+        let gaps = zip(samples.dropFirst(), samples).map { $0.t - $1.t }.sorted()
+        let dt = max(gaps[gaps.count / 2], 1.0 / 120)
 
         // Body height: nose-to-ankle is ~87% of standing height. Fall back to the torso when the feet are out of frame.
         let spans = samples.compactMap(\.span)
@@ -158,9 +171,16 @@ final class ShotAnalyzer {
 
         // Set point: walk back from the fastest moment of the release push to where the ball last stopped.
         let lo = max(1, rel - Int(0.8 / dt))
-        let pushStart = max(lo, rel - Int(0.27 / dt))
-        var setIdx = (pushStart..<max(pushStart + 1, rel)).max { speed[$0] < speed[$1] } ?? max(lo, rel - 1)
-        while setIdx > lo && speed[setIdx - 1] <= speed[setIdx] { setIdx -= 1 }
+        // Go back up the push to its fastest frame, then down to where the hand slowed; a dip that is still more
+        // than half as fast as the push is jitter within it, so keep going.
+        var setIdx = max(lo, rel - 1)
+        var pushSpeed = 0.0
+        while true {
+            while setIdx > lo && speed[setIdx - 1] >= speed[setIdx] { setIdx -= 1 }
+            pushSpeed = max(pushSpeed, speed[setIdx])
+            while setIdx > lo && speed[setIdx - 1] <= speed[setIdx] { setIdx -= 1 }
+            if setIdx <= lo || speed[setIdx] < pushSpeed * 0.5 { break }
+        }
         var a = setIdx, b = setIdx
         while a > lo && speed[a - 1] < config.pauseSpeed { a -= 1 }
         while b < rel - 1 && speed[b + 1] < config.pauseSpeed { b += 1 }
@@ -168,11 +188,23 @@ final class ShotAnalyzer {
         let set = samples[setIdx]
         let setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
 
-        let elbowFlare = view == .front ? Double(abs(set.elbow.x - set.wrist.x)) / H : nil
+        // Elbow: sideways elbow-to-wrist offset over the third of a second before the release (the median, so one
+        // frame where the forearm is turned toward the camera doesn't count as a flare).
+        var elbowFlare: Double?
+        if view == .front {
+            let offsets = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }.map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
+            elbowFlare = offsets.isEmpty ? Double(abs(set.elbow.x - set.wrist.x)) / H : offsets[offsets.count / 2]
+        }
 
+        // Arc: the arm's elevation while it is fully extended at the release (earlier frames still show the set point).
         var armAngle: Double?
         if view == .side {
-            armAngle = (max(0, rel - 2)...min(n - 1, rel + 3)).map { Geometry.elevation(from: samples[$0].shoulder, to: samples[$0].wrist) }.max()
+            let window = Array(max(0, rel - 2)...min(n - 1, rel + 4))
+            let reach = { (i: Int) in Geometry.distance(samples[i].shoulder, samples[i].wrist) }
+            let longest = window.map(reach).max() ?? 0
+            let extended = window.filter { reach($0) >= longest * 0.97 }
+                .map { Geometry.elevation(from: samples[$0].shoulder, to: samples[$0].wrist) }.sorted()
+            armAngle = extended.isEmpty ? nil : extended[extended.count / 2]
         }
 
         // Follow-through lasts until the shooting hand is first seen back below the head (frames Vision missed don't end it).
@@ -205,13 +237,40 @@ final class ShotAnalyzer {
             while s1 < n - 1, let f = feet[s1 + 1], f > floor1 + 0.012 { s1 += 1 }
             let air = s1 - s0 + 1
             if air >= 3, rel >= s0 - 2, rel <= s1 + 2 {
-                releaseTiming = Double(rel - top) / (Double(air) / 2)
+                // Sub-frame peak and takeoff/landing times: a short jump is only a few frames long.
+                // The hips trace the jump's arc; feet tuck in the air and peak early.
+                let hips = samples.map { s in s.root.map { -Double($0.y) / H } }
+                let peakIdx = (s0...s1).filter { hips[$0] != nil }.max { hips[$0]! < hips[$1]! } ?? top
+                var apex = samples[peakIdx].t
+                if peakIdx > 0, peakIdx < n - 1, let a = hips[peakIdx - 1], let b = hips[peakIdx], let c = hips[peakIdx + 1],
+                   a - 2 * b + c < 0 {
+                    apex += (a - c) / (2 * (a - 2 * b + c)) * dt
+                }
+                func crossing(_ i: Int, _ j: Int, _ level: Double) -> Double? {
+                    guard i >= 0, j < n, let fi = feet[i], let fj = feet[j], fi != fj else { return nil }
+                    return samples[i].t + (level - fi) / (fj - fi) * (samples[j].t - samples[i].t)
+                }
+                let up = crossing(s0 - 1, s0, floor0 + 0.012) ?? samples[s0].t
+                let down = crossing(s1, s1 + 1, floor1 + 0.012) ?? samples[s1].t
+                releaseTiming = (samples[rel].t - apex) / max((down - up) / 2, dt)
                 let takeoff = samples[..<s0].last { $0.ankle != nil } ?? samples[firstFoot]
                 let settled = samples.last { $0.ankle != nil && $0.t <= samples[s1].t + 0.6 } ?? samples[lastFoot]
                 if let a0 = takeoff.ankle, let a1 = settled.ankle {
                     var d = Double(abs(a1.x - a0.x)) / H
                     if view == .front, let h0 = takeoff.span, let h1 = settled.span, h1 > 0 {
                         d = max(d, abs(1 - h0 / h1) * 3.1) // getting bigger or smaller = moving toward or away from the camera
+                    } else if view == .side {
+                        // From the side, drifting toward or away from the camera only shows as a change in size. The torso
+                        // keeps its length through the jump (the head and legs don't), so compare it before and after.
+                        func torso(_ s: ArraySlice<Sample>) -> Double? {
+                            let lengths = s.compactMap { x in x.root.map { Geometry.distance(x.shoulder, $0) } }.sorted()
+                            return lengths.isEmpty ? nil : lengths[lengths.count / 2]
+                        }
+                        let after = samples.indices.filter { samples[$0].t >= samples[s1].t + 0.35 && samples[$0].t <= samples[s1].t + 0.65 }
+                        if let t0 = torso(samples[max(0, s0 - 4)..<s0]), let first = after.first, let last = after.last,
+                           let t1 = torso(samples[first...last]), t1 > 0 {
+                            d = max(d, abs(1 - t0 / t1) * 3.1)
+                        }
                     }
                     drift = d
                 }
@@ -221,7 +280,9 @@ final class ShotAnalyzer {
         var guideHandPush: Double?
         if view == .front, rel + 4 < n, let g0 = samples[rel].guide, let g1 = samples[rel + 4].guide,
            let r0 = samples[rel].root, let r1 = samples[rel + 4].root {
-            guideHandPush = hypot(Double((g1.x - g0.x) - (r1.x - r0.x)), Double((g1.y - g0.y) - (r1.y - r0.y))) / H
+            // Only travel toward the shooting hand is a push; a guide hand dropping or peeling away is a clean release.
+            let toward: CGFloat = samples[rel].wrist.x >= g0.x ? 1 : -1
+            guideHandPush = max(0, Double(((g1.x - g0.x) - (r1.x - r0.x)) * toward)) / H
         }
 
         return ShotMetrics(view: view, setPointHeight: setPointHeight, elbowFlare: elbowFlare, armAngle: armAngle,

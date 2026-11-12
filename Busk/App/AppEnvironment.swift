@@ -12,6 +12,8 @@ enum AppEnvironment {
     }
     /// Use the synthetic shooter instead of the camera.
     static var forceDemo: Bool { isUITesting || isSimulator || arguments.contains("-demo") }
+    /// `-demo-idle`: the demo shooter stands still for two minutes before shooting (UI tests that need no shots).
+    static var demoIdle: Bool { arguments.contains("-demo-idle") }
     /// `-videoPath /path/clip.mp4` runs Vision on a video file instead of the camera or demo shooter.
     static var videoURL: URL? {
         UserDefaults.standard.string(forKey: "videoPath").map { URL(fileURLWithPath: $0) }

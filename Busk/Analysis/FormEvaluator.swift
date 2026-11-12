@@ -109,13 +109,13 @@ struct FormEvaluator {
 
     struct Thresholds {
         var setPoint = Limit(ok: 0.06, bad: 0.0)
-        var releaseTiming = Limit(ok: 0.18, bad: 0.30)
+        var releaseTiming = Limit(ok: 0.20, bad: 0.33)
         var drift = Limit(ok: 0.11, bad: 0.16)
         var hitch = Limit(ok: 0.10, bad: 0.15)
         var elbow = Limit(ok: 0.05, bad: 0.07)
-        var guideHand = Limit(ok: 0.035, bad: 0.05)
-        var armAngle = Limit(ok: 65, bad: 60)
-        var legDrive = Limit(ok: 0.025, bad: 0.013)
+        var guideHand = Limit(ok: 0.025, bad: 0.035)
+        var armAngle = Limit(ok: 64, bad: 59)
+        var legDrive = Limit(ok: 0.028, bad: 0.016)
         var followThrough = Limit(ok: 0.40, bad: 0.25)
     }
 
@@ -135,7 +135,7 @@ struct FormEvaluator {
         add(.balance, m.drift, t.drift) { String(format: "Moved %.0f%% of your height in the air", $0 * 100) }
         add(.rhythm, m.hitch, t.hitch) { String(format: "Ball paused %.2f s at the set point", $0) }
         add(.elbow, m.elbowFlare, t.elbow) { String(format: "Elbow %.0f%% of your height outside the ball", $0 * 100) }
-        add(.guideHand, m.guideHandPush, t.guideHand) { $0 > 0.05 ? "Guide hand pushed the ball" : "Guide hand came off clean" }
+        add(.guideHand, m.guideHandPush, t.guideHand) { $0 > t.guideHand.bad ? "Guide hand pushed the ball" : "Guide hand came off clean" }
         add(.arc, m.armAngle, t.armAngle) { "Launch about \(Int(($0 - 20).rounded()))°" }
         add(.legs, m.legDrive, t.legDrive) { $0 < 0.013 ? "Barely any knee bend" : "Good dip into your legs" }
         add(.followThrough, m.followThrough, t.followThrough) { String(format: "Held %.1f s", $0) }

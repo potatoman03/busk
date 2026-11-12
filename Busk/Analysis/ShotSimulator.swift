@@ -35,14 +35,15 @@ struct ShotSimulator {
         static let noFollowThrough = Style(name: "No follow-through", followThroughHold: 0)
         static let stiffLegs = Style(name: "Stiff legs", kneeForward: 0.01)
         static let hitched = Style(name: "Hitch", hitch: 0.3)
-        static let fader = Style(name: "Fading away", releaseDelay: 0.17, drift: -0.15)
+        static let fader = Style(name: "Fading away", releaseDelay: 0.03, drift: -0.15)
+        static let lateRelease = Style(name: "Late release", releaseDelay: 0.24)
         static let guideThumb = Style(name: "Guide-hand push", guidePush: true)
 
         /// A demo session: one shot per flaw the camera angle can show, between good shots.
         static func demoRotation(for view: CameraView) -> [Style] {
             view == .side
-                ? [.good, .lowSet, .flat, .hitched, .fader, .noFollowThrough, .stiffLegs, .good]
-                : [.good, .flaredElbow, .guideThumb, .lowSet, .hitched, .fader, .noFollowThrough, .good]
+                ? [.good, .lowSet, .flat, .hitched, .fader, .lateRelease, .noFollowThrough, .stiffLegs, .good]
+                : [.good, .flaredElbow, .guideThumb, .lowSet, .hitched, .fader, .lateRelease, .noFollowThrough, .good]
         }
     }
 

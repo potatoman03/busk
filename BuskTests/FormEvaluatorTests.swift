@@ -79,7 +79,9 @@ final class FormEvaluatorTests: XCTestCase {
         let expected: [(CameraView, ShotSimulator.Style, FormArea?)] = [
             (.side, .good, nil), (.side, .lowSet, .setPoint), (.side, .flat, .arc), (.side, .hitched, .rhythm),
             (.side, .noFollowThrough, .followThrough), (.side, .stiffLegs, .legs),
+            (.side, .fader, .balance), (.side, .lateRelease, .releaseTiming),
             (.front, .good, nil), (.front, .flaredElbow, .elbow), (.front, .guideThumb, .guideHand),
+            (.front, .fader, .balance), (.front, .lateRelease, .releaseTiming),
         ]
         for (view, style, focus) in expected {
             var sim = ShotSimulator()
@@ -96,7 +98,7 @@ final class FormEvaluatorTests: XCTestCase {
         let analyzer = ShotAnalyzer(handedness: .right, view: .side)
         let shot = sim.frames(for: .fader)
         let fader = (shot + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 0.04)).compactMap { analyzer.process($0) }.first
-        XCTAssertEqual(Set(fader.map { FormEvaluator().evaluate($0).fixes } ?? []), [.releaseTiming, .balance])
+        XCTAssertEqual(fader.map { FormEvaluator().evaluate($0).cue }, FormArea.balance.cue)
     }
 
     func testSessionSummary() {
