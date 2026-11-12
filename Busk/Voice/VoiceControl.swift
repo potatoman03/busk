@@ -40,6 +40,10 @@ final class VoiceControl {
     @ObservationIgnored private var generation = 0
     @ObservationIgnored private var restartTimer: Timer?
     @ObservationIgnored private var configObserver: NSObjectProtocol?
+    @ObservationIgnored private var interruptionObserver: NSObjectProtocol?
+    @ObservationIgnored private var starting = false
+    /// Bumped by `stop()`, so a `start()` still waiting on a permission prompt doesn't open the mic afterwards.
+    @ObservationIgnored private var runID = 0
     @ObservationIgnored private var lastCommandAt = Date.distantPast
     @ObservationIgnored private let clock: () -> Date
 
@@ -51,7 +55,7 @@ final class VoiceControl {
     var isActive: Bool { state == .simulated || state == .listening }
 
     func start() async {
-        guard state == .off || state == .needsPermission else { return }
+        guard !starting, state == .off || state == .needsPermission else { return }
         if simulateInput {
             state = .simulated
             return
@@ -60,8 +64,12 @@ final class VoiceControl {
             state = .unavailable("Voice commands need on-device speech recognition")
             return
         }
+        starting = true
+        defer { starting = false }
+        let run = runID
         let speech = await withCheckedContinuation { c in SFSpeechRecognizer.requestAuthorization { c.resume(returning: $0) } }
         let mic = await AVAudioApplication.requestRecordPermission()
+        guard run == runID, !Task.isCancelled else { return }
         guard speech == .authorized, mic else {
             state = .needsPermission
             return
@@ -85,13 +93,26 @@ final class VoiceControl {
                                                                 queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.restartEngine() }
         }
+        // A phone call or Siri stops the engine without a configuration change; resume once it's over.
+        interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
+                                                                      object: nil, queue: .main) { [weak self] note in
+            let type = (note.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt).flatMap(AVAudioSession.InterruptionType.init)
+            guard type == .ended else { return }
+            MainActor.assumeIsolated {
+                CoachVoice.configureAudioSession()
+                self?.restartEngine()
+            }
+        }
     }
 
     func stop() {
+        runID += 1
         restartTimer?.invalidate()
         restartTimer = nil
         if let configObserver { NotificationCenter.default.removeObserver(configObserver) }
         configObserver = nil
+        if let interruptionObserver { NotificationCenter.default.removeObserver(interruptionObserver) }
+        interruptionObserver = nil
         task?.cancel()
         task = nil
         tapTarget.request?.endAudio()
