@@ -103,9 +103,10 @@ def _read_json(path: Path) -> dict | None:
 
 
 def save_keypoints(argv: list[str], clip, video: Path, dest: Path, cwd: Path, timeout: float = 300) -> str | None:
-    """Have busk-analyze write the real clip's pose sidecar (the simulator has no Vision body pose model)."""
-    if dest.exists():
-        return None
+    """Have busk-analyze write the real clip's pose sidecar (the simulator has no Vision body pose model).
+
+    Rewritten every run so the replayed poses always come from the current video and analyzer."""
+    dest.unlink(missing_ok=True)
     out = dest.with_name(dest.stem + ".analysis.json")
     cmd = list(argv) + ["--video", str(video), "--handedness", clip.handedness, "--view", clip.view,
                         "--output", str(out), "--save-keypoints", str(dest)]
