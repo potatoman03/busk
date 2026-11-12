@@ -151,8 +151,15 @@ final class ShotAnalyzer {
         }
         let all = window.compactMap { sample($0, keepArm: false) }
         // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
-        // would otherwise mix in a pose from somewhere else).
-        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.5 && all[$0].t <= rt } ?? 0
+        // would otherwise mix in a pose from somewhere else), and only since the tracker last moved to a different
+        // person: a head that jumps more than a torso and a half in one step is someone else.
+        let torsos = all.compactMap { s in s.root.map { Double(Geometry.distance(s.shoulder, $0)) } }.sorted()
+        let torso = torsos.isEmpty ? nil : torsos[torsos.count / 2]
+        let cut = all.indices.last { i in
+            i > 0 && all[i].t <= rt &&
+                (all[i].t - all[i - 1].t > 0.5 ||
+                 torso.map { Double(Geometry.distance(all[i].head, all[i - 1].head)) > 1.5 * $0 } == true)
+        } ?? 0
         let samples = Array(all[cut...])
         guard samples.count >= 8 else { return nil }
         let n = samples.count
@@ -214,11 +221,15 @@ final class ShotAnalyzer {
         }
         let set = samples[setIdx]
         var setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
-        if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 {
+        if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 || speed[setIdx] > 0.5 {
             // From the front, a ball carried up toward the camera without stopping hides the set point, so the slowest
-            // frame is the bottom of the dip. The ball is loaded where the elbow bends most with the wrist above it.
+            // frame is the bottom of the dip, or a hand that only slowed on the way up (still moving half a body height a
+            // second) in a one-motion shot. The ball is loaded where the elbow bends most with the wrist above it,
+            // once the forearm is within 45° of upright: tipped further, it is still turning over on the way up.
             let bend = { (i: Int) in Geometry.angle(samples[i].shoulder, samples[i].elbow, samples[i].wrist) }
-            if let loaded = (setIdx..<rel).filter({ samples[$0].wrist.y < samples[$0].elbow.y }).min(by: { bend($0) < bend($1) }) {
+            let above = (setIdx..<rel).filter { samples[$0].wrist.y < samples[$0].elbow.y }
+            let upright = above.filter { abs(samples[$0].elbow.x - samples[$0].wrist.x) <= samples[$0].elbow.y - samples[$0].wrist.y }
+            if let loaded = (upright.isEmpty ? above : upright).min(by: { bend($0) < bend($1) }) {
                 setPointHeight = max(setPointHeight, lift(loaded))
             }
         }
