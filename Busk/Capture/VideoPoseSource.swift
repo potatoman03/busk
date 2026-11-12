@@ -47,6 +47,7 @@ final class VideoPoseSource: PoseSource {
     private func playLoop() {
         var offset: TimeInterval = 0
         while running {
+            if offset > 0 { detector.rewind() }
             guard let played = playOnce(offset: offset), played > 0 else {
                 DispatchQueue.main.async { self.failed = true }
                 return

@@ -55,6 +55,13 @@ final class ShooterTracker {
         justShot = 0
     }
 
+    /// A looping clip jumps back to its start: keep the shooter but forget the shot hold and look wider for them,
+    /// so the skeleton doesn't drop out while they're back at their starting spot.
+    func rewind() {
+        justShot = 0
+        missed = max(missed, 7)
+    }
+
     private func lost() -> [Joint: CGPoint]? {
         missed += 1
         if missed >= patience, justShot == 0 { center = nil }

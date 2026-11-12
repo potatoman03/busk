@@ -27,6 +27,16 @@ final class ShooterTrackerTests: XCTestCase {
         XCTAssertEqual(tracker.select([bystander, landed]), landed, "stays on the shooter once their hand comes down")
     }
 
+    func testRewindKeepsTheShooterWhenALoopingClipRestarts() {
+        let tracker = ShooterTracker()
+        let bystander = person(x: 0.2, height: 0.45, floor: 0.95)
+        let shot = person(x: 0.5, height: 0.4, handUp: true)
+        XCTAssertEqual(tracker.select([bystander, shot]), shot)
+        tracker.rewind()
+        let start = person(x: 0.44, height: 0.4)
+        XCTAssertEqual(tracker.select([bystander, start]), start, "back at the start spot, still the shooter")
+    }
+
     func testIgnoresHandsUpInTheStands() {
         let tracker = ShooterTracker()
         let shooter = person(x: 0.5, height: 0.4, floor: 0.9)
