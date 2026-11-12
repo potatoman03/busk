@@ -273,13 +273,12 @@ struct LiveSessionView: View {
             .multilineTextAlignment(.center)
             .minimumScaleFactor(0.7)
             .fixedSize(horizontal: false, vertical: true)
-            // Swap the words outright: a crossfade draws the old and new cue on top of each other.
-            .contentTransition(.identity)
+            // Swap the words and resize the backdrop in the same frame: animating either lets the text show
+            // over the old cue or past the edge of the backdrop.
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .accessibilityIdentifier("cueBanner")
-            .animation(.snappy, value: session.bannerText)
     }
 }
 
