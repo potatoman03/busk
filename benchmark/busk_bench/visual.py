@@ -55,6 +55,69 @@ def replay_seconds(keypoints: dict) -> float:
     return len(keypoints.get("frames", [])) / float(keypoints.get("fps") or 30) + 1.5
 
 
+# The simulator plays clips about 3.5x slower than real time; leave room for a slower or busier machine.
+SLOWDOWN_ALLOWANCE = 8.0
+MIN_WAIT_S = 30.0
+SETTLE_S = 1.5  # let the coaching card finish animating in before the screenshot
+
+
+def coaching_timeout(clip_seconds: float) -> float:
+    return max(MIN_WAIT_S, SLOWDOWN_ALLOWANCE * clip_seconds)
+
+
+def coached(status: dict | None, label: str, loops: bool) -> str | None:
+    """Outcome of busk's replay status for this clip so far: "coached", "no_shot", or None while still playing.
+
+    A keypoint replay counts once every frame has played and busk has coached a shot; a `-videoPath` clip loops
+    and never finishes, so it counts at its first coached shot.
+    """
+    if not status or status.get("label") != label:
+        return None
+    if status.get("shots", 0) > 0 and (loops or status.get("finished")):
+        return "coached"
+    if status.get("finished"):
+        return "no_shot"
+    return None
+
+
+def wait_for_coaching(read, label: str, loops: bool, timeout: float, sleep=time.sleep, clock=time.monotonic):
+    """Poll `read()` (the replay status, or None) until busk coaches the clip: (outcome, seconds, last status)."""
+    t0 = clock()
+    status = None
+    while True:
+        status = read() or status
+        outcome = coached(status, label, loops)
+        waited = clock() - t0
+        if outcome:
+            return outcome, waited, status
+        if waited >= timeout:
+            return "timeout", waited, status
+        sleep(0.5)
+
+
+def _read_json(path: Path) -> dict | None:
+    try:
+        return json.loads(path.read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def save_keypoints(argv: list[str], clip, video: Path, dest: Path, cwd: Path, timeout: float = 300) -> str | None:
+    """Have busk-analyze write the real clip's pose sidecar (the simulator has no Vision body pose model)."""
+    if dest.exists():
+        return None
+    out = dest.with_name(dest.stem + ".analysis.json")
+    cmd = list(argv) + ["--video", str(video), "--handedness", clip.handedness, "--view", clip.view,
+                        "--output", str(out), "--save-keypoints", str(dest)]
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return str(e)
+    if p.returncode != 0 or not dest.exists():
+        return (p.stderr or "busk-analyze wrote no keypoints (does it support --save-keypoints?)")[-300:]
+    return None
+
+
 def app_data_dir(udid: str) -> Path | None:
     p = subprocess.run(["xcrun", "simctl", "get_app_container", udid, BUSK_BUNDLE_ID, "data"],
                        capture_output=True, text=True)
@@ -76,6 +139,7 @@ class SimulatorCapture:
         self.recording = None
         self.screenshots = []
         self.replayed = []
+        self.outcomes = {}
         self.data_dir = None
         self.status = "not_started"
         self.error = None
@@ -117,18 +181,46 @@ class SimulatorCapture:
         return True
 
     def replay(self, name: str, keypoints: Path):
-        """Have busk analyse this clip in-app, then screenshot its feedback."""
+        """Have busk analyse this rendered clip in-app, wait for its coaching, then screenshot it."""
         if self.status != "recording":
             return None
         dest = self.data_dir / "Documents" / "benchmark" / f"{name}.keypoints.json"
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(keypoints, dest)
+        return self._run(name, ["-replay-keypoints", str(dest)], replay_seconds(json.loads(dest.read_text())),
+                         loops=False)
+
+    def replay_video(self, name: str, video: Path, sidecar: Path, view: str, handedness: str):
+        """Have busk run a real clip in-app via `-videoPath` (pose from its sidecar), wait for coaching, screenshot."""
+        if self.status != "recording":
+            return None
+        d = self.data_dir / "Documents" / "real"
+        d.mkdir(parents=True, exist_ok=True)
+        dest = d / f"{name}.mp4"
+        shutil.copyfile(video, dest)
+        shutil.copyfile(sidecar, d / f"{name}.keypoints.json")
+        return self._run(name, ["-videoPath", str(dest), "-cameraView", view, "-handedness", handedness],
+                         replay_seconds(json.loads(sidecar.read_text())), loops=True)
+
+    def _run(self, name: str, args: list[str], clip_seconds: float, loops: bool):
+        status_path = self.data_dir / "Documents" / "benchmark" / f"{name}.status.json"
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.unlink(missing_ok=True)
         p = subprocess.run(["xcrun", "simctl", "launch", "--terminate-running-process", self.device, BUSK_BUNDLE_ID,
-                            "-replay-keypoints", str(dest), "-replay-label", name], capture_output=True, text=True)
+                            *args, "-replay-label", name, "-replay-status", str(status_path)],
+                           capture_output=True, text=True)
         if p.returncode != 0:
             self.log(f"busk replay of {name} failed to launch: {p.stderr.strip()[-200:]}")
+            self.outcomes[name] = {"outcome": "launch_failed", "seconds": 0.0}
             return None
-        time.sleep(1.5 + replay_seconds(json.loads(dest.read_text())))
+        timeout = coaching_timeout(clip_seconds)
+        outcome, waited, st = wait_for_coaching(lambda: _read_json(status_path), name, loops, timeout)
+        self.outcomes[name] = {"outcome": outcome, "seconds": round(waited, 1), "timeout_s": round(timeout, 1),
+                               "shots": (st or {}).get("shots", 0), "cues": (st or {}).get("cues", [])}
+        if outcome == "coached":
+            time.sleep(SETTLE_S)
+        else:
+            self.log(f"IN-APP MISS {name}: {outcome} after {waited:.0f} s (busk showed no coaching card)")
         self.replayed.append(name)
         return self.screenshot(name)
 
@@ -163,6 +255,8 @@ class SimulatorCapture:
     def summary(self):
         return {"status": self.status, "error": self.error,
                 "device": self.device, "device_name": self.device_name, "app": BUSK_BUNDLE_ID,
-                "mode": "in-app replay (-replay-keypoints)", "replayed_clips": self.replayed,
+                "mode": "in-app replay (-replay-keypoints, -videoPath for real clips)", "replayed_clips": self.replayed,
+                "in_app": self.outcomes,
+                "in_app_misses": [k for k, v in self.outcomes.items() if v["outcome"] != "coached"],
                 "recording": str(self.recording) if self.status == "captured" else None,
                 "screenshots": self.screenshots}

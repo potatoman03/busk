@@ -120,8 +120,10 @@ final class ShotAnalyzer {
             guard let r = f.point(.rightShoulder), let l = f.point(.leftShoulder), abs(r.x - l.x) > 0.01 else { return nil }
             return r.x - l.x
         }
-        let usual = view == .front ? history.compactMap(order).reduce(0) { $0 + ($1 > 0 ? 1 : -1) } : 0
-        let all: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
+        let window = history.filter { $0.timestamp >= rt - config.lookback }
+        // Only this shot's frames vote: a pose left over from before (a held frame, the last shot) can't flip it.
+        let usual = view == .front ? window.compactMap(order).reduce(0) { $0 + ($1 > 0 ? 1 : -1) } : 0
+        let all: [Sample] = window.compactMap { f in
             let flipped = usual != 0 && order(f).map { ($0 > 0) != (usual > 0) } == true
             let hand: Handedness = flipped ? (handedness == .right ? .left : .right) : handedness
             let guideSide: Handedness = hand == .right ? .left : .right

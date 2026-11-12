@@ -74,9 +74,6 @@ struct LiveSessionView: View {
                 }
                 .padding()
             }
-            .onChange(of: geo.size, initial: true) { _, size in
-                (session.source as? CameraPoseSource)?.setRotation(size.width > size.height ? 0 : 90)
-            }
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
