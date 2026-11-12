@@ -1,4 +1,5 @@
 import AVFoundation
+import CoreImage
 import CoreGraphics
 import ImageIO
 import Vision
@@ -20,15 +21,50 @@ enum VideoPoses {
         let aspect = rotated ? size.height / size.width : size.width / size.height
         let request = VNDetectHumanBodyPoseRequest()
         var candidates: [(t: TimeInterval, people: [[Joint: CGPoint]])] = []
+        var content: CGRect?
         while let sample = output.copyNextSampleBuffer() {
             guard let pixels = CMSampleBufferGetImageBuffer(sample) else { continue }
             let t = CMSampleBufferGetPresentationTimeStamp(sample).seconds
-            try? VNImageRequestHandler(cvPixelBuffer: pixels, orientation: orientation).perform([request])
-            candidates.append((t, (request.results ?? []).map { VisionPose.joints(from: $0) }.filter { $0.count >= 4 }))
+            if candidates.isEmpty, orientation == .up { content = contentBounds(pixels) }
+            var people: [[Joint: CGPoint]]
+            if let r = content {
+                // Letterboxed footage: run Vision on the picture only, so the shooter fills more of its input.
+                let w = CGFloat(CVPixelBufferGetWidth(pixels)), h = CGFloat(CVPixelBufferGetHeight(pixels))
+                let ciRect = CGRect(x: r.minX, y: h - r.maxY, width: r.width, height: r.height)
+                let image = CIImage(cvPixelBuffer: pixels).cropped(to: ciRect)
+                    .transformed(by: CGAffineTransform(translationX: -ciRect.minX, y: -ciRect.minY))
+                try? VNImageRequestHandler(ciImage: image).perform([request])
+                people = (request.results ?? []).map { VisionPose.joints(from: $0).mapValues {
+                    CGPoint(x: (r.minX + $0.x * r.width) / w, y: (r.minY + $0.y * r.height) / h)
+                } }
+            } else {
+                try? VNImageRequestHandler(cvPixelBuffer: pixels, orientation: orientation).perform([request])
+                people = (request.results ?? []).map { VisionPose.joints(from: $0) }
+            }
+            candidates.append((t, people.filter { $0.count >= 4 }))
         }
         let frames = followShooter(candidates, handedness: handedness).map { PoseFrame(timestamp: $0.t, joints: $0.joints, aspect: aspect) }
         if reader.status == .failed { throw Failure("decode failed: \(reader.error?.localizedDescription ?? "")") }
         return frames
+    }
+
+    /// The picture inside black letterbox / pillarbox bars (top-left origin, pixels), or nil when there are no bars.
+    static func contentBounds(_ pixels: CVPixelBuffer) -> CGRect? {
+        guard CVPixelBufferGetPixelFormatType(pixels) == kCVPixelFormatType_32BGRA else { return nil }
+        CVPixelBufferLockBaseAddress(pixels, .readOnly)
+        defer { CVPixelBufferUnlockBaseAddress(pixels, .readOnly) }
+        guard let base = CVPixelBufferGetBaseAddress(pixels)?.assumingMemoryBound(to: UInt8.self) else { return nil }
+        let w = CVPixelBufferGetWidth(pixels), h = CVPixelBufferGetHeight(pixels), row = CVPixelBufferGetBytesPerRow(pixels)
+        func lit(_ x: Int, _ y: Int) -> Bool {
+            let p = base + y * row + x * 4
+            return max(p[0], p[1], p[2]) > 24
+        }
+        let step = 4
+        let cols = stride(from: 0, to: w, by: 1).filter { x in stride(from: 0, to: h, by: step).contains { lit(x, $0) } }
+        let rows = stride(from: 0, to: h, by: 1).filter { y in stride(from: 0, to: w, by: step).contains { lit($0, y) } }
+        guard let x0 = cols.first, let x1 = cols.last, let y0 = rows.first, let y1 = rows.last else { return nil }
+        let r = CGRect(x: x0, y: y0, width: x1 - x0 + 1, height: y1 - y0 + 1)
+        return r.width < CGFloat(w) * 0.9 || r.height < CGFloat(h) * 0.9 ? r : nil
     }
 
     /// Picks the shooter out of everyone Vision sees: people are linked frame to frame into tracks by position,

@@ -59,14 +59,23 @@ func inferView(_ frames: [PoseFrame]) -> CameraView? {
 }
 let cameraView = view ?? inferView(frames)
 
-if let dump = opts["dump-poses"] {
+// `--save-keypoints OUT.json` writes the tracked shooter's pose as a `busk-bench-keypoints/1` sidecar, which the app's
+// `-videoPath` replays where Vision can't run (the simulator).
+if let dump = opts["save-keypoints"] ?? opts["dump-poses"] {
     let names: [Joint: String] = Dictionary(uniqueKeysWithValues: Joint.allCases.map { j in
         (j, j.rawValue.replacingOccurrences(of: "([A-Z])", with: "_$1", options: .regularExpression).lowercased())
     })
-    let doc: [String: Any] = ["aspect": Double(frames.first?.aspect ?? 1), "view": cameraView?.rawValue ?? "unknown", "frames": frames.map { f in
-        ["t": f.timestamp, "joints": Dictionary(uniqueKeysWithValues: f.joints.map { (names[$0.key]!, [Double($0.value.x), Double($0.value.y)]) })] as [String: Any]
-    }]
-    try? JSONSerialization.data(withJSONObject: doc).write(to: URL(fileURLWithPath: dump))
+    let duration = (frames.last?.timestamp ?? 0) - (frames.first?.timestamp ?? 0)
+    let doc: [String: Any] = [
+        "format": "busk-bench-keypoints/1", "source": "busk-analyze",
+        "fps": frames.count > 1 && duration > 0 ? Double(frames.count - 1) / duration : 30,
+        "width": Double(frames.first?.aspect ?? 1), "height": 1.0,
+        "view": cameraView?.rawValue ?? "unknown", "handedness": handedness.rawValue,
+        "frames": frames.map { f in
+            ["t": f.timestamp, "joints": Dictionary(uniqueKeysWithValues: f.joints.map { (names[$0.key]!, [Double($0.value.x), Double($0.value.y)]) })] as [String: Any]
+        },
+    ]
+    try? JSONSerialization.data(withJSONObject: doc, options: [.sortedKeys]).write(to: URL(fileURLWithPath: dump))
 }
 
 let analyzer = ShotAnalyzer(handedness: handedness, view: cameraView)
