@@ -106,11 +106,11 @@ def save_keypoints(argv: list[str], clip, video: Path, dest: Path, cwd: Path, ti
     """Have busk-analyze write the real clip's pose sidecar (the simulator has no Vision body pose model).
 
     Rewritten every run so the replayed poses always come from the current video and analyzer."""
-    dest.unlink(missing_ok=True)
     out = dest.with_name(dest.stem + ".analysis.json")
     cmd = list(argv) + ["--video", str(video), "--handedness", clip.handedness, "--view", clip.view,
                         "--output", str(out), "--save-keypoints", str(dest)]
     try:
+        dest.unlink(missing_ok=True)
         p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired) as e:
         return str(e)
