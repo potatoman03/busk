@@ -31,20 +31,23 @@ final class DemoPoseSource: PoseSource {
     private var timer: Timer?
     private var clock: TimeInterval = 0
     private var styleIndex = 0
+    private let leadIn: Double
     private var wallStart: Date?
 
-    init(handedness: Handedness = .right, view: CameraView = .side, styles: [ShotSimulator.Style]? = nil, gap: Double = 0.8) {
+    init(handedness: Handedness = .right, view: CameraView = .side, styles: [ShotSimulator.Style]? = nil, gap: Double = 0.8,
+         leadIn: Double = 0.5) {
         var sim = ShotSimulator()
         sim.handedness = handedness
         sim.view = view
         simulator = sim
         self.styles = styles ?? ShotSimulator.Style.demoRotation(for: view)
         self.gap = gap
+        self.leadIn = leadIn
     }
 
     func start() {
         stop()
-        queue = simulator.idleFrames(seconds: 0.5, start: clock)
+        queue = simulator.idleFrames(seconds: leadIn, start: clock)
         wallStart = Date().addingTimeInterval(-clock)
         timer = Timer.scheduledTimer(withTimeInterval: 1 / simulator.fps, repeats: true) { [weak self] _ in
             self?.tick()
