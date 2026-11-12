@@ -244,22 +244,14 @@ final class ShotAnalyzer {
             }
         }
         // Judged by the ball itself when it is seen in the hand: the wrist is beside or under it, and the hand alone
-        // reads the same at the shoulders whether the ball is in front of the chin or the chest. A hand that never stays
-        // put for a tenth of a second at the slowest frame only slowed passing through: in that one-motion shot the
-        // ball is set where the push starts, at the tightest elbow bend before the release.
+        // reads the same at the shoulders whether the ball is in front of the chin or the chest. Until the push starts
+        // (the hand moving a body height a second or faster) the ball is still being brought up to where it is set: a
+        // one-motion shot that only slowed passing the chest keeps carrying it up to the face, while a push from the
+        // chest leaves at speed from where it stopped.
         let ballLift = { (i: Int) in samples[i].ball.map { Double(samples[i].shoulder.y - $0.y) / H - Self.ballAboveHand } }
         let atSet = [setFrame, setFrame - 1, setFrame + 1, setFrame - 2, setFrame + 2].first { $0 >= 0 && $0 < rel && samples[$0].ball != nil }
-        let still = { (i: Int) in Double(hypot(hand(i).x - hand(setIdx).x, hand(i).y - hand(setIdx).y)) / H < self.config.pauseRadius }
-        var first = setIdx, last = setIdx
-        while first > lo && still(first - 1) { first -= 1 }
-        while last + 1 < rel && still(last + 1) { last += 1 }
-        var loaded: Int?
-        if Double(last - first + 1) * dt < 0.09 {
-            let held = (setIdx..<rel).filter { samples[$0].ball != nil && samples[$0].wrist.y < samples[$0].elbow.y }
-            let upright = held.filter { abs(samples[$0].elbow.x - samples[$0].wrist.x) <= samples[$0].elbow.y - samples[$0].wrist.y }
-            loaded = (upright.isEmpty ? held : upright).min { bend($0) < bend($1) }
-        }
-        if let height = [atSet, loaded].compactMap({ $0.flatMap(ballLift) }).max() {
+        let carried = (setIdx..<rel).prefix { speed[$0] < 1 }.compactMap(ballLift).max()
+        if let height = [atSet.flatMap(ballLift), carried].compactMap({ $0 }).max() {
             setPointHeight = height
         }
 
