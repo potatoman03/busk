@@ -30,6 +30,12 @@ struct ShotMetrics: Codable, Equatable, Sendable {
     var launchAngle: Double? { armAngle.map { $0 - 20 } }
 }
 
+/// One shot's pose frames and the moment of release, for replaying it.
+struct ShotClip: Sendable {
+    var frames: [PoseFrame]
+    var release: TimeInterval
+}
+
 enum ShotPhase: String, Sendable {
     case waiting = "Waiting for your shot"
     case gathering = "Gathering"
@@ -59,6 +65,8 @@ final class ShotAnalyzer {
     var config = Config()
 
     private(set) var phase: ShotPhase = .waiting
+    /// The frames of the shot `process` last returned, with its measured release.
+    private(set) var lastShotClip: ShotClip?
     private var history: [PoseFrame] = []
     private var releaseTime: TimeInterval?
     private var armDropped = false
@@ -320,6 +328,7 @@ final class ShotAnalyzer {
             guideHandPush = max(0, Double(((g1.x - g0.x) - (r1.x - r0.x)) * toward)) / H
         }
 
+        lastShotClip = ShotClip(frames: history.filter { $0.timestamp >= samples[0].t }, release: samples[rel].t)
         return ShotMetrics(view: view, setPointHeight: timed ? setPointHeight : nil, elbowFlare: elbowFlare, armAngle: armAngle,
                            followThrough: followThrough, legDrive: legDrive, releaseTiming: timed ? releaseTiming : nil,
                            hitch: timed ? hitch : nil, drift: drift, guideHandPush: guideHandPush)

@@ -58,8 +58,8 @@ struct LiveSessionView: View {
                 VStack(spacing: 12) {
                     topBar
                     if landscape {
-                        HStack {
-                            Spacer(minLength: 0)
+                        HStack(spacing: 16) {
+                            replayPanel
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
                                 feedback(compact: true)
@@ -67,7 +67,7 @@ struct LiveSessionView: View {
                             .frame(width: hudWidth)
                         }
                     } else {
-                        Spacer()
+                        replayPanel
                         feedback(compact: false)
                     }
                 }
@@ -76,6 +76,16 @@ struct LiveSessionView: View {
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
+    }
+
+    @ViewBuilder private var replayPanel: some View {
+        if let replay = session.replay {
+            GhostReplayView(replay: replay, handedness: session.handedness) { session.dismissReplay(replay.id) }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+        } else {
+            Spacer(minLength: 0)
+        }
     }
 
     @ViewBuilder private func feedback(compact: Bool) -> some View {
@@ -88,7 +98,7 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if let shot = session.lastShot { ShotCard(shot: shot) }
+                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
     }
 
     private var topBar: some View {
@@ -167,6 +177,8 @@ struct Pill: View {
 
 struct ShotCard: View {
     let shot: ShotResult
+    /// The landscape side column is short, so show fewer, single-line areas there.
+    var compact = false
     var body: some View {
         HStack(spacing: 14) {
             VStack {
@@ -176,11 +188,11 @@ struct ShotCard: View {
                 Text("form").font(.caption2).foregroundStyle(.secondary)
             }
             VStack(alignment: .leading, spacing: 4) {
-                ForEach(shot.areas.sorted { $0.grade > $1.grade }.prefix(4)) { a in
+                ForEach(shot.areas.sorted { $0.grade > $1.grade }.prefix(compact ? 3 : 4)) { a in
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
+                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
                     }
                 }
             }

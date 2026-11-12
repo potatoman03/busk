@@ -9,7 +9,7 @@ struct SkeletonOverlay: View {
     /// Aspect-fill to line up with a full-screen camera preview; otherwise fit so the whole body stays visible.
     var fill = true
 
-    private static let bones: [(Joint, Joint)] = [
+    static let bones: [(Joint, Joint)] = [
         (.nose, .neck), (.neck, .leftShoulder), (.neck, .rightShoulder),
         (.leftShoulder, .leftElbow), (.leftElbow, .leftWrist),
         (.rightShoulder, .rightElbow), (.rightElbow, .rightWrist),

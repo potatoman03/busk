@@ -22,6 +22,9 @@ final class CoachSession {
     var voiceEnabled: Bool {
         didSet { voice.enabled = voiceEnabled }
     }
+    /// Show a slow-motion replay after each shot with the session's best shot as a ghost.
+    let ghostReplayEnabled: Bool
+    private(set) var replay: ShotReplay?
 
     @ObservationIgnored private let analyzer: ShotAnalyzer
     @ObservationIgnored private let evaluator = FormEvaluator()
@@ -29,12 +32,15 @@ final class CoachSession {
     @ObservationIgnored private var lastSeen: TimeInterval = 0
     @ObservationIgnored private var lastFrameTime: TimeInterval = 0
     @ObservationIgnored private var announcedVisible = false
+    @ObservationIgnored private var best: (clip: ShotClip, number: Int, score: Int)?
 
     var lastShot: ShotResult? { shots.last }
     var summary: SessionSummary { SessionSummary(shots: shots) }
     var isDemo: Bool { source.isDemo }
 
-    init(cameraView: CameraView, handedness: Handedness, source: PoseSource, voiceEnabled: Bool) {
+    init(cameraView: CameraView, handedness: Handedness, source: PoseSource, voiceEnabled: Bool,
+         ghostReplayEnabled: Bool = UserDefaults.standard.bool(forKey: SettingsKey.ghostReplay)) {
+        self.ghostReplayEnabled = ghostReplayEnabled
         self.cameraView = cameraView
         self.handedness = handedness
         self.source = source
@@ -83,6 +89,12 @@ final class CoachSession {
                 Self.log.notice("shot #\(self.shots.count + 1, privacy: .public) metrics: \(text, privacy: .public)")
             }
             shots.append(result)
+            if let clip = analyzer.lastShotClip {
+                if ghostReplayEnabled {
+                    replay = ShotReplay(shot: clip, number: shots.count, score: result.score, best: best)
+                }
+                if result.score > best?.score ?? -1 { best = (clip, shots.count, result.score) }
+            }
             bannerText = result.cue
             speak(result.cue)
         }
@@ -91,6 +103,10 @@ final class CoachSession {
             Self.analyzerLog.notice("t=\(frame.timestamp, format: .fixed(precision: 2)) phase \(next, privacy: .public) wrist=\(wrist, privacy: .public)")
         }
         phase = analyzer.phase
+    }
+
+    func dismissReplay(_ id: ShotReplay.ID) {
+        if replay?.id == id { replay = nil }
     }
 
     private func speak(_ text: String) {
