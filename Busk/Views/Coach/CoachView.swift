@@ -105,13 +105,8 @@ struct CoachView: View {
 
     // MARK: - Workout
 
-    /// Tracked sets count as done once a session with that focus was saved today.
     private func isDone(_ step: WorkoutStep) -> Bool {
-        if case .trackedSet(let focus, _) = step.kind {
-            let today = records.filter { Calendar.current.isDateInToday($0.date) }
-            if today.contains(where: { $0.focus == focus && (focus != nil || $0.shots.count > 0) }) { return true }
-        }
-        return done.contains(step.id)
+        WorkoutChecklist.isDone(step, checked: done, sessions: records.map(\.practice))
     }
 
     private func toggle(_ step: WorkoutStep) {

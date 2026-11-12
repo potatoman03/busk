@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showGuide = false
     @AppStorage(SettingsKey.hasSeenSetupTips) private var hasSeenGuide = false
+    @State private var checkedSteps = WorkoutChecklist.done()
     @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
@@ -103,6 +104,7 @@ struct HomeView: View {
             .coachDestinations()
             .sheet(isPresented: $showSettings) { SettingsView() }
             .sheet(isPresented: $showGuide) { GuideView() }
+            .onAppear { checkedSteps = WorkoutChecklist.done() }
             .task {
                 // UI tests start on Home unless they ask for the first-run guide.
                 if !hasSeenGuide && (!AppEnvironment.isUITesting || AppEnvironment.arguments.contains("-show-guide")) {
@@ -132,8 +134,8 @@ struct HomeView: View {
     private var coachCard: some View {
         let plan = CoachPlan(sessions: records.map(\.practice))
         let steps = plan.workout(hasBall: hasBall)
-        let done = WorkoutChecklist.done()
-        let next = steps.first { !done.contains($0.id) }
+        let sessions = records.map(\.practice)
+        let next = steps.first { !WorkoutChecklist.isDone($0, checked: checkedSteps, sessions: sessions) }
         return NavigationLink(value: CoachRoute.plan) {
             Card {
                 HStack {

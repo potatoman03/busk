@@ -162,7 +162,7 @@ struct LiveSessionView: View {
             Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
                 .accessibilityIdentifier("phaseLabel")
             if let focus = session.focus, let r = session.summary.focusResult {
-                Pill(text: "\(focus.title) \(r.good)/\(r.measured)" + (session.targetShots.map { " · set \(min(session.shots.count, $0))/\($0)" } ?? ""),
+                Pill(text: "\(focus.title) \(r.good)/\(r.measured)" + (session.targetShots.map { session.shots.count >= $0 ? " · set done" : " · set \(session.shots.count)/\($0)" } ?? ""),
                      systemImage: "scope")
                     .accessibilityIdentifier("focusPill")
             }

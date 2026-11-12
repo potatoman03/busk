@@ -190,4 +190,13 @@ enum WorkoutChecklist {
         if done { ids.insert(id) } else { ids.remove(id) }
         defaults.set(ids.sorted(), forKey: key(for: date))
     }
+
+    /// Tracked sets count as done once a session with that focus was saved today; other steps once checked off.
+    static func isDone(_ step: WorkoutStep, checked: Set<String>, sessions: [PracticeSession], now: Date = Date()) -> Bool {
+        if case .trackedSet(let focus, _) = step.kind {
+            let today = sessions.filter { Calendar.current.isDate($0.date, inSameDayAs: now) }
+            if today.contains(where: { $0.focus == focus && !$0.shots.isEmpty }) { return true }
+        }
+        return checked.contains(step.id)
+    }
 }

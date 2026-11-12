@@ -75,7 +75,9 @@ struct LessonView: View {
             .padding(20)
         }
         .background(Theme.court.ignoresSafeArea())
+        .navigationTitle(lesson.title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
         .onAppear { WorkoutChecklist.set("lesson-\(lesson.id)", done: true) }
         .fullScreenCover(item: $launch) { SetupFlowView(focus: $0.focus, targetShots: CoachPlan.focusSetShots) }
     }
@@ -139,7 +141,9 @@ struct DrillView: View {
             .padding(20)
         }
         .background(Theme.court.ignoresSafeArea())
+        .navigationTitle(drill.title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.visible, for: .navigationBar)
         .onAppear { done = WorkoutChecklist.done().contains("drill-\(drill.id)") }
     }
 
