@@ -111,8 +111,23 @@ struct LiveSessionView: View {
     }
 
     @ViewBuilder private func feedback(compact: Bool) -> some View {
+        if compact {
+            // The landscape column is short: when a long cue doesn't leave room, drop the spoken-cue log, then the
+            // form card, so the cue and the voice buttons stay whole.
+            ViewThatFits(in: .vertical) {
+                feedbackStack(compact: true, cueLog: true, card: true)
+                feedbackStack(compact: true, cueLog: false, card: true)
+                feedbackStack(compact: true, cueLog: false, card: false)
+            }
+        } else {
+            feedbackStack(compact: false, cueLog: true, card: true)
+        }
+    }
+
+    private func feedbackStack(compact: Bool, cueLog: Bool, card: Bool) -> some View {
+        VStack(spacing: 12) {
                     banner(compact: compact)
-                    if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
+                    if cueLog, AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
                             .font(.caption.monospaced())
@@ -120,9 +135,9 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
-                    // Keep the voice buttons on screen in the short landscape column; the banner shrinks instead.
-                    VoiceControlBar(commands: [.status, .end], compact: compact).layoutPriority(1)
+                    if card, let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
+                    VoiceControlBar(commands: [.status, .end], compact: compact)
+        }
     }
 
     private var topBar: some View {
@@ -165,9 +180,8 @@ struct LiveSessionView: View {
         Text(session.bannerText)
             .font(compact ? .title3.bold() : .title2.bold())
             .multilineTextAlignment(.center)
-            .minimumScaleFactor(compact ? 0.5 : 0.7)
-            .lineLimit(compact ? 3 : nil)
-            .fixedSize(horizontal: false, vertical: !compact)
+            .minimumScaleFactor(0.7)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
