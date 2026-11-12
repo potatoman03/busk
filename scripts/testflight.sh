@@ -14,7 +14,7 @@ rm -rf "$OUT" && mkdir -p "$OUT/keys"
 trap 'rm -rf "$OUT/keys"' EXIT
 
 JWT=$(swift scripts/asc_jwt.swift)
-api() { curl -sf -H "Authorization: Bearer $JWT" "https://api.appstoreconnect.apple.com$1"; }
+api() { curl -sfg -H "Authorization: Bearer $JWT" "https://api.appstoreconnect.apple.com$1"; }
 
 TEAM_ID=${APPLE_TEAM_ID:-$(api "/v1/bundleIds?filter[identifier]=$BUNDLE_ID" | jq -r '.data[0].attributes.seedId')}
 APP_ID=$(api "/v1/apps?filter[bundleId]=$BUNDLE_ID" | jq -r '.data[0].id // empty')
