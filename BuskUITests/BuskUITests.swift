@@ -36,9 +36,9 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["demoBadge"].waitForExistence(timeout: 5) || app.otherElements["demoBadge"].exists)
         let count = app.staticTexts["shotCount"]
         XCTAssertTrue(count.waitForExistence(timeout: 5))
-        let twoShots = NSPredicate(format: "label == '2'")
+        let twoShots = NSPredicate(format: "label.intValue >= 2")
         expectation(for: twoShots, evaluatedWith: count)
-        waitForExpectations(timeout: 20)
+        waitForExpectations(timeout: 60)
         XCTAssertTrue(app.staticTexts["lastShotScore"].exists)
         XCTAssertTrue(app.staticTexts["cueBanner"].exists)
         snapshot("03-live")

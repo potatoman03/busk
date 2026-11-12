@@ -135,7 +135,7 @@ struct ShotCard: View {
                 Text("form").font(.caption2).foregroundStyle(.secondary)
             }
             VStack(alignment: .leading, spacing: 4) {
-                ForEach(shot.areas) { a in
+                ForEach(shot.areas.sorted { $0.grade > $1.grade }.prefix(4)) { a in
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())

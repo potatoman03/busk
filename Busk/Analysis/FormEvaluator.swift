@@ -12,38 +12,63 @@ enum Grade: Int, Codable, Comparable, Sendable {
     }
 }
 
-/// The four coaching areas plus legs, in the order cues are prioritized.
+/// The form areas Busk coaches. Each matches one flaw in the shooting-feedback benchmark taxonomy.
+/// Declaration order breaks ties when two areas are equally far off.
 enum FormArea: String, Codable, CaseIterable, Identifiable, Sendable {
-    case elbow, arc, armExtension, releaseHeight, followThrough, legs
+    case setPoint, releaseTiming, balance, rhythm, elbow, guideHand, arc, legs, followThrough
     var id: String { rawValue }
+    var priority: Int { FormArea.allCases.firstIndex(of: self) ?? 0 }
     var title: String {
         switch self {
+        case .setPoint: return "Set point"
+        case .releaseTiming: return "Release timing"
+        case .balance: return "Balance"
+        case .rhythm: return "Rhythm"
         case .elbow: return "Elbow"
+        case .guideHand: return "Guide hand"
         case .arc: return "Arc"
-        case .armExtension: return "Release extension"
-        case .releaseHeight: return "Release point"
-        case .followThrough: return "Follow-through"
         case .legs: return "Legs"
+        case .followThrough: return "Follow-through"
         }
     }
     var cue: String {
         switch self {
-        case .elbow: return "Tuck your elbow under the ball"
-        case .arc: return "More arc, shoot up not out"
-        case .armExtension: return "Extend all the way up"
-        case .releaseHeight: return "Release higher, above your forehead"
-        case .followThrough: return "Hold your follow-through"
-        case .legs: return "Bend your knees more"
+        case .setPoint: return "Bring the ball up above your forehead before you shoot, not from your chest"
+        case .releaseTiming: return "Release at the top of your jump, not on the way down"
+        case .balance: return "Jump straight up and land where you took off"
+        case .rhythm: return "One smooth motion, don't stop the ball at your set point"
+        case .elbow: return "Tuck your shooting elbow under the ball"
+        case .guideHand: return "Guide hand on the side, let it come off clean"
+        case .arc: return "More arc, shoot up and over the rim"
+        case .legs: return "Bend your knees and drive up through your legs"
+        case .followThrough: return "Snap your wrist and hold your follow-through"
+        }
+    }
+    /// Flaw ID in benchmark/taxonomy.json.
+    var flawID: String {
+        switch self {
+        case .setPoint: return "low_set_point"
+        case .releaseTiming: return "releasing_on_the_way_down"
+        case .balance: return "off_balance_drift"
+        case .rhythm: return "hitch_at_set_point"
+        case .elbow: return "elbow_flare"
+        case .guideHand: return "guide_hand_interference"
+        case .arc: return "flat_arc"
+        case .legs: return "no_leg_drive"
+        case .followThrough: return "no_follow_through"
         }
     }
     var symbol: String {
         switch self {
+        case .setPoint: return "hand.raised"
+        case .releaseTiming: return "arrow.up.to.line"
+        case .balance: return "figure.stand"
+        case .rhythm: return "metronome"
         case .elbow: return "arrow.down.right.and.arrow.up.left"
+        case .guideHand: return "hand.wave"
         case .arc: return "point.topleft.down.to.point.bottomright.curvepath"
-        case .armExtension: return "arrow.up.to.line"
-        case .releaseHeight: return "hand.raised"
-        case .followThrough: return "hand.point.down"
         case .legs: return "figure.basketball"
+        case .followThrough: return "hand.point.down"
         }
     }
 }
@@ -53,6 +78,8 @@ struct AreaResult: Codable, Equatable, Identifiable, Sendable {
     var grade: Grade
     var value: Double
     var detail: String
+    /// How far past the needs-work line the measurement is (0 when it isn't). Picks which cue comes first.
+    var severity: Double = 0
     var id: FormArea { area }
 }
 
@@ -65,16 +92,31 @@ struct ShotResult: Codable, Equatable, Identifiable, Sendable {
     /// What the coach says out loud after this shot.
     var cue: String
     var focus: FormArea?
+    /// Every area that needs work, most important first.
+    var fixes: [FormArea] = []
 }
 
 struct FormEvaluator {
+    /// One check: `ok` and `bad` are the lines where a measurement turns from good to OK and from OK to needs work.
+    struct Limit {
+        var ok: Double, bad: Double
+        /// Larger values are worse when `bad > ok`.
+        func grade(_ v: Double) -> Grade {
+            bad > ok ? (v > bad ? .needsWork : v > ok ? .ok : .good) : (v < bad ? .needsWork : v < ok ? .ok : .good)
+        }
+        func severity(_ v: Double) -> Double { max(0, (v - bad) / (bad - ok)) }
+    }
+
     struct Thresholds {
-        var elbowOffsetGood = 0.30, elbowOffsetOK = 0.50
-        var extensionGood = 160.0, extensionOK = 150.0
-        var heightGood = 0.45, heightOK = 0.25
-        var arcGood = 52.0...82.0, arcOK = 45.0...88.0
-        var followGood = 0.40, followOK = 0.20
-        var kneeGood = 150.0, kneeOK = 162.0
+        var setPoint = Limit(ok: 0.06, bad: 0.0)
+        var releaseTiming = Limit(ok: 0.18, bad: 0.30)
+        var drift = Limit(ok: 0.11, bad: 0.16)
+        var hitch = Limit(ok: 0.10, bad: 0.15)
+        var elbow = Limit(ok: 0.05, bad: 0.07)
+        var guideHand = Limit(ok: 0.035, bad: 0.05)
+        var armAngle = Limit(ok: 65, bad: 60)
+        var legDrive = Limit(ok: 0.025, bad: 0.013)
+        var followThrough = Limit(ok: 0.40, bad: 0.25)
     }
 
     var thresholds = Thresholds()
@@ -82,49 +124,29 @@ struct FormEvaluator {
     func evaluate(_ m: ShotMetrics) -> ShotResult {
         let t = thresholds
         var areas: [AreaResult] = []
+        func add(_ area: FormArea, _ value: Double?, _ limit: Limit, _ detail: (Double) -> String) {
+            guard let value else { return }
+            let grade = limit.grade(value)
+            areas.append(AreaResult(area: area, grade: grade, value: value, detail: detail(value),
+                                    severity: grade == .needsWork ? 1 + limit.severity(value) : 0))
+        }
+        add(.setPoint, m.setPointHeight, t.setPoint) { $0 < 0 ? "Ball set below your shoulders" : "Ball set above your head" }
+        add(.releaseTiming, m.releaseTiming, t.releaseTiming) { $0 > 0.3 ? "Let go after the peak of your jump" : "Released near the top of your jump" }
+        add(.balance, m.drift, t.drift) { String(format: "Moved %.0f%% of your height in the air", $0 * 100) }
+        add(.rhythm, m.hitch, t.hitch) { String(format: "Ball paused %.2f s at the set point", $0) }
+        add(.elbow, m.elbowFlare, t.elbow) { String(format: "Elbow %.0f%% of your height outside the ball", $0 * 100) }
+        add(.guideHand, m.guideHandPush, t.guideHand) { $0 > 0.05 ? "Guide hand pushed the ball" : "Guide hand came off clean" }
+        add(.arc, m.armAngle, t.armAngle) { "Launch about \(Int(($0 - 20).rounded()))°" }
+        add(.legs, m.legDrive, t.legDrive) { $0 < 0.013 ? "Barely any knee bend" : "Good dip into your legs" }
+        add(.followThrough, m.followThrough, t.followThrough) { String(format: "Held %.1f s", $0) }
 
-        areas.append(AreaResult(area: .elbow,
-                                grade: m.elbowOffset <= t.elbowOffsetGood ? .good : m.elbowOffset <= t.elbowOffsetOK ? .ok : .needsWork,
-                                value: m.elbowOffset,
-                                detail: "Elbow \(Int((m.elbowOffset * 100).rounded()))% of a forearm off the ball line"))
-        if let arc = m.releaseAngle {
-            areas.append(AreaResult(area: .arc,
-                                    grade: t.arcGood.contains(arc) ? .good : t.arcOK.contains(arc) ? .ok : .needsWork,
-                                    value: arc,
-                                    detail: "Released at \(Int(arc.rounded()))° (aim for 55-75°)"))
-        }
-        areas.append(AreaResult(area: .armExtension,
-                                grade: m.releaseElbowAngle >= t.extensionGood ? .good : m.releaseElbowAngle >= t.extensionOK ? .ok : .needsWork,
-                                value: m.releaseElbowAngle,
-                                detail: "Elbow opened to \(Int(m.releaseElbowAngle.rounded()))°"))
-        areas.append(AreaResult(area: .releaseHeight,
-                                grade: m.releaseHeight >= t.heightGood ? .good : m.releaseHeight >= t.heightOK ? .ok : .needsWork,
-                                value: m.releaseHeight,
-                                detail: m.releaseHeight >= t.heightGood ? "High release" : "Release is low"))
-        areas.append(AreaResult(area: .followThrough,
-                                grade: m.followThrough >= t.followGood ? .good : m.followThrough >= t.followOK ? .ok : .needsWork,
-                                value: m.followThrough,
-                                detail: String(format: "Held %.1fs", m.followThrough)))
-        if let knee = m.kneeAngle {
-            areas.append(AreaResult(area: .legs,
-                                    grade: knee <= t.kneeGood ? .good : knee <= t.kneeOK ? .ok : .needsWork,
-                                    value: knee,
-                                    detail: "Knees bent to \(Int(knee.rounded()))°"))
-        }
-
-        let penalty = areas.reduce(0) { $0 + ($1.grade == .needsWork ? 20 : $1.grade == .ok ? 7 : 0) }
-        let score = max(0, 100 - penalty)
-        let focus = areas.first { $0.grade == .needsWork }?.area ?? areas.first { $0.grade == .ok }?.area
-        let cue: String
-        if let f = focus, areas.contains(where: { $0.area == f && $0.grade == .needsWork }) {
-            cue = f.cue
-        } else if score >= 90 {
-            cue = "Great shot, same again"
-        } else if let f = focus {
-            cue = "Nice. " + f.cue
-        } else {
-            cue = "Great shot, same again"
-        }
-        return ShotResult(metrics: m, areas: areas, score: score, cue: cue, focus: focus)
+        let penalty = areas.map { (r: AreaResult) -> Int in r.grade == .needsWork ? 20 : r.grade == .ok ? 7 : 0 }.reduce(0, +)
+        let needsWork: [AreaResult] = areas.filter { $0.grade == .needsWork }
+        let fixes: [FormArea] = needsWork.sorted { (a: AreaResult, b: AreaResult) -> Bool in
+            a.severity != b.severity ? a.severity > b.severity : a.area.priority < b.area.priority
+        }.map(\.area)
+        let focus = fixes.first
+        return ShotResult(metrics: m, areas: areas, score: max(0, 100 - penalty),
+                          cue: focus?.cue ?? "Great shot, same again", focus: focus, fixes: fixes)
     }
 }

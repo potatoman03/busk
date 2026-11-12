@@ -28,6 +28,7 @@
 		CE59664121A1F24525B0CCE4 /* PoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58C3402EAFF7EAC0ED0DC5D /* PoseSource.swift */; };
 		D0C8D0AF644FD8E86E423B6D /* ShotSimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A89227129404F8B9E1BC54B /* ShotSimulator.swift */; };
 		DB1EFDF4C2D6876415F58000 /* CoachSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDA323BF296563705A809843 /* CoachSession.swift */; };
+		DC7E94FC7CB9ACFB1E5CCD66 /* VisionPose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5200040ECAA5BE7FA5B5B172 /* VisionPose.swift */; };
 		DF38769352D2AAE707CA117B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10EE5C10464DA177167DEE90 /* HomeView.swift */; };
 		E516177751EAF6EF7CC06C49 /* ShotAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3682D5D07C7CC9F2D902C1 /* ShotAnalyzer.swift */; };
 		F69C60EACE736B9D6C34817D /* LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F6ADC54DFC6F2E89B30BC7 /* LiveSessionView.swift */; };
@@ -59,6 +60,7 @@
 		4A89227129404F8B9E1BC54B /* ShotSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotSimulator.swift; sourceTree = "<group>"; };
 		4BF8BAA5075D0438F943C610 /* SessionRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecord.swift; sourceTree = "<group>"; };
 		4E222060D0868BDFF1D83F71 /* Pose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pose.swift; sourceTree = "<group>"; };
+		5200040ECAA5BE7FA5B5B172 /* VisionPose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPose.swift; sourceTree = "<group>"; };
 		632628D1BE8604194782A543 /* CameraPoseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPoseSource.swift; sourceTree = "<group>"; };
 		689250600A941C98DB79ADF2 /* SetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowView.swift; sourceTree = "<group>"; };
 		7F1FBD0C434C9AD4E5810D3D /* Busk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Busk.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -173,6 +175,7 @@
 			children = (
 				632628D1BE8604194782A543 /* CameraPoseSource.swift */,
 				A58C3402EAFF7EAC0ED0DC5D /* PoseSource.swift */,
+				5200040ECAA5BE7FA5B5B172 /* VisionPose.swift */,
 			);
 			path = Capture;
 			sourceTree = "<group>";
@@ -342,6 +345,7 @@
 				7BAFAFED8EF0B38E5F6B7FB5 /* SkeletonOverlay.swift in Sources */,
 				21F5939035B6BF5C895F4AB8 /* SummaryView.swift in Sources */,
 				C16006D3F528B68AA58E3E1D /* Theme.swift in Sources */,
+				DC7E94FC7CB9ACFB1E5CCD66 /* VisionPose.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -7,3 +7,4 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 /screenshots-out/
+.build/

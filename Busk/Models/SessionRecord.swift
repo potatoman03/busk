@@ -51,7 +51,3 @@ struct SessionSummary {
         return counts.max { a, b in a.value == b.value ? a.key.priority > b.key.priority : a.value < b.value }?.key
     }
 }
-
-extension FormArea {
-    var priority: Int { FormArea.allCases.firstIndex(of: self) ?? 0 }
-}
