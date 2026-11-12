@@ -58,6 +58,33 @@ final class FormEvaluatorTests: XCTestCase {
         XCTAssertEqual(FormEvaluator().evaluate(m).focus, .setPoint)
     }
 
+    func testFrontChestPushIsToldToRaiseTheSetPointBeforeTheGuideHand() {
+        var m = good
+        m.guideHandPush = 0.071 // a two-hand push reads far past the guide-hand line
+        m.setPointHeight = -0.075
+        m.followThrough = 0.133
+        m.legDrive = 0.002
+        m.elbowFlare = 0.081
+        let r = FormEvaluator().evaluate(m)
+        XCTAssertEqual(r.fixes.first, .setPoint)
+        XCTAssertEqual(r.fixes.prefix(2), [.setPoint, .guideHand])
+    }
+
+    func testFrontTwoMotionIsToldOneMotionBeforeTheGuideHand() {
+        var m = good
+        m.guideHandPush = 0.072
+        m.hitch = 0.566
+        m.legDrive = 0.006
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.rhythm, .guideHand, .legs])
+    }
+
+    func testGuideHandStillLeadsWithoutASetPointOrRhythmFlaw() {
+        var m = good
+        m.guideHandPush = 0.071
+        m.followThrough = 0.133
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.guideHand, .followThrough])
+    }
+
     func testMinorIssueIsNotCorrected() {
         var m = good
         m.followThrough = 0.3

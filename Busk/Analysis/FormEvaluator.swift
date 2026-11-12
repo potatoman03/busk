@@ -145,9 +145,16 @@ struct FormEvaluator {
 
         let penalty = areas.map { (r: AreaResult) -> Int in r.grade == .needsWork ? 20 : r.grade == .ok ? 7 : 0 }.reduce(0, +)
         let needsWork: [AreaResult] = areas.filter { $0.grade == .needsWork }
-        let fixes: [FormArea] = needsWork.sorted { (a: AreaResult, b: AreaResult) -> Bool in
+        var fixes: [FormArea] = needsWork.sorted { (a: AreaResult, b: AreaResult) -> Bool in
             a.severity != b.severity ? a.severity > b.severity : a.area.priority < b.area.priority
         }.map(\.area)
+        // A guide hand can't come off clean while the ball is pushed from the chest or stopped on the way up,
+        // so a low set point or a two-motion shot is fixed first.
+        if let guide = fixes.firstIndex(of: .guideHand) {
+            let roots = fixes[guide...].filter { $0 == .setPoint || $0 == .rhythm }
+            fixes.removeAll { roots.contains($0) }
+            fixes.insert(contentsOf: roots, at: guide)
+        }
         let focus = fixes.first
         return ShotResult(metrics: m, areas: areas, score: max(0, 100 - penalty),
                           cue: focus?.cue ?? "Great shot, same again", focus: focus, fixes: fixes)
