@@ -83,6 +83,10 @@ final class CoachSession {
             bannerText = result.cue
             speak(result.cue)
         }
+        if analyzer.phase != phase {
+            let next = analyzer.phase.rawValue, wrist = String(describing: frame[handedness.wrist])
+            Self.analyzerLog.notice("t=\(frame.timestamp, format: .fixed(precision: 2)) phase \(next, privacy: .public) wrist=\(wrist, privacy: .public)")
+        }
         phase = analyzer.phase
     }
 
@@ -94,6 +98,7 @@ final class CoachSession {
     }
 
     private static let log = Logger(subsystem: "com.potatoman03.busk", category: "voice")
+    private static let analyzerLog = Logger(subsystem: "com.potatoman03.busk", category: "analyzer")
 }
 
 struct SpokenCue: Equatable {
