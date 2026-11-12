@@ -20,6 +20,13 @@ struct LessonView: View {
                     Text(lesson.why)
                 }
 
+                if lesson.id == "overview" || lesson.id == "setPoint" {
+                    Card {
+                        Label("What it looks like", systemImage: "figure.basketball").font(.headline)
+                        BallPositionsPicture()
+                    }
+                }
+
                 Card {
                     Label("How to do it", systemImage: "list.number").font(.headline)
                     ForEach(Array(lesson.steps.enumerated()), id: \.offset) { i, step in
@@ -211,5 +218,84 @@ struct LibraryView: View {
         .scrollContentBackground(.hidden)
         .background(Theme.court.ignoresSafeArea())
         .navigationTitle("Lessons")
+    }
+}
+
+/// Side-on figures of where the ball goes: the shooting pocket, the set point, and the chest push to avoid.
+struct BallPositionsPicture: View {
+    struct Panel: Identifiable {
+        let id: String
+        let title: String
+        let example: String
+        let style: ShotSimulator.Style
+        let time: Double
+        let good: Bool
+    }
+
+    static let panels = [
+        Panel(id: "pocket", title: "Shooting pocket", example: "Ball at your waist on your shooting side, knees bent",
+              style: .good, time: 0.40, good: true),
+        Panel(id: "setPoint", title: "Set point", example: "Just above your forehead. You see the rim under the ball",
+              style: .good, time: 0.70, good: true),
+        Panel(id: "chest", title: "Not this", example: "From your chest, like a pass",
+              style: .lowSet, time: 0.70, good: false),
+    ]
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            ForEach(Self.panels) { panel in
+                VStack(spacing: 6) {
+                    PoseFigure(pose: Self.pose(panel), color: panel.good ? .white : .red.opacity(0.85))
+                        .frame(height: 130)
+                    Label(panel.title, systemImage: panel.good ? "checkmark.circle.fill" : "xmark.circle.fill")
+                        .font(.caption.bold())
+                        .foregroundStyle(panel.good ? Color.green : Color.red)
+                        .labelStyle(.titleAndIcon)
+                    Text(panel.example).font(.caption2).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("ballPosition-\(panel.id)")
+            }
+        }
+    }
+
+    static func pose(_ panel: Panel) -> PoseFrame {
+        let frames = ShotSimulator().frames(for: panel.style)
+        return frames[min(frames.count - 1, Int(panel.time * 30))]
+    }
+}
+
+/// A stick figure with the ball at the shooting hand, scaled to fit.
+struct PoseFigure: View {
+    let pose: PoseFrame
+    var color: Color = .white
+
+    var body: some View {
+        Canvas { ctx, size in
+            guard let wrist = pose[.rightWrist] else { return }
+            let ball = CGPoint(x: wrist.x + 0.012, y: wrist.y - 0.03), radius: CGFloat = 0.03
+            let points = Array(pose.joints.values) + [CGPoint(x: ball.x, y: ball.y - radius), CGPoint(x: ball.x + radius, y: ball.y)]
+            let minX = points.map(\.x).min()!, maxX = points.map(\.x).max()!
+            let minY = points.map(\.y).min()!, maxY = points.map(\.y).max()!
+            let scale = min(size.width / max(maxX - minX, 0.3), size.height / (maxY - minY)) * 0.92
+            let ox = size.width / 2 - (minX + maxX) / 2 * scale, oy = size.height / 2 - (minY + maxY) / 2 * scale
+            func map(_ p: CGPoint) -> CGPoint { CGPoint(x: ox + p.x * scale, y: oy + p.y * scale) }
+            for (a, b) in SkeletonOverlay.bones {
+                guard let pa = pose[a], let pb = pose[b] else { continue }
+                var path = Path()
+                path.move(to: map(pa))
+                path.addLine(to: map(pb))
+                ctx.stroke(path, with: .color(color.opacity(0.85)), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            }
+            if let nose = pose[.nose] {
+                let c = map(nose), r = 0.025 * scale
+                ctx.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)), with: .color(color), lineWidth: 3)
+            }
+            let c = map(ball), r = radius * scale
+            ctx.fill(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)), with: .color(Theme.orange))
+        }
+        .accessibilityHidden(true)
     }
 }

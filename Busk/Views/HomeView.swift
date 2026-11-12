@@ -132,9 +132,9 @@ struct HomeView: View {
 
     /// Today's plan at a glance; opens the full coaching plan.
     private var coachCard: some View {
-        let plan = CoachPlan(sessions: records.map(\.practice))
+        let plan = CoachPlan(sessions: records.coachingSessions)
         let steps = plan.workout(hasBall: hasBall)
-        let sessions = records.map(\.practice)
+        let sessions = records.coachingSessions
         let next = steps.first { !WorkoutChecklist.isDone($0, checked: checkedSteps, sessions: sessions) }
         return NavigationLink(value: CoachRoute.plan) {
             Card {

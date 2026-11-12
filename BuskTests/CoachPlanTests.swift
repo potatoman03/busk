@@ -26,13 +26,86 @@ final class CoachPlanTests: XCTestCase {
 
     func testFocusIsAreaThatNeedsWorkMost() {
         let shots = Array(repeating: shot([.elbow: .needsWork, .legs: .ok]), count: 8)
-            + Array(repeating: shot([.guideHand: .needsWork]), count: 4)
+            + Array(repeating: shot([.guideHand: .needsWork]), count: 8)
         XCTAssertEqual(CoachPlan(sessions: [session(shots)]).focus, .elbow)
     }
 
-    func testTiesGoToEarlierInCurriculum() {
-        let shots = Array(repeating: shot([.elbow: .needsWork, .legs: .needsWork]), count: 12)
+    func testTiesGoByCoachingPriority() {
+        let shots = Array(repeating: shot([.elbow: .needsWork, .legs: .needsWork]), count: 15)
         XCTAssertEqual(CoachPlan(sessions: [session(shots)]).focus, .legs)
+        let set = Array(repeating: shot([.setPoint: .needsWork, .legs: .needsWork]), count: 15)
+        XCTAssertEqual(CoachPlan(sessions: [session(set)]).focus, .setPoint, "Set point ranks before legs, as live")
+    }
+
+    /// A beginner pushing from the chest: the plan's focus is the fix the live cue and the summary lead with.
+    func testFocusMatchesTheLiveCueForAChestPush() throws {
+        var sim = ShotSimulator()
+        sim.view = .side
+        let analyzer = ShotAnalyzer(handedness: .right, view: .side)
+        var frames = sim.idleFrames(seconds: 0.5, start: 0)
+        for _ in 0..<CoachPlan.baselineShots {
+            let shot = sim.frames(for: .lowSet, start: frames.last!.timestamp + 1 / sim.fps)
+            frames += shot + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 1 / sim.fps)
+        }
+        let results = frames.compactMap { analyzer.process($0) }.map { FormEvaluator().evaluate($0) }
+        XCTAssertEqual(results.count, CoachPlan.baselineShots)
+        let live = try XCTUnwrap(SessionSummary(shots: results).topFocus)
+        XCTAssertEqual(live, .setPoint)
+        XCTAssertEqual(CoachPlan(sessions: [session(results)]).focus, live)
+    }
+
+    func testPlanFollowsShotsLeadFixOverMoreFrequentMarginalFlaw() {
+        // Legs is graded needs-work on every shot (marginal), but each shot led with the set point.
+        let shots = (0..<15).map { _ -> ShotResult in
+            var r = shot([.legs: .needsWork, .setPoint: .needsWork])
+            r.focus = .setPoint
+            return r
+        } + (0..<5).map { _ in var r = shot([.legs: .needsWork]); r.focus = .legs; return r }
+        XCTAssertEqual(CoachPlan(sessions: [session(shots)]).focus, .setPoint)
+    }
+
+    func testBaselineSetIsDoneOnlyAtItsTarget() {
+        let partial = [session(Array(repeating: shot(), count: 6))]
+        let plan = CoachPlan(sessions: partial)
+        let baseline = try! XCTUnwrap(plan.workout(hasBall: false).first { $0.id == "baseline" })
+        XCTAssertEqual(baseline.title, "Baseline: \(CoachPlan.baselineShots) shadow shots")
+        XCTAssertFalse(WorkoutChecklist.isDone(baseline, checked: [], sessions: partial))
+        let split = [session(Array(repeating: shot(), count: 8)), session(Array(repeating: shot(), count: 7))]
+        XCTAssertTrue(WorkoutChecklist.isDone(baseline, checked: [], sessions: split))
+        let focusSet = WorkoutStep(id: "focus-legs", kind: .trackedSet(focus: .legs, shots: 20), title: "", detail: "")
+        XCTAssertFalse(WorkoutChecklist.isDone(focusSet, checked: [], sessions: [session(Array(repeating: shot(), count: 12), focus: .legs)]))
+        XCTAssertTrue(WorkoutChecklist.isDone(focusSet, checked: [], sessions: [session(Array(repeating: shot(), count: 20), focus: .legs)]))
+    }
+
+    func testFlawOutsideTheFocusIsCalledOut() {
+        func r(_ grades: [FormArea: Grade], focus: FormArea?) -> ShotResult {
+            var s = shot(grades); s.focus = focus; return s
+        }
+        XCTAssertEqual(CoachSession.outranksFocus(.legs, in: r([.setPoint: .needsWork], focus: .setPoint)), .setPoint)
+        XCTAssertEqual(CoachSession.outranksFocus(.legs, in: r([.setPoint: .needsWork, .legs: .needsWork], focus: .setPoint)), .setPoint)
+        XCTAssertNil(CoachSession.outranksFocus(.setPoint, in: r([.setPoint: .needsWork, .legs: .needsWork], focus: .setPoint)))
+        XCTAssertNil(CoachSession.outranksFocus(.setPoint, in: r([.legs: .needsWork, .setPoint: .needsWork], focus: .legs)),
+                     "A lower-priority flaw doesn't interrupt a focus that still needs work")
+        XCTAssertNil(CoachSession.outranksFocus(.legs, in: r([:], focus: nil)))
+    }
+
+    func testDemoSessionsDontBuildAPlan() throws {
+        try XCTSkipIf(AppEnvironment.demoCountsForPlan)
+        let shots = Array(repeating: shot([.setPoint: .needsWork]), count: 13)
+        let demo = SessionRecord(date: Date(), duration: 60, view: .side, handedness: .right, isDemo: true, shots: shots)
+        let real = SessionRecord(date: Date(), duration: 60, view: .side, handedness: .right, isDemo: false, shots: shots)
+        let plan = CoachPlan(sessions: [demo].coachingSessions)
+        XCTAssertEqual(plan.totalShots, 0)
+        XCTAssertNil(plan.focus)
+        XCTAssertEqual([demo, real].coachingSessions.count, 1)
+    }
+
+    func testPraiseIsGrammatical() {
+        for n in 0..<4 {
+            let line = FormArea.legs.praise(n)
+            XCTAssertNil(line.range(of: "that legs"), line)
+            XCTAssertNil(line.range(of: "the legs"), line)
+        }
     }
 
     func testCleanShooterGetsNoFocus() {
@@ -80,7 +153,7 @@ final class CoachPlanTests: XCTestCase {
     }
 
     func testWorkoutWithoutBallUsesBallFreeDrills() {
-        let plan = CoachPlan(sessions: [session(Array(repeating: shot([.elbow: .needsWork]), count: 12))])
+        let plan = CoachPlan(sessions: [session(Array(repeating: shot([.elbow: .needsWork]), count: 15))])
         XCTAssertEqual(plan.focus, .elbow)
         let steps = plan.workout(hasBall: false)
         XCTAssertEqual(steps.first?.id, "warmup")
@@ -92,7 +165,7 @@ final class CoachPlanTests: XCTestCase {
     }
 
     func testWorkoutWithBallWarmsUpWithFormShooting() {
-        let plan = CoachPlan(sessions: [session(Array(repeating: shot([.elbow: .needsWork]), count: 12))])
+        let plan = CoachPlan(sessions: [session(Array(repeating: shot([.elbow: .needsWork]), count: 15))])
         guard case .drill(let warmUp) = plan.workout(hasBall: true).first?.kind else { return XCTFail() }
         XCTAssertEqual(warmUp.id, "formShooting")
     }

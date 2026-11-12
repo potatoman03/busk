@@ -9,7 +9,7 @@ struct CoachView: View {
     @State private var launch: FocusLaunch?
     @State private var showGuide = false
 
-    private var plan: CoachPlan { CoachPlan(sessions: records.map(\.practice)) }
+    private var plan: CoachPlan { CoachPlan(sessions: records.coachingSessions) }
 
     var body: some View {
         let plan = plan
@@ -97,6 +97,11 @@ struct CoachView: View {
                      ? "Learn the four beats of a jump shot, then take \(CoachPlan.baselineShots)+ shots. Busk picks the one thing to fix first and builds your plan around it."
                      : "\(plan.totalShots) of \(CoachPlan.baselineShots) baseline shots done. A few more and Busk picks your focus.")
                     .font(.subheadline).foregroundStyle(.secondary)
+                if records.contains(where: \.isDemo) && !AppEnvironment.demoCountsForPlan {
+                    Label("Demo shooter sessions don't count toward your plan", systemImage: "info.circle")
+                        .font(.caption).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("coachDemoNote")
+                }
             }
             if !plan.graduated.isEmpty {
                 Label("Mastered: " + plan.graduated.map(\.title).joined(separator: ", "), systemImage: "checkmark.seal.fill")
@@ -111,7 +116,7 @@ struct CoachView: View {
     // MARK: - Workout
 
     private func isDone(_ step: WorkoutStep) -> Bool {
-        WorkoutChecklist.isDone(step, checked: done, sessions: records.map(\.practice))
+        WorkoutChecklist.isDone(step, checked: done, sessions: records.coachingSessions)
     }
 
     private func toggle(_ step: WorkoutStep) {

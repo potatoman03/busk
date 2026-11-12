@@ -298,6 +298,7 @@ final class BuskUITests: XCTestCase {
         app.buttons["step-lesson-overview"].tap()
         XCTAssertTrue(app.staticTexts["lessonTitle"].waitForExistence(timeout: 5))
         snapshot("10-lesson-overview")
+        XCTAssertTrue(app.descendants(matching: .any)["ballPosition-setPoint"].exists)
         app.navigationBars.buttons.element(boundBy: 0).tap()
         XCTAssertEqual(app.staticTexts["workoutProgress"].label, "1/2")
 

@@ -30,6 +30,13 @@ final class SessionRecord {
     var practice: PracticeSession { PracticeSession(date: date, focus: focus, shots: shots) }
 }
 
+extension Sequence where Element == SessionRecord {
+    /// The sessions the coaching plan learns from: demo shooter sessions are not the player's shots.
+    var coachingSessions: [PracticeSession] {
+        filter { !$0.isDemo || AppEnvironment.demoCountsForPlan }.map(\.practice)
+    }
+}
+
 /// Aggregates a set of shots for the summary screen.
 struct SessionSummary {
     let shots: [ShotResult]

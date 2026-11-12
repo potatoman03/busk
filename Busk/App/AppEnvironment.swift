@@ -16,6 +16,8 @@ enum AppEnvironment {
     static var demoIdle: Bool { arguments.contains("-demo-idle") }
     /// `-demo-walk-in`: the demo shooter starts badly framed (off to the side, too close, feet cut off) so the framing check shows.
     static var demoWalkIn: Bool { arguments.contains("-demo-walk-in") }
+    /// Demo shots stay out of the coaching plan, except in UI tests or with `-demo-counts` (simulator checks of the plan).
+    static var demoCountsForPlan: Bool { isUITesting || arguments.contains("-demo-counts") }
     /// `-videoPath /path/clip.mp4` runs Vision on a video file instead of the camera or demo shooter.
     static var videoURL: URL? {
         UserDefaults.standard.string(forKey: "videoPath").map { URL(fileURLWithPath: $0) }

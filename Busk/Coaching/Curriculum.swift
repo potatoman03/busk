@@ -346,7 +346,8 @@ extension FormArea {
     /// Spoken after a focus-set shot where this area was good.
     func praise(_ n: Int) -> String {
         let name = title.lowercased()
-        let lines = ["Good \(name). Same again", "That's the \(name). Keep it", "\(title) looked right. Again", "Yes, that \(name). Repeat it"]
+        let lines = ["Good \(name) that time. Same again", "That's it on your \(name). Keep it", "\(title) looked right. Again",
+                     "Yes, your \(name) was right. Repeat it"]
         return lines[abs(n) % lines.count]
     }
 }

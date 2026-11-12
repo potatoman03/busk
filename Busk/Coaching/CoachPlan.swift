@@ -56,7 +56,7 @@ struct CoachPlan: Sendable {
     static let lockedInShots = 30
     static let lockedInRate = 0.85
     /// Shots needed before Busk picks a focus.
-    static let baselineShots = 10
+    static let baselineShots = 15
     static let focusSetShots = 20
 
     let areas: [AreaProgress]
@@ -89,21 +89,32 @@ struct CoachPlan: Sendable {
         if let current = sorted.last(where: { $0.focus != nil })?.focus, (byArea[current]?.stage ?? .unmeasured) < .solid {
             focus = current
         } else if totalShots >= Self.baselineShots {
-            focus = Self.pickFocus(areas)
+            focus = Self.pickFocus(areas, shots: Array(shots.suffix(Self.window)))
         } else {
             focus = nil
         }
     }
 
-    /// The area that needs work most often; ties go to the one earlier in the curriculum.
-    static func pickFocus(_ areas: [AreaProgress]) -> FormArea? {
-        let candidates = areas.filter { $0.measured >= minimumToJudge && $0.stage < .solid && $0.needsWorkRate > 0 }
+    /// The fix the live coach led with most often over recent shots, so the plan, the live cue and the summary agree.
+    /// Each shot's `focus` already ranks clearly bad flaws before marginal ones, then by `coachingPriority`; ties go the
+    /// same way. Falls back to the area most often graded needs-work, then the lowest good rate.
+    static func pickFocus(_ areas: [AreaProgress], shots: [ShotResult] = []) -> FormArea? {
+        let open = Set(areas.filter { $0.measured >= minimumToJudge && $0.stage < .solid }.map(\.area))
+        let led = Dictionary(grouping: shots.compactMap(\.focus).filter(open.contains), by: { $0 }).mapValues(\.count)
+        if let top = led.max(by: { a, b in
+            a.value != b.value ? a.value < b.value : Self.ranksAfter(a.key, b.key)
+        }) {
+            return top.key
+        }
+        let candidates = areas.filter { open.contains($0.area) && $0.needsWorkRate > 0 }
         return candidates.max { a, b in
-            abs(a.needsWorkRate - b.needsWorkRate) > 0.001
-                ? a.needsWorkRate < b.needsWorkRate
-                : order.firstIndex(of: a.area)! > order.firstIndex(of: b.area)!
-        }?.area ?? areas.filter { $0.measured >= minimumToJudge && $0.stage < .solid }
-            .min { $0.goodRate < $1.goodRate }?.area
+            abs(a.needsWorkRate - b.needsWorkRate) > 0.001 ? a.needsWorkRate < b.needsWorkRate : Self.ranksAfter(a.area, b.area)
+        }?.area ?? areas.filter { open.contains($0.area) }.min { $0.goodRate < $1.goodRate }?.area
+    }
+
+    /// Whether `a` is coached after `b` when both need the same amount of work.
+    private static func ranksAfter(_ a: FormArea, _ b: FormArea) -> Bool {
+        a.coachingPriority != b.coachingPriority ? a.coachingPriority > b.coachingPriority : a.priority > b.priority
     }
 
     func progress(for area: FormArea) -> AreaProgress? { areas.first { $0.area == area } }
@@ -119,7 +130,7 @@ struct CoachPlan: Sendable {
         guard let focus, let p = progress(for: focus) else { return nil }
         if p.measured < Self.minimumToJudge { return "Busk hasn't measured your \(focus.title.lowercased()) much yet." }
         let off = p.measured - p.good
-        return "\(off) of your last \(p.measured) shots weren't right on your \(focus.title.lowercased()). Get it to \(Int(Self.graduateRate * 100))% good to move on."
+        return "Your \(focus.title.lowercased()) needed work on \(off) of your last \(p.measured) shots. Get it to \(Int(Self.graduateRate * 100))% good to move on."
     }
 
     /// Today's workout, in order.
@@ -137,8 +148,8 @@ struct CoachPlan: Sendable {
             return [
                 WorkoutStep(id: "lesson-overview", kind: .lesson(Lesson.byID("overview")!), title: "Learn the four beats",
                             detail: "Two minutes on how a jump shot works."),
-                WorkoutStep(id: "baseline", kind: .trackedSet(focus: nil, shots: 15),
-                            title: hasBall ? "Baseline: 15 shots" : "Baseline: 15 shadow shots",
+                WorkoutStep(id: "baseline", kind: .trackedSet(focus: nil, shots: Self.baselineShots),
+                            title: hasBall ? "Baseline: \(Self.baselineShots) shots" : "Baseline: \(Self.baselineShots) shadow shots",
                             detail: hasBall ? "Shoot from 2-3 m. Busk finds what to work on first."
                                 : "Full shooting motion, no ball. Busk finds what to work on first."),
             ]
@@ -202,9 +213,9 @@ enum WorkoutChecklist {
 
     /// Tracked sets count as done once a session with that focus was saved today; other steps once checked off.
     static func isDone(_ step: WorkoutStep, checked: Set<String>, sessions: [PracticeSession], now: Date = Date()) -> Bool {
-        if case .trackedSet(let focus, _) = step.kind {
-            let today = sessions.filter { Calendar.current.isDate($0.date, inSameDayAs: now) }
-            if today.contains(where: { $0.focus == focus && !$0.shots.isEmpty }) { return true }
+        if case .trackedSet(let focus, let target) = step.kind {
+            let today = sessions.filter { Calendar.current.isDate($0.date, inSameDayAs: now) && $0.focus == focus }
+            if today.map(\.shots.count).reduce(0, +) >= target { return true }
         }
         return checked.contains(step.id)
     }

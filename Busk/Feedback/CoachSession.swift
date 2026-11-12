@@ -38,6 +38,8 @@ final class CoachSession {
     @ObservationIgnored private var lastSeen: TimeInterval = 0
     @ObservationIgnored private var lastFrameTime: TimeInterval = 0
     @ObservationIgnored private var announcedVisible = false
+    /// In a focus set: the shot number when each other area was last called out as more urgent than the focus.
+    @ObservationIgnored private var flaggedOutsideFocus: [FormArea: Int] = [:]
     @ObservationIgnored private var adviceSince: (text: String, time: TimeInterval)?
     @ObservationIgnored private var lastAdviceSpoken: (text: String, time: TimeInterval)?
     @ObservationIgnored private var statusUntil = Date.distantPast
@@ -124,6 +126,11 @@ final class CoachSession {
                 cue = Self.improved(focus, from: previous, to: result) ? "Better that time. \(focus.cue)" : focus.cue
             case nil: cue = result.cue
             }
+            if let other = Self.outranksFocus(focus, in: result),
+               flaggedOutsideFocus[other].map({ shots.count - $0 >= Self.reflagEvery }) ?? true {
+                flaggedOutsideFocus[other] = shots.count
+                cue += ". Also, your \(other.title.lowercased()): \(other.cue.prefix(1).lowercased() + other.cue.dropFirst())"
+            }
         } else if let fix = result.focus, Self.improved(fix, from: previous, to: result) {
             cue = "Better. \(result.cue)"
         } else if let prev = previous?.focus, prev != result.focus,
@@ -140,6 +147,18 @@ final class CoachSession {
             cue += ". Set done: \(r.good) of \(r.measured) good on your \(focus.title.lowercased()). Keep going or tap End"
         }
         return cue
+    }
+
+    /// Shots between reminders about a flaw outside the focus that is still the top fix.
+    nonisolated static let reflagEvery = 5
+
+    /// The shot's top fix when it isn't the focus and matters more: a beginner hears about a bad set point
+    /// even in a legs set, at least once.
+    nonisolated static func outranksFocus(_ focus: FormArea, in result: ShotResult) -> FormArea? {
+        guard let top = result.focus, top != focus,
+              result.areas.first(where: { $0.area == top })?.grade == .needsWork else { return nil }
+        let focusGrade = result.areas.first { $0.area == focus }?.grade
+        return focusGrade != .needsWork || top.coachingPriority < focus.coachingPriority ? top : nil
     }
 
     /// The area still needs work but is clearly less off than on the last shot.
