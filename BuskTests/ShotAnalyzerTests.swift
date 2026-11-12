@@ -131,6 +131,23 @@ final class ShotAnalyzerTests: XCTestCase {
         XCTAssertTrue(frames.compactMap { analyzer.process($0) }.isEmpty)
     }
 
+    func testFramesFromSomeoneElseBeforeTheTrackerLocksOnAreNotMeasured() throws {
+        // At a crowded court the tracker can follow a bystander (arms down) until the shooter starts the shot.
+        let sim = ShotSimulator()
+        let shot = sim.frames(for: .good, start: 0)
+        let bystander = sim.idleFrames(seconds: 0.7, start: 0).map { f -> PoseFrame in
+            var f = f
+            f.joints = f.joints.mapValues { CGPoint(x: $0.x - 0.35, y: $0.y) }
+            return f
+        }
+        let frames = bystander + shot.filter { $0.timestamp >= 0.7 }
+            + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 1 / sim.fps)
+        let analyzer = ShotAnalyzer(handedness: .right, view: .side)
+        let m = try XCTUnwrap(frames.compactMap { analyzer.process($0) }.first)
+        XCTAssertNotEqual(FormEvaluator().evaluate(m).cue, FormEvaluator().evaluate(try XCTUnwrap(run(.lowSet).first)).cue)
+        if let set = m.setPointHeight { XCTAssertGreaterThan(set, 0) }
+    }
+
     func testLoopedClipMeasuresTheSameEachTime() {
         let sim = ShotSimulator()
         let analyzer = ShotAnalyzer(handedness: .right, view: .front)

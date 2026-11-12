@@ -151,8 +151,15 @@ final class ShotAnalyzer {
         }
         let all = window.compactMap { sample($0, keepArm: false) }
         // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
-        // would otherwise mix in a pose from somewhere else).
-        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.5 && all[$0].t <= rt } ?? 0
+        // would otherwise mix in a pose from somewhere else), and only since the tracker last moved to a different
+        // person: a head that jumps more than a torso and a half in one step is someone else.
+        let torsos = all.compactMap { s in s.root.map { Double(Geometry.distance(s.shoulder, $0)) } }.sorted()
+        let torso = torsos.isEmpty ? nil : torsos[torsos.count / 2]
+        let cut = all.indices.last { i in
+            i > 0 && all[i].t <= rt &&
+                (all[i].t - all[i - 1].t > 0.5 ||
+                 torso.map { Double(Geometry.distance(all[i].head, all[i - 1].head)) > 1.5 * $0 } == true)
+        } ?? 0
         let samples = Array(all[cut...])
         guard samples.count >= 8 else { return nil }
         let n = samples.count
