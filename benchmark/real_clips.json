@@ -1,0 +1,90 @@
+{
+  "version": "1",
+  "about": "Real footage tier. Each clip is fetched from Wikimedia Commons and verified against the pinned SHA-1; no footage is stored in this repo. Licenses are per clip (CC BY / CC BY-SA need attribution: see source.credit and source.page). Labels follow taxonomy.json; flaws: [] means good form that should be praised, not corrected.",
+  "clips": [
+    {
+      "id": "mcandrew_free_throw",
+      "tier": "advanced",
+      "view": "front",
+      "handedness": "right",
+      "description": "High-school All-American forward shooting a game free throw, filmed upright on a phone from the stands, facing the shooter.",
+      "flaws": [],
+      "label_notes": "Clean, repeatable free throw: knees load, ball rises in line, high release and a held follow-through. No coachable flaw visible.",
+      "label_confidence": "medium",
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:20240301_Jackson_McAndrew_free_throw_video_01.webm",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/53/20240301_Jackson_McAndrew_free_throw_video_01.webm",
+        "sha1": "aa595a7e474e03c834310ef3e38c10e4e2bcb468",
+        "bytes": 3081392,
+        "license": "CC BY 4.0",
+        "credit": "TonyTheTiger (Wikimedia Commons)",
+        "width": 1440,
+        "height": 1920,
+        "duration_s": 2.29
+      }
+    },
+    {
+      "id": "kobe_bryant_warmup_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "description": "Kobe Bryant shooting a free throw during Lakers warmups, handheld fan video from the baseline stands; other players are in frame.",
+      "flaws": [],
+      "label_notes": "Elite NBA shooter, textbook mechanics; should get praise, not fixes. Several players in frame also tests shooter selection.",
+      "label_confidence": "medium",
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Kobe_Bryant.ogv",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/8/83/Kobe_Bryant.ogv",
+        "sha1": "0dfbc46b071c4502e81a4aeb87f59a0c151a0eee",
+        "bytes": 413102,
+        "license": "CC BY 2.0",
+        "credit": "Flickr: see source page",
+        "width": 640,
+        "height": 480,
+        "duration_s": 3.8
+      }
+    },
+    {
+      "id": "tolo_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "description": "Pro centre Marianna Tolo shooting a game free throw (Open LFB 2014), filmed from high in the stands (wide, small subject).",
+      "flaws": [],
+      "label_notes": "Professional free throw with no coachable flaw visible; small subject tests robustness to distance.",
+      "label_confidence": "low",
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Marianna_Tolo-lancer_franc-Open_LFB_2014.ogv",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Marianna_Tolo-lancer_franc-Open_LFB_2014.ogv",
+        "sha1": "e41b1eea7cf4d0ca9976f76cbde612e88a84483f",
+        "bytes": 7952665,
+        "license": "CC BY-SA 4.0",
+        "credit": "Chris93",
+        "width": 1920,
+        "height": 1080,
+        "duration_s": 4.48
+      }
+    },
+    {
+      "id": "research_jump_shot",
+      "tier": "advanced",
+      "view": "side",
+      "handedness": "right",
+      "description": "Trained player demonstrating a two-legged above-head jump shot for a published shot-type study; static camera roughly side-on.",
+      "flaws": [],
+      "label_notes": "Competitive-level jump shot: leg drive, high set point, release near the top of the jump, held follow-through. No flaw labeled.",
+      "label_confidence": "medium",
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Basketball-Shot-Types-and-Shot-Success-in-Different-Levels-of-Competitive-Basketball-pone.0128885.s001.ogv",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Basketball-Shot-Types-and-Shot-Success-in-Different-Levels-of-Competitive-Basketball-pone.0128885.s001.ogv",
+        "sha1": "422db1933421de134be07a06b4b40c1ee72754f9",
+        "bytes": 2312988,
+        "license": "CC BY 4.0",
+        "credit": "Erčulj F, Štrumbelj E",
+        "width": 1920,
+        "height": 1080,
+        "duration_s": 3.92
+      }
+    }
+  ]
+}

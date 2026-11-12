@@ -1,0 +1,1334 @@
+{
+  "schema_version": 1,
+  "benchmark": {
+    "taxonomy_version": "1.0.0",
+    "taxonomy_sha256": "5545c16a720b7e721fd8cf861fd1fb140a859dcda2b5cf5c4e861c0a72725660",
+    "dataset_version": "1.0.0+real1",
+    "dataset_sha256": "98e8551e63a5726e07501b0b7b61741cc5a3ec388cc32d5f3bd413504173f455",
+    "renderer": "595ca9f87a5d",
+    "clip_ids": [
+      "beginner_chest_push__side",
+      "beginner_chest_push__front",
+      "beginner_flailing_jumper__side",
+      "beginner_flailing_jumper__front",
+      "beginner_two_motion__side",
+      "beginner_two_motion__front",
+      "rec_elbow_out__side",
+      "rec_elbow_out__front",
+      "rec_flat_shot__side",
+      "rec_flat_shot__front",
+      "rec_lazy_finish__side",
+      "rec_lazy_finish__front",
+      "rec_fader__side",
+      "rec_fader__front",
+      "rec_guide_thumb__side",
+      "rec_guide_thumb__front",
+      "advanced_solid__side",
+      "advanced_solid__front",
+      "advanced_slight_flare__side",
+      "advanced_slight_flare__front",
+      "elite_curry_one_motion__side",
+      "elite_curry_one_motion__front",
+      "elite_klay_textbook__side",
+      "elite_klay_textbook__front",
+      "elite_durant_high_release__side",
+      "elite_durant_high_release__front",
+      "elite_lefty__side",
+      "elite_lefty__front",
+      "real__mcandrew_free_throw__front",
+      "real__kobe_bryant_warmup_free_throw__front",
+      "real__tolo_free_throw__front",
+      "real__research_jump_shot__side"
+    ]
+  },
+  "run": {
+    "started_at": "2026-11-12T07:46:59+00:00",
+    "duration_s": 0.8,
+    "git_sha": "ca998eed5443942b8f54cd1f392ee32ed597df09",
+    "git_ref": "HEAD",
+    "analyzer_command": [
+      "benchmark/adapters/busk-analyze/run.sh"
+    ],
+    "analyzer_source": "BUSK_ANALYZER_CMD",
+    "analyzer_status": "partial",
+    "clip_statuses": {
+      "ok": 28,
+      "error": 4
+    },
+    "real_unavailable": {},
+    "keypoints_provided": true,
+    "analyzer_build_error": null,
+    "visual_evidence": {
+      "status": "not_requested"
+    }
+  },
+  "summary": {
+    "overall_score": 44.2124,
+    "clips": 32,
+    "tiers": {
+      "beginner": {
+        "score": 15.4663,
+        "clips": 6
+      },
+      "intermediate": {
+        "score": 37.2,
+        "clips": 10
+      },
+      "advanced": {
+        "score": 45.8333,
+        "clips": 6
+      },
+      "elite": {
+        "score": 67.5,
+        "clips": 10
+      }
+    },
+    "views": {
+      "front": {
+        "score": 38.8151,
+        "clips": 17
+      },
+      "side": {
+        "score": 50.3294,
+        "clips": 15
+      }
+    },
+    "flawed_clip_score": 19.3198,
+    "clean_clip_score": 66.1765,
+    "detection": 0.3025,
+    "advice": 0.1792,
+    "priority": 0.1333,
+    "false_alarms_per_clip": 0.4688,
+    "clean_clips_with_false_alarms": 7
+  },
+  "flaws": {
+    "no_leg_drive": {
+      "clips_with_flaw": 6,
+      "detection_rate": 1.0,
+      "advice_rate": 0.3333,
+      "false_alarm_rate": 0.4231
+    },
+    "low_set_point": {
+      "clips_with_flaw": 2,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    },
+    "elbow_flare": {
+      "clips_with_flaw": 4,
+      "detection_rate": 0.25,
+      "advice_rate": 0.25,
+      "false_alarm_rate": 0.1667
+    },
+    "flat_arc": {
+      "clips_with_flaw": 3,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    },
+    "no_follow_through": {
+      "clips_with_flaw": 6,
+      "detection_rate": 1.0,
+      "advice_rate": 0.8333,
+      "false_alarm_rate": 0.0
+    },
+    "guide_hand_interference": {
+      "clips_with_flaw": 3,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    },
+    "releasing_on_the_way_down": {
+      "clips_with_flaw": 4,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    },
+    "hitch_at_set_point": {
+      "clips_with_flaw": 4,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    },
+    "off_balance_drift": {
+      "clips_with_flaw": 4,
+      "detection_rate": 0.0,
+      "advice_rate": 0.0,
+      "false_alarm_rate": 0.0
+    }
+  },
+  "weakest": {
+    "flaws_by_advice": [
+      {
+        "flaw": "flat_arc",
+        "advice_rate": 0.0,
+        "detection_rate": 0.0,
+        "false_alarm_rate": 0.0
+      },
+      {
+        "flaw": "guide_hand_interference",
+        "advice_rate": 0.0,
+        "detection_rate": 0.0,
+        "false_alarm_rate": 0.0
+      },
+      {
+        "flaw": "hitch_at_set_point",
+        "advice_rate": 0.0,
+        "detection_rate": 0.0,
+        "false_alarm_rate": 0.0
+      },
+      {
+        "flaw": "low_set_point",
+        "advice_rate": 0.0,
+        "detection_rate": 0.0,
+        "false_alarm_rate": 0.0
+      },
+      {
+        "flaw": "off_balance_drift",
+        "advice_rate": 0.0,
+        "detection_rate": 0.0,
+        "false_alarm_rate": 0.0
+      }
+    ],
+    "over_called_flaws": [
+      {
+        "flaw": "no_leg_drive",
+        "false_alarm_rate": 0.4231
+      },
+      {
+        "flaw": "elbow_flare",
+        "false_alarm_rate": 0.1667
+      }
+    ],
+    "lowest_tier": "beginner",
+    "lowest_clips": [
+      {
+        "clip": "advanced_slight_flare__front",
+        "score": 0.0
+      },
+      {
+        "clip": "beginner_flailing_jumper__front",
+        "score": 0.0
+      },
+      {
+        "clip": "real__kobe_bryant_warmup_free_throw__front",
+        "score": 0.0
+      },
+      {
+        "clip": "real__mcandrew_free_throw__front",
+        "score": 0.0
+      },
+      {
+        "clip": "real__research_jump_shot__side",
+        "score": 0.0
+      }
+    ]
+  },
+  "set_scores": {
+    "synthetic": 50.5,
+    "real": 0.0
+  },
+  "clips": [
+    {
+      "score": 18.749999999999996,
+      "detection": 0.375,
+      "advice": 0.125,
+      "priority": 0.0,
+      "detected": [
+        "no_leg_drive",
+        "no_follow_through"
+      ],
+      "advised": [
+        "no_follow_through"
+      ],
+      "missed": [
+        "low_set_point",
+        "no_leg_drive",
+        "flat_arc"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Hold your follow-through"
+      ],
+      "flaws_reported": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "clip": "beginner_chest_push__side",
+      "set": "synthetic",
+      "archetype": "beginner_chest_push",
+      "tier": "beginner",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [
+        "low_set_point",
+        "no_leg_drive",
+        "flat_arc",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 15.0,
+      "detection": 0.3,
+      "advice": 0.1,
+      "priority": 0.0,
+      "detected": [
+        "no_leg_drive",
+        "no_follow_through"
+      ],
+      "advised": [
+        "no_follow_through"
+      ],
+      "missed": [
+        "low_set_point",
+        "no_leg_drive",
+        "elbow_flare",
+        "guide_hand_interference"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Hold your follow-through"
+      ],
+      "flaws_reported": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "clip": "beginner_chest_push__front",
+      "set": "synthetic",
+      "archetype": "beginner_chest_push",
+      "tier": "beginner",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "low_set_point",
+        "no_leg_drive",
+        "elbow_flare",
+        "guide_hand_interference",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 13.333333333333334,
+      "detection": 0.16666666666666666,
+      "advice": 0.16666666666666666,
+      "priority": 0.0,
+      "detected": [
+        "no_follow_through"
+      ],
+      "advised": [
+        "no_follow_through"
+      ],
+      "missed": [
+        "releasing_on_the_way_down",
+        "off_balance_drift"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Hold your follow-through"
+      ],
+      "flaws_reported": [
+        "no_follow_through"
+      ],
+      "clip": "beginner_flailing_jumper__side",
+      "set": "synthetic",
+      "archetype": "beginner_flailing_jumper",
+      "tier": "beginner",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "releasing_on_the_way_down",
+        "off_balance_drift",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.125,
+      "advice": 0.125,
+      "priority": 0.0,
+      "detected": [
+        "no_follow_through"
+      ],
+      "advised": [
+        "no_follow_through"
+      ],
+      "missed": [
+        "releasing_on_the_way_down",
+        "elbow_flare",
+        "off_balance_drift"
+      ],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Hold your follow-through"
+      ],
+      "flaws_reported": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "clip": "beginner_flailing_jumper__front",
+      "set": "synthetic",
+      "archetype": "beginner_flailing_jumper",
+      "tier": "beginner",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "releasing_on_the_way_down",
+        "elbow_flare",
+        "off_balance_drift",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
+        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 22.857142857142854,
+      "detection": 0.2857142857142857,
+      "advice": 0.2857142857142857,
+      "priority": 0.0,
+      "detected": [
+        "no_leg_drive"
+      ],
+      "advised": [
+        "no_leg_drive"
+      ],
+      "missed": [
+        "hitch_at_set_point",
+        "flat_arc"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "beginner_two_motion__side",
+      "set": "synthetic",
+      "archetype": "beginner_two_motion",
+      "tier": "beginner",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.025,
+      "labeled_flaws": [
+        "hitch_at_set_point",
+        "no_leg_drive",
+        "flat_arc"
+      ],
+      "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 22.857142857142854,
+      "detection": 0.2857142857142857,
+      "advice": 0.2857142857142857,
+      "priority": 0.0,
+      "detected": [
+        "no_leg_drive"
+      ],
+      "advised": [
+        "no_leg_drive"
+      ],
+      "missed": [
+        "hitch_at_set_point",
+        "guide_hand_interference"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "beginner_two_motion__front",
+      "set": "synthetic",
+      "archetype": "beginner_two_motion",
+      "tier": "beginner",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [
+        "hitch_at_set_point",
+        "no_leg_drive",
+        "guide_hand_interference"
+      ],
+      "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "rec_elbow_out__side",
+      "set": "synthetic",
+      "archetype": "rec_elbow_out",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 90.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
+        "elbow_flare"
+      ],
+      "advised": [
+        "elbow_flare"
+      ],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [
+        "elbow_flare",
+        "no_leg_drive"
+      ],
+      "clip": "rec_elbow_out__front",
+      "set": "synthetic",
+      "archetype": "rec_elbow_out",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "elbow_flare"
+      ],
+      "expected_advice": [
+        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "flat_arc"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Extend all the way up"
+      ],
+      "flaws_reported": [],
+      "clip": "rec_flat_shot__side",
+      "set": "synthetic",
+      "archetype": "rec_flat_shot",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "flat_arc"
+      ],
+      "expected_advice": [
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "rec_flat_shot__front",
+      "set": "synthetic",
+      "archetype": "rec_flat_shot",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 25.0,
+      "detection": 1.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "advised": [],
+      "missed": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "false_alarms": [
+        "elbow_flare"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [
+        "elbow_flare",
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "clip": "rec_lazy_finish__side",
+      "set": "synthetic",
+      "archetype": "rec_lazy_finish",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "expected_advice": [
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 82.0,
+      "detection": 1.0,
+      "advice": 0.6,
+      "priority": 1.0,
+      "detected": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "advised": [
+        "no_follow_through"
+      ],
+      "missed": [
+        "no_leg_drive"
+      ],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Hold your follow-through"
+      ],
+      "flaws_reported": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "clip": "rec_lazy_finish__front",
+      "set": "synthetic",
+      "archetype": "rec_lazy_finish",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "no_follow_through",
+        "no_leg_drive"
+      ],
+      "expected_advice": [
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "false_alarms": [
+        "elbow_flare"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [
+        "elbow_flare"
+      ],
+      "clip": "rec_fader__side",
+      "set": "synthetic",
+      "archetype": "rec_fader",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "rec_fader__front",
+      "set": "synthetic",
+      "archetype": "rec_fader",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "hitch_at_set_point"
+      ],
+      "false_alarms": [
+        "elbow_flare"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [
+        "elbow_flare"
+      ],
+      "clip": "rec_guide_thumb__side",
+      "set": "synthetic",
+      "archetype": "rec_guide_thumb",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [
+        "hitch_at_set_point"
+      ],
+      "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "guide_hand_interference",
+        "hitch_at_set_point"
+      ],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "rec_guide_thumb__front",
+      "set": "synthetic",
+      "archetype": "rec_guide_thumb",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "guide_hand_interference",
+        "hitch_at_set_point"
+      ],
+      "expected_advice": [
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "advanced_solid__side",
+      "set": "synthetic",
+      "archetype": "advanced_solid",
+      "tier": "advanced",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "advanced_solid__front",
+      "set": "synthetic",
+      "archetype": "advanced_solid",
+      "tier": "advanced",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "advanced_slight_flare__side",
+      "set": "synthetic",
+      "archetype": "advanced_slight_flare",
+      "tier": "advanced",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [
+        "elbow_flare"
+      ],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "advanced_slight_flare__front",
+      "set": "synthetic",
+      "archetype": "advanced_slight_flare",
+      "tier": "advanced",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [
+        "elbow_flare"
+      ],
+      "expected_advice": [
+        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "elite_curry_one_motion__side",
+      "set": "synthetic",
+      "archetype": "elite_curry_one_motion",
+      "tier": "elite",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "elite_curry_one_motion__front",
+      "set": "synthetic",
+      "archetype": "elite_curry_one_motion",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.025,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "elite_klay_textbook__side",
+      "set": "synthetic",
+      "archetype": "elite_klay_textbook",
+      "tier": "elite",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "elite_klay_textbook__front",
+      "set": "synthetic",
+      "archetype": "elite_klay_textbook",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Nice. Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [],
+      "clip": "elite_durant_high_release__side",
+      "set": "synthetic",
+      "archetype": "elite_durant_high_release",
+      "tier": "elite",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.023,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "elite_durant_high_release__front",
+      "set": "synthetic",
+      "archetype": "elite_durant_high_release",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "elbow_flare"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Tuck your elbow under the ball"
+      ],
+      "flaws_reported": [
+        "elbow_flare"
+      ],
+      "clip": "elite_lefty__side",
+      "set": "synthetic",
+      "archetype": "elite_lefty",
+      "tier": "elite",
+      "view": "side",
+      "handedness": "left",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 75.0,
+      "detection": null,
+      "advice": null,
+      "priority": null,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [
+        "no_leg_drive"
+      ],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bend your knees more"
+      ],
+      "flaws_reported": [
+        "no_leg_drive"
+      ],
+      "clip": "elite_lefty__front",
+      "set": "synthetic",
+      "archetype": "elite_lefty",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "left",
+      "status": "ok",
+      "seconds": 0.024,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__mcandrew_free_throw__front",
+      "set": "real",
+      "archetype": "real__mcandrew_free_throw",
+      "tier": "advanced",
+      "view": "front",
+      "handedness": "right",
+      "status": "error",
+      "seconds": 0.013,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:20240301_Jackson_McAndrew_free_throw_video_01.webm",
+        "license": "CC BY 4.0",
+        "credit": "TonyTheTiger (Wikimedia Commons)"
+      },
+      "error": "this adapter needs --keypoints: Vision pose detection only runs inside the iOS app\n"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__kobe_bryant_warmup_free_throw__front",
+      "set": "real",
+      "archetype": "real__kobe_bryant_warmup_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "error",
+      "seconds": 0.013,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Kobe_Bryant.ogv",
+        "license": "CC BY 2.0",
+        "credit": "Flickr: see source page"
+      },
+      "error": "this adapter needs --keypoints: Vision pose detection only runs inside the iOS app\n"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__tolo_free_throw__front",
+      "set": "real",
+      "archetype": "real__tolo_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "error",
+      "seconds": 0.013,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Marianna_Tolo-lancer_franc-Open_LFB_2014.ogv",
+        "license": "CC BY-SA 4.0",
+        "credit": "Chris93"
+      },
+      "error": "this adapter needs --keypoints: Vision pose detection only runs inside the iOS app\n"
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__research_jump_shot__side",
+      "set": "real",
+      "archetype": "real__research_jump_shot",
+      "tier": "advanced",
+      "view": "side",
+      "handedness": "right",
+      "status": "error",
+      "seconds": 0.013,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Basketball-Shot-Types-and-Shot-Success-in-Different-Levels-of-Competitive-Basketball-pone.0128885.s001.ogv",
+        "license": "CC BY 4.0",
+        "credit": "Er\u010dulj F, \u0160trumbelj E"
+      },
+      "error": "this adapter needs --keypoints: Vision pose detection only runs inside the iOS app\n"
+    }
+  ]
+}
