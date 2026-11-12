@@ -8,6 +8,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.handedness) private var handedness: Handedness = .right
     @AppStorage(SettingsKey.cameraView) private var cameraView: CameraView = .side
     @AppStorage(SettingsKey.ghostReplay) private var ghostReplay = false
+    @AppStorage(SettingsKey.dailyShotGoal) private var dailyShotGoal = PracticeGoal.defaultShots
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [SessionRecord]
     @State private var confirmDelete = false
@@ -45,13 +46,23 @@ struct SettingsView: View {
                     Text("Cues play even with the silent switch on. Turn the volume up or put AirPods in if you can't hear them.")
                 }
                 Section {
+                    Stepper(value: $dailyShotGoal, in: PracticeGoal.range, step: 10) {
+                        LabeledContent("Daily goal", value: "\(dailyShotGoal) shots")
+                    }
+                    .accessibilityIdentifier("dailyGoalSetting")
+                } header: {
+                    Text("Practice")
+                } footer: {
+                    Text("Shots a day to aim for. Home shows today's progress and your streak of days in a row with practice.")
+                }
+                Section {
                     Toggle("Voice commands", isOn: $voiceCommands).accessibilityIdentifier("voiceCommandsSetting")
                     Toggle("Ghost replay", isOn: $ghostReplay).accessibilityIdentifier("ghostReplaySetting")
                 } header: {
                     Text("Extras")
                 } footer: {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Voice commands: from the shooting spot, say “start session”, “how am I doing” or “end session”. Speech is recognized on your phone; Busk asks for the microphone when you turn this on.")
+                        Text("Voice commands: from the shooting spot, say “start session”, “how am I doing” or “end session”, and “made it” or “missed it” after a shot. Speech is recognized on your phone; Busk asks for the microphone when you turn this on.")
                         Text("Ghost replay: after each shot, replays it in slow motion with your best shot of the session drawn over it, lined up at the release.")
                     }
                 }

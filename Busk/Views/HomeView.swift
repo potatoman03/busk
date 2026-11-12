@@ -10,6 +10,7 @@ struct HomeView: View {
     @AppStorage(SettingsKey.hasSeenSetupTips) private var hasSeenGuide = false
     @State private var checkedSteps = WorkoutChecklist.done()
     @Environment(VoiceControl.self) private var voice: VoiceControl?
+    @AppStorage(SettingsKey.dailyShotGoal) private var goal = PracticeGoal.defaultShots
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,12 @@ struct HomeView: View {
                     .buttonStyle(.borderedProminent)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .accessibilityIdentifier("startButton")
+
+                    NavigationLink(value: HomeRoute.progress) {
+                        TodayCard(log: PracticeLog(records: records), goal: goal)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("todayCard")
 
                     coachCard
 
@@ -102,13 +109,25 @@ struct HomeView: View {
                     .accessibilityIdentifier("historyButton")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(value: HomeRoute.progress) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                    }
+                    .accessibilityLabel("Progress")
+                    .accessibilityIdentifier("progressButton")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel("Settings")
                         .accessibilityIdentifier("settingsButton")
                 }
             }
             .navigationDestination(for: SessionRecord.self) { SummaryView(record: $0) }
-            .navigationDestination(for: HomeRoute.self) { _ in HistoryView() }
+            .navigationDestination(for: HomeRoute.self) { route in
+                switch route {
+                case .history: HistoryView()
+                case .progress: PracticeProgressView()
+                }
+            }
             .coachDestinations()
             .sheet(isPresented: $showSettings) { SettingsView() }
             .sheet(isPresented: $showGuide) { GuideView() }
@@ -169,23 +188,39 @@ struct HomeView: View {
 }
 
 enum HomeRoute: Hashable {
-    case history
+    case history, progress
 }
 
 struct SessionRow: View {
     let record: SessionRecord
+    /// History rows sit under a day header, so they only need the time.
+    var timeOnly = false
     var body: some View {
         let s = record.summary
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(record.date, format: .dateTime.weekday().month().day().hour().minute()).font(.headline)
-                Text("\(s.count) \(s.count == 1 ? "shot" : "shots")" + (s.topFocus.map { " · focus: \($0.title.lowercased())" } ?? ""))
+                HStack(spacing: 8) {
+                    Text(record.date, format: timeOnly ? .dateTime.hour().minute() : .dateTime.weekday().month().day().hour().minute())
+                        .font(.headline)
+                    if record.isDemo {
+                        Text("Demo").font(.caption2.bold()).padding(.horizontal, 6).padding(.vertical, 2)
+                            .background(.secondary.opacity(0.25), in: Capsule())
+                            .accessibilityIdentifier("demoTag")
+                    }
+                }
+                Text("\(s.count) shot\(s.count == 1 ? "" : "s")" + (s.makes.map { " · \($0) made" } ?? "") + " · \(record.durationText)")
                     .font(.subheadline).foregroundStyle(.secondary)
+                if let focus = s.topFocus {
+                    Text("Focus: \(focus.title.lowercased())").font(.caption).foregroundStyle(.secondary)
+                }
             }
             Spacer()
-            Text("\(s.averageScore)")
-                .font(.title.bold().monospacedDigit())
-                .foregroundStyle(Theme.color(forScore: s.averageScore))
+            VStack(alignment: .trailing, spacing: 0) {
+                Text("\(s.averageScore)")
+                    .font(.title.bold().monospacedDigit())
+                    .foregroundStyle(Theme.color(forScore: s.averageScore))
+                Text("form").font(.caption2).foregroundStyle(.secondary)
+            }
         }
     }
 }

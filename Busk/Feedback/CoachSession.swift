@@ -203,6 +203,14 @@ final class CoachSession {
         return before.severity > 0 && now.severity < before.severity * 0.75
     }
 
+    /// Marks the latest shot made or missed (live buttons, or "made it" / "missed it"); nil clears it.
+    func markLastShot(made: Bool?) {
+        guard !shots.isEmpty else { return }
+        let i = shots.count - 1
+        shots[i].made = made
+        Self.log.notice("shot #\(self.shots.count, privacy: .public) marked \(String(describing: self.shots[i].made), privacy: .public)")
+    }
+
     func dismissReplay(_ id: ShotReplay.ID) {
         if replay?.id == id { replay = nil }
     }

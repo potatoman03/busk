@@ -11,9 +11,12 @@ final class SessionRecord {
     var shotsData: Data
     /// The form area a focus set worked on (nil for a regular session).
     var focusRaw: String?
+    /// Shots that went in, when the player counted the whole session on the summary. Nil falls back to the shots marked
+    /// Made or Missed live.
+    var makes: Int?
 
     init(date: Date, duration: TimeInterval, view: CameraView, handedness: Handedness, isDemo: Bool, shots: [ShotResult],
-         focus: FormArea? = nil) {
+         focus: FormArea? = nil, makes: Int? = nil) {
         self.focusRaw = focus?.rawValue
         self.date = date
         self.duration = duration
@@ -21,6 +24,7 @@ final class SessionRecord {
         self.handednessRaw = handedness.rawValue
         self.isDemo = isDemo
         self.shotsData = (try? JSONEncoder().encode(shots)) ?? Data()
+        self.makes = makes
     }
 
     func update(duration: TimeInterval, shots: [ShotResult]) {
@@ -31,8 +35,13 @@ final class SessionRecord {
     var shots: [ShotResult] { (try? JSONDecoder().decode([ShotResult].self, from: shotsData)) ?? [] }
     var view: CameraView { CameraView(rawValue: viewRaw) ?? .side }
     var focus: FormArea? { focusRaw.flatMap(FormArea.init(rawValue:)) }
-    var summary: SessionSummary { SessionSummary(shots: shots, focus: focus) }
+    var summary: SessionSummary { SessionSummary(shots: shots, focus: focus, makes: makes) }
     var practice: PracticeSession { PracticeSession(date: date, focus: focus, shots: shots) }
+
+    /// "12 min", or "<1 min" for a quick one.
+    var durationText: String {
+        duration < 60 ? "<1 min" : "\(Int((duration / 60).rounded())) min"
+    }
 }
 
 extension Sequence where Element == SessionRecord {
@@ -46,7 +55,7 @@ extension Sequence where Element == SessionRecord {
 struct SessionSummary {
     let shots: [ShotResult]
     /// The area a focus set worked on.
-    var focus: FormArea? = nil
+    let focus: FormArea?
 
     /// Focus set: shots where the focus area was measured, and how many of those were good.
     var focusResult: (good: Int, measured: Int)? {
@@ -54,6 +63,29 @@ struct SessionSummary {
         let grades = shots.compactMap { $0.areas.first { $0.area == focus }?.grade }
         return (grades.filter { $0 == .good }.count, grades.count)
     }
+
+    private let loggedMakes: Int?
+
+    init(shots: [ShotResult], focus: FormArea? = nil, makes: Int? = nil) {
+        self.shots = shots
+        self.focus = focus
+        loggedMakes = makes
+    }
+
+    /// Shots that went in: the player's count for the whole session, else the shots marked made, else nil when nothing
+    /// was logged.
+    var makes: Int? {
+        if let loggedMakes { return loggedMakes }
+        return marked > 0 ? shots.filter { $0.made == true }.count : nil
+    }
+    /// Whether makes are the player's count for the whole session rather than per-shot marks.
+    var countedWhole: Bool { loggedMakes != nil }
+    var marked: Int { shots.filter { $0.made != nil }.count }
+    /// Shots the makes are out of: every shot for a whole-session count, else only the marked ones, so a shot nobody
+    /// marked isn't a miss.
+    var attempts: Int { countedWhole ? count : marked }
+    var unmarked: Int { count - attempts }
+    var makeRate: Double? { makes.flatMap { attempts > 0 ? Double($0) / Double(attempts) : nil } }
 
     var count: Int { shots.count }
     var averageScore: Int {
@@ -76,6 +108,7 @@ struct SessionSummary {
     var spokenStatus: String {
         guard count > 0 else { return "No shots yet. Shoot when you're ready." }
         var parts = ["\(count) \(count == 1 ? "shot" : "shots"), average form \(averageScore), best \(bestScore)."]
+        if let makes { parts.append("\(makes) of \(attempts) went in.") }
         if count >= 4 {
             let recent = shots.suffix(3).map(\.score)
             let recentAverage = Int((Double(recent.reduce(0, +)) / Double(recent.count)).rounded())
