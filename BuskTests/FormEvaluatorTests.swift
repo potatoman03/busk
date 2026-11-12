@@ -18,7 +18,7 @@ final class FormEvaluatorTests: XCTestCase {
             (.setPoint, { $0.setPointHeight = -0.05 }),
             (.releaseTiming, { $0.releaseTiming = 0.6 }),
             (.balance, { $0.drift = 0.25 }),
-            (.rhythm, { $0.hitch = 0.3 }),
+            (.rhythm, { $0.hitch = 0.4 }),
             (.elbow, { $0.elbowFlare = 0.1 }),
             (.guideHand, { $0.guideHandPush = 0.08 }),
             (.legs, { $0.legDrive = 0.005 }),
