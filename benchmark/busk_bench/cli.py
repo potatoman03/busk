@@ -214,7 +214,7 @@ def cmd_run(a):
     if a.require_analyzer and analyzer_status != "ok":
         rc = rc or 2
     if visual.get("in_app_misses"):
-        log(f"in-app misses (busk showed no coaching card before the timeout): {', '.join(visual['in_app_misses'])}")
+        log(f"in-app misses (busk coached no shot, or none before the timeout): {', '.join(visual['in_app_misses'])}")
     if a.require_visuals and visual.get("status") != "captured":
         log(f"visual evidence missing: {visual.get('error') or visual.get('status')}")
         rc = rc or 3
