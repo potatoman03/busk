@@ -91,6 +91,8 @@ final class BuskUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(logged, 1)
         app.steppers["makesStepper"].buttons.element(boundBy: 0).tap()
         XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged - 1)
+        app.steppers["makesStepper"].buttons.element(boundBy: 1).tap()
+        XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged, "the live make is kept")
         XCTAssertTrue(app.descendants(matching: .any)["summaryDemoNote"].exists, "demo sessions stay out of the tracker")
         snapshot("13-summary-makes")
         app.buttons["summaryDoneButton"].tap()
