@@ -20,9 +20,12 @@ struct SummaryContent: View {
     private var summary: SessionSummary { record.summary }
     @State private var lesson: Lesson?
 
+    /// Demo shooter sessions stay out of the coaching plan, so they never set the player's next focus.
+    private var countsForPlan: Bool { !record.isDemo || AppEnvironment.demoCountsForPlan }
+
     /// Once the plan has a baseline, the next focus is the plan's, so Summary and Coach never disagree.
     private var nextFocus: (plan: Bool, focus: FormArea?) {
-        if !record.isDemo || AppEnvironment.demoCountsForPlan {
+        if countsForPlan {
             let plan = CoachPlan(sessions: records.coachingSessions)
             if plan.totalShots >= CoachPlan.baselineShots { return (true, plan.focus) }
         }
@@ -64,7 +67,8 @@ struct SummaryContent: View {
                     .accessibilityIdentifier("summaryFocus")
                 } else if let focus = nextFocus.focus {
                     Card {
-                        Label("Next session focus", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
+                        Label(countsForPlan ? "Next session focus" : "The demo shooter's main fix", systemImage: "scope")
+                            .font(.caption).foregroundStyle(.secondary)
                         Text(focus.title).font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
                         Text(focus.cue).foregroundStyle(.secondary)
                         lessonButton(focus)

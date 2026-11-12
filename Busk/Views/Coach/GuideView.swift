@@ -32,7 +32,7 @@ struct GuideView: View {
             ("circle.grid.3x3", "Each part of the shot gets a dot: green good, yellow close, red needs work."),
         ]),
         Page(id: 3, symbol: "graduationcap", title: "Your coach", lines: [
-            ("scope", "After 10 shots Busk picks one focus, the part that's off most often, and builds a daily workout around it."),
+            ("scope", "After \(CoachPlan.baselineShots) shots Busk picks one focus, the part that's off most often, and builds a daily workout around it."),
             ("book", "Every part has a lesson: why it matters, how to do it, and drills, most without a ball."),
             ("chart.line.uptrend.xyaxis", "Hit 70% good on your focus over 15+ shots and it's mastered. Then Busk moves you to the next one."),
         ]),
