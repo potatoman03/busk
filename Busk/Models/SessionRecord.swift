@@ -45,6 +45,27 @@ struct SessionSummary {
         }
     }
 
+    /// A short spoken answer to "how am I doing".
+    var spokenStatus: String {
+        guard count > 0 else { return "No shots yet. Shoot when you're ready." }
+        var parts = ["\(count) \(count == 1 ? "shot" : "shots"), average form \(averageScore), best \(bestScore)."]
+        if count >= 4 {
+            let recent = shots.suffix(3).map(\.score)
+            let recentAverage = Int((Double(recent.reduce(0, +)) / Double(recent.count)).rounded())
+            if recentAverage >= averageScore + 5 {
+                parts.append("Last three are better, averaging \(recentAverage).")
+            } else if recentAverage <= averageScore - 5 {
+                parts.append("Last three dipped to \(recentAverage).")
+            }
+        }
+        if let focus = topFocus {
+            parts.append("Main thing: \(focus.title.lowercased()). \(focus.cue).")
+        } else {
+            parts.append("Form looks clean. Keep it going.")
+        }
+        return parts.joined(separator: " ")
+    }
+
     /// The area that most often needed work.
     var topFocus: FormArea? {
         let counts = Dictionary(grouping: shots.compactMap(\.focus), by: { $0 }).mapValues(\.count)

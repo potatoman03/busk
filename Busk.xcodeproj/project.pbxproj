@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E13048B95697C4BCB10B2A7 /* VoiceControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8982083D89024FE5FB83BF7E /* VoiceControlBar.swift */; };
 		0EF2878F5F0158A08B0B88B5 /* ReplayPoseSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3490E25B77A0630BFA13BCB4 /* ReplayPoseSourceTests.swift */; };
 		157DCF15CB5509D5D1244DD3 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = C387F68209C9B4B01916BED0 /* AppEnvironment.swift */; };
 		1E74038D4CE77040A8A7AFE7 /* CameraPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9033CF4AAEB85809BB20FC84 /* CameraPreview.swift */; };
@@ -27,7 +28,9 @@
 		88DF8BE608E666FABE374566 /* VideoPoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD855C2609D46562912A935 /* VideoPoseSource.swift */; };
 		8B74D103A24ECDBEDDA44600 /* FormEvaluatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC06A4C9D17F8E3CC8D2A210 /* FormEvaluatorTests.swift */; };
 		9662F35656FBF6787362B1AA /* BuskUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FBD0B931EDB59DFFE884677 /* BuskUITests.swift */; };
+		9C617A0317DB98F924F7A5C0 /* VoiceCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AABD4DA8C30BAF5CA59062C /* VoiceCommand.swift */; };
 		AEF46C4178110100EA49C750 /* BuskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3B912433003821C359BC2EC /* BuskApp.swift */; };
+		B36F9914E145913B05D0149B /* VoiceCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 671E94E0E8F24A07F4AC57B9 /* VoiceCommandTests.swift */; };
 		B4834B5098CF91645F875D68 /* SetupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 689250600A941C98DB79ADF2 /* SetupFlowView.swift */; };
 		B76DD53696BC16423A985CDC /* ShotAnalyzerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB643033FEA7BF58481805CA /* ShotAnalyzerTests.swift */; };
 		C16006D3F528B68AA58E3E1D /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC39FDBCC4809B51848A0D15 /* Theme.swift */; };
@@ -39,6 +42,7 @@
 		DC7E94FC7CB9ACFB1E5CCD66 /* VisionPose.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5200040ECAA5BE7FA5B5B172 /* VisionPose.swift */; };
 		DF38769352D2AAE707CA117B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10EE5C10464DA177167DEE90 /* HomeView.swift */; };
 		E516177751EAF6EF7CC06C49 /* ShotAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3682D5D07C7CC9F2D902C1 /* ShotAnalyzer.swift */; };
+		EE227DFA7EE3A44342A56D9C /* VoiceControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28B9208755B00888EB95F50 /* VoiceControl.swift */; };
 		F69C60EACE736B9D6C34817D /* LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F6ADC54DFC6F2E89B30BC7 /* LiveSessionView.swift */; };
 /* End PBXBuildFile section */
 
@@ -72,11 +76,14 @@
 		5200040ECAA5BE7FA5B5B172 /* VisionPose.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPose.swift; sourceTree = "<group>"; };
 		5E7645D978D8D44028B7DCB5 /* VisionPoseDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPoseDetector.swift; sourceTree = "<group>"; };
 		632628D1BE8604194782A543 /* CameraPoseSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPoseSource.swift; sourceTree = "<group>"; };
+		671E94E0E8F24A07F4AC57B9 /* VoiceCommandTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCommandTests.swift; sourceTree = "<group>"; };
 		689250600A941C98DB79ADF2 /* SetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowView.swift; sourceTree = "<group>"; };
 		71CEC174D8C751EE7A477C41 /* ShooterTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShooterTrackerTests.swift; sourceTree = "<group>"; };
+		7AABD4DA8C30BAF5CA59062C /* VoiceCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceCommand.swift; sourceTree = "<group>"; };
 		7C546EF77059F8216B42B15C /* ShooterTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShooterTracker.swift; sourceTree = "<group>"; };
 		7F1FBD0C434C9AD4E5810D3D /* Busk.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Busk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		86DA3443491BD21A4E263EC6 /* ReplaySessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplaySessionView.swift; sourceTree = "<group>"; };
+		8982083D89024FE5FB83BF7E /* VoiceControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceControlBar.swift; sourceTree = "<group>"; };
 		9033CF4AAEB85809BB20FC84 /* CameraPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPreview.swift; sourceTree = "<group>"; };
 		965E7DFA918753358272F4AF /* FormEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormEvaluator.swift; sourceTree = "<group>"; };
 		98E1C4F5960C2298FC8F9AB6 /* SummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryView.swift; sourceTree = "<group>"; };
@@ -94,6 +101,7 @@
 		DAF5D4BBAA797440073B1B52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DDA323BF296563705A809843 /* CoachSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachSession.swift; sourceTree = "<group>"; };
 		EC06A4C9D17F8E3CC8D2A210 /* FormEvaluatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormEvaluatorTests.swift; sourceTree = "<group>"; };
+		F28B9208755B00888EB95F50 /* VoiceControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceControl.swift; sourceTree = "<group>"; };
 		F42C4CA1F50BF5B097945EE0 /* CoachVoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachVoice.swift; sourceTree = "<group>"; };
 		F85A461764938FFD9187B340 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FC3682D5D07C7CC9F2D902C1 /* ShotAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotAnalyzer.swift; sourceTree = "<group>"; };
@@ -135,6 +143,7 @@
 				3490E25B77A0630BFA13BCB4 /* ReplayPoseSourceTests.swift */,
 				71CEC174D8C751EE7A477C41 /* ShooterTrackerTests.swift */,
 				AB643033FEA7BF58481805CA /* ShotAnalyzerTests.swift */,
+				671E94E0E8F24A07F4AC57B9 /* VoiceCommandTests.swift */,
 			);
 			path = BuskTests;
 			sourceTree = "<group>";
@@ -175,6 +184,7 @@
 				34ED3F4106812A40191BE356 /* Models */,
 				1C36220919D08BC1989A3EAA /* Resources */,
 				35DDE2DDBE68E8F8E0A9C81F /* Views */,
+				E43137114F11A7BB76D0CD59 /* Voice */,
 			);
 			path = Busk;
 			sourceTree = "<group>";
@@ -221,6 +231,16 @@
 				C3B912433003821C359BC2EC /* BuskApp.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		E43137114F11A7BB76D0CD59 /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				7AABD4DA8C30BAF5CA59062C /* VoiceCommand.swift */,
+				F28B9208755B00888EB95F50 /* VoiceControl.swift */,
+				8982083D89024FE5FB83BF7E /* VoiceControlBar.swift */,
+			);
+			path = Voice;
 			sourceTree = "<group>";
 		};
 		F72600BBF898F0AB9A6B81E8 /* BuskUITests */ = {
@@ -376,6 +396,9 @@
 				88DF8BE608E666FABE374566 /* VideoPoseSource.swift in Sources */,
 				DC7E94FC7CB9ACFB1E5CCD66 /* VisionPose.swift in Sources */,
 				C7F5B2E18449AD7302F37B03 /* VisionPoseDetector.swift in Sources */,
+				9C617A0317DB98F924F7A5C0 /* VoiceCommand.swift in Sources */,
+				EE227DFA7EE3A44342A56D9C /* VoiceControl.swift in Sources */,
+				0E13048B95697C4BCB10B2A7 /* VoiceControlBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +410,7 @@
 				0EF2878F5F0158A08B0B88B5 /* ReplayPoseSourceTests.swift in Sources */,
 				28E0ED450FC64C9244FCD4E7 /* ShooterTrackerTests.swift in Sources */,
 				B76DD53696BC16423A985CDC /* ShotAnalyzerTests.swift in Sources */,
+				B36F9914E145913B05D0149B /* VoiceCommandTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

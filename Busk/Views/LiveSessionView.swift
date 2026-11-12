@@ -6,6 +6,7 @@ struct LiveSessionView: View {
     var onClose: () -> Void
     @Environment(\.modelContext) private var modelContext
     @State private var ended = false
+    @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
         if ended {
@@ -79,6 +80,27 @@ struct LiveSessionView: View {
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
+        .onChange(of: voice?.event) { _, event in
+            guard !ended else { return }
+            switch event?.command {
+            case .end: endSession()
+            case .status: session.speakStatus()
+            case .start, nil: break
+            }
+        }
+    }
+
+    private func endSession() {
+        session.stop()
+        if !session.shots.isEmpty {
+            modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
+                                              view: session.cameraView, handedness: session.handedness,
+                                              isDemo: session.isDemo, shots: session.shots))
+            try? modelContext.save()
+            ended = true
+        } else {
+            onClose()
+        }
     }
 
     @ViewBuilder private var feedback: some View {
@@ -92,23 +114,13 @@ struct LiveSessionView: View {
                             .accessibilityIdentifier("lastSpokenCue")
                     }
                     if let shot = session.lastShot { ShotCard(shot: shot) }
+                    VoiceControlBar(commands: [.status, .end])
     }
 
     private var topBar: some View {
         VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
-            Button {
-                session.stop()
-                if !session.shots.isEmpty {
-                    modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
-                                                      view: session.cameraView, handedness: session.handedness,
-                                                      isDemo: session.isDemo, shots: session.shots))
-                    try? modelContext.save()
-                    ended = true
-                } else {
-                    onClose()
-                }
-            } label: {
+            Button(action: endSession) {
                 Label("End", systemImage: "stop.fill").font(.headline).lineLimit(1).fixedSize()
             }
             .buttonStyle(.borderedProminent)

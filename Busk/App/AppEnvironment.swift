@@ -21,6 +21,8 @@ enum AppEnvironment {
     /// Shows a record of every spoken cue on screen (simulator, UI tests, or `-showSpokenCues`).
     static var showSpokenCues: Bool { isUITesting || isSimulator || arguments.contains("-showSpokenCues") }
     /// Benchmark: replay this keypoint file in a live session instead of showing the home screen.
+    /// No microphone in the simulator or UI tests: voice commands come from on-screen buttons (`-simulateVoice` forces this).
+    static var simulateVoiceInput: Bool { isUITesting || isSimulator || arguments.contains("-simulateVoice") }
     static var replayKeypointsPath: String? { value(after: "-replay-keypoints") }
     static var replayLabel: String? { value(after: "-replay-label") }
     static var replayStatusPath: String? { value(after: "-replay-status") }
@@ -36,4 +38,5 @@ enum SettingsKey {
     static let handedness = "handedness"
     static let cameraView = "cameraView"
     static let hasSeenSetupTips = "hasSeenSetupTips"
+    static let voiceCommands = "voiceCommands"
 }

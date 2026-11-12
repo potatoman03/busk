@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(SettingsKey.voiceEnabled) private var voiceEnabled = true
+    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = true
     @AppStorage(SettingsKey.handedness) private var handedness: Handedness = .right
     @AppStorage(SettingsKey.cameraView) private var cameraView: CameraView = .side
 
@@ -13,6 +14,11 @@ struct SettingsView: View {
                     Toggle("Spoken feedback", isOn: $voiceEnabled).accessibilityIdentifier("voiceSetting")
                     Button("Test voice") { CoachVoice.preview.say("Tuck your elbow under the ball") }
                         .disabled(!voiceEnabled)
+                }
+                Section {
+                    Toggle("Voice commands", isOn: $voiceCommands).accessibilityIdentifier("voiceCommandsSetting")
+                } footer: {
+                    Text("From the shooting spot, say “start session”, “how am I doing” or “end session”. Speech is recognized on your phone.")
                 }
                 Section("Defaults") {
                     Picker("Shooting hand", selection: $handedness) {

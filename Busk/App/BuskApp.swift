@@ -4,6 +4,8 @@ import SwiftUI
 @main
 struct BuskApp: App {
     let container: ModelContainer
+    @State private var voiceControl = VoiceControl()
+    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = true
 
     init() {
         let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil
@@ -28,6 +30,10 @@ struct BuskApp: App {
                     ReplaySessionView(video: video, label: AppEnvironment.replayLabel)
                 } else {
                     HomeView()
+                        .environment(voiceControl)
+                        .task(id: voiceCommands) {
+                            if voiceCommands { await voiceControl.start() } else { voiceControl.stop() }
+                        }
                 }
             }
             .tint(Theme.orange)

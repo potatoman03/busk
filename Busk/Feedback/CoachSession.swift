@@ -93,11 +93,16 @@ final class CoachSession {
         phase = analyzer.phase
     }
 
-    private func speak(_ text: String) {
-        let cue = SpokenCue(text: text, muted: !voiceEnabled)
+    /// Answers "how am I doing": a spoken summary of the session so far, even when the coach is muted.
+    func speakStatus() {
+        speak(summary.spokenStatus, force: true)
+    }
+
+    private func speak(_ text: String, force: Bool = false) {
+        let cue = SpokenCue(text: text, muted: !voiceEnabled && !force)
         spokenLog.append(cue)
         Self.log.notice("\(cue.muted ? "muted" : "spoken", privacy: .public) cue #\(self.spokenLog.count, privacy: .public): \(text, privacy: .public)")
-        voice.say(text)
+        voice.say(text, force: force)
     }
 
     private static let log = Logger(subsystem: "com.potatoman03.busk", category: "voice")
