@@ -5,7 +5,7 @@ import SwiftUI
 struct BuskApp: App {
     let container: ModelContainer
     @State private var voiceControl = VoiceControl()
-    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = true
+    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = false
 
     init() {
         let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil

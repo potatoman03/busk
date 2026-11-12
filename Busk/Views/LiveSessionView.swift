@@ -51,7 +51,7 @@ struct LiveSessionView: View {
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
-                SkeletonOverlay(pose: session.latestPose, handedness: session.handedness,
+                SkeletonOverlay(pose: (session.source as? VideoPoseSource)?.currentImagePose ?? session.latestPose, handedness: session.handedness,
                                 aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
                                 phase: session.phase, fill: session.source is CameraPoseSource)
                     .padding(.trailing, poseInset)
@@ -63,13 +63,13 @@ struct LiveSessionView: View {
                             Spacer(minLength: 0)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
-                                feedback
+                                feedback(compact: true)
                             }
                             .frame(width: hudWidth)
                         }
                     } else {
                         Spacer()
-                        feedback
+                        feedback(compact: false)
                     }
                 }
                 .padding()
@@ -100,8 +100,8 @@ struct LiveSessionView: View {
         }
     }
 
-    @ViewBuilder private var feedback: some View {
-                    banner
+    @ViewBuilder private func feedback(compact: Bool) -> some View {
+                    banner(compact: compact)
                     if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
@@ -150,10 +150,12 @@ struct LiveSessionView: View {
         }
     }
 
-    private var banner: some View {
+    private func banner(compact: Bool) -> some View {
         Text(session.bannerText)
-            .font(.title2.bold())
+            .font(compact ? .title3.bold() : .title2.bold())
             .multilineTextAlignment(.center)
+            .minimumScaleFactor(0.7)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))

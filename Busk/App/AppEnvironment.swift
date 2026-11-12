@@ -38,5 +38,6 @@ enum SettingsKey {
     static let handedness = "handedness"
     static let cameraView = "cameraView"
     static let hasSeenSetupTips = "hasSeenSetupTips"
+    /// Prototype, off by default; `-voiceCommands YES` turns it on for simulator runs.
     static let voiceCommands = "voiceCommands"
 }

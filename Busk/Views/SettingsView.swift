@@ -3,7 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(SettingsKey.voiceEnabled) private var voiceEnabled = true
-    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = true
+    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = false
     @AppStorage(SettingsKey.handedness) private var handedness: Handedness = .right
     @AppStorage(SettingsKey.cameraView) private var cameraView: CameraView = .side
 
@@ -17,8 +17,10 @@ struct SettingsView: View {
                 }
                 Section {
                     Toggle("Voice commands", isOn: $voiceCommands).accessibilityIdentifier("voiceCommandsSetting")
+                } header: {
+                    Text("Prototype")
                 } footer: {
-                    Text("From the shooting spot, say “start session”, “how am I doing” or “end session”. Speech is recognized on your phone.")
+                    Text("From the shooting spot, say “start session”, “how am I doing” or “end session”. Speech is recognized on your phone; Busk asks for the microphone when you turn this on.")
                 }
                 Section("Defaults") {
                     Picker("Shooting hand", selection: $handedness) {

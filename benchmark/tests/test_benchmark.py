@@ -13,7 +13,7 @@ from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
 from busk_bench.heldout import load_heldout_clips  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
-from busk_bench.visual import coaching_timeout, coached, pick_device, replay_seconds, wait_for_coaching  # noqa: E402
+from busk_bench.visual import coaching_timeout, coached, pick_device, replay_seconds, save_keypoints, wait_for_coaching  # noqa: E402
 
 TAX = load_taxonomy()
 CLIPS, _, _ = load_clips(TAX)
@@ -303,6 +303,17 @@ class SimulatorPick(unittest.TestCase):
 
     def test_nothing_booted(self):
         self.assertIsNotNone(pick_device([], "booted", {})[1])
+
+
+class SaveKeypoints(unittest.TestCase):
+    def test_sidecar_is_rewritten_each_run(self):
+        writer = "import sys; a = sys.argv; open(a[a.index('--save-keypoints') + 1], 'w').write('fresh')"
+        clip = type("Clip", (), {"handedness": "right", "view": "side"})()
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "clip.keypoints.json"
+            dest.write_text("stale")
+            self.assertIsNone(save_keypoints([sys.executable, "-c", writer], clip, Path(d) / "clip.mp4", dest, Path(d)))
+            self.assertEqual(dest.read_text(), "fresh")
 
 
 if __name__ == "__main__":

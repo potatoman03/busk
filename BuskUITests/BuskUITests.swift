@@ -10,6 +10,23 @@ final class BuskUITests: XCTestCase {
         app.launch()
     }
 
+    private func relaunch(_ arguments: [String]) {
+        app.terminate()
+        app.launchArguments = arguments
+        app.launch()
+    }
+
+    /// Rotates and waits for the layout to settle, so screenshots aren't taken mid-rotation.
+    private func rotate(_ orientation: UIDeviceOrientation) {
+        XCUIDevice.shared.orientation = orientation
+        let window = app.windows.firstMatch
+        let wide = orientation.isLandscape
+        for _ in 0..<20 where (window.frame.width > window.frame.height) != wide {
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        Thread.sleep(forTimeInterval: 0.8)
+    }
+
     private func snapshot(_ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
         a.name = name
@@ -52,7 +69,7 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(matched, spoken.label)
         snapshot("03-live")
 
-        XCUIDevice.shared.orientation = .landscapeLeft
+        rotate(.landscapeLeft)
         defer { XCUIDevice.shared.orientation = .portrait }
         let end = app.buttons["endSessionButton"]
         XCTAssertTrue(end.waitForExistence(timeout: 5))
@@ -78,6 +95,7 @@ final class BuskUITests: XCTestCase {
     /// Hands-free flow: the simulator has no microphone, so the on-screen voice buttons inject each phrase into the
     /// same parser the speech recognizer feeds on a device.
     func testHandsFreeVoiceCommands() {
+        relaunch(["-ui-testing", "-voiceCommands", "YES"])
         let status = app.staticTexts["voiceStatus"].firstMatch
         XCTAssertTrue(status.waitForExistence(timeout: 10))
         XCTAssertTrue(status.label.contains("start session"), status.label)
@@ -106,16 +124,44 @@ final class BuskUITests: XCTestCase {
         snapshot("10-voice-ended-summary")
     }
 
-    func testVoiceCommandsSettingHidesVoiceBar() {
-        XCTAssertTrue(app.staticTexts["voiceStatus"].waitForExistence(timeout: 10))
+    /// Voice commands are an off-by-default prototype: no voice bar (and no mic prompt) until Settings turns them on.
+    func testVoiceCommandsSettingShowsVoiceBar() {
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["voiceStatus"].exists)
         app.buttons["settingsButton"].tap()
         let toggle = app.switches["voiceCommandsSetting"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
-        toggle.switches.firstMatch.tap()
         XCTAssertEqual(toggle.value as? String, "0")
+        snapshot("11-voice-prototype-setting")
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "1")
         app.buttons["settingsDoneButton"].tap()
-        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["voiceStatus"].exists)
+        XCTAssertTrue(app.staticTexts["voiceStatus"].firstMatch.waitForExistence(timeout: 5))
+    }
+
+    /// A replayed clip ends like a live session: Summary then Done lands on Home, and the clip is in History.
+    func testReplayDoneReturnsHomeWithHistory() {
+        let clip = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/side.keypoints.json").path
+        app.terminate()
+        app.launchArguments = ["-ui-testing", "-replay-keypoints", clip, "-replay-label", "side-real"]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["replayComplete"].waitForExistence(timeout: 30))
+        rotate(.landscapeLeft)
+        defer { XCUIDevice.shared.orientation = .portrait }
+        XCTAssertTrue(app.staticTexts["cueBanner"].waitForExistence(timeout: 5))
+        snapshot("06-replay-landscape")
+        rotate(.portrait)
+        snapshot("06b-replay-complete")
+        app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.buttons["summaryDoneButton"].waitForExistence(timeout: 5))
+        snapshot("06c-replay-summary")
+        app.buttons["summaryDoneButton"].tap()
+        XCTAssertTrue(app.buttons["historyButton"].waitForExistence(timeout: 5))
+        app.buttons["historyButton"].tap()
+        XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
+        snapshot("06d-replay-history")
     }
 
     func testEndingWithoutShotsReturnsHome() {
