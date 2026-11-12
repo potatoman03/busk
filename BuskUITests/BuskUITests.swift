@@ -109,6 +109,12 @@ final class BuskUITests: XCTestCase {
         waitForExpectations(timeout: 60)
         snapshot("08-voice-live")
 
+        // The landscape column is shorter, but the score stays on screen beside the voice bar.
+        rotate(.landscapeLeft)
+        XCTAssertTrue(app.staticTexts["lastShotScore"].waitForExistence(timeout: 5))
+        snapshot("08b-voice-live-landscape")
+        rotate(.portrait)
+
         app.buttons["simulateVoice-status"].tap()
         // Wait on the answer first: it only holds the cue log for a few seconds before the next shot's cue.
         let spoken = app.staticTexts["lastSpokenCue"]
