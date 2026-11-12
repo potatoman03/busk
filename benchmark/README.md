@@ -133,15 +133,17 @@ run with the last successful `main` run (or `baselines/main.json`), uploads `sho
 
 ## Visual evidence
 
-Every run that counts needs screenshots and a recording of the busk app running. On a Mac with busk
-running in a booted simulator, add `--capture-simulator --require-visuals`. The run then records
-`results/visual/simulator.mp4` and takes one screenshot per clip, and lists their paths under
-`run.visual_evidence` and in each clip's `screenshot`. Attach them to the PR or report.
+Every run that counts needs screenshots and a recording of busk analysing the benchmark's clips. On a Mac
+with busk installed in a booted simulator, add `--capture-simulator --require-visuals`. The run records
+`results/visual/simulator.mp4` and, for every clip with keypoints, relaunches busk with
+`-replay-keypoints <clip>.keypoints.json -replay-label <clip id>`. busk then plays that clip through its live
+session (the same `ShotAnalyzer` and `FormEvaluator`), shows the cue and form card it gives, and the run
+screenshots it. Paths are listed under `run.visual_evidence` and in each clip's `screenshot`. Attach them to
+the PR or report. Real clips have no keypoints, so they are not replayed.
 
-The capture records the booted simulator that is running busk (`com.potatoman03.busk`), so a second
-booted device doesn't get recorded by mistake; `--simulator NAME|UDID` picks one explicitly. With
-`--require-visuals` the run exits 3 if busk isn't running there for the whole recording. In the simulator
-busk uses its demo shooter, so start a demo session (Start shooting, then Start demo session) before the run.
+The capture picks the booted simulator that has busk (`com.potatoman03.busk`); `--simulator NAME|UDID` picks
+one explicitly. With `--require-visuals` the run exits 3 unless busk analysed at least one clip and was still
+running when the recording stopped.
 
 ## Limits
 

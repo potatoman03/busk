@@ -131,8 +131,8 @@ def cmd_run(a):
         else:
             status, out, err, secs = run_clip(argv, c, video, None if a.no_keypoints else kp,
                                               out_dir / f"{c.id}.json", a.timeout, REPO_ROOT)
-        if capture is not None:
-            shot = capture.screenshot(c.id)
+        if capture is not None and kp is not None:
+            shot = capture.replay(c.id, kp)
             if shot:
                 results.setdefault("_shots", {})[c.id] = shot
         r = score_clip(c, out, tax)
@@ -316,7 +316,7 @@ def main(argv=None):
     r.add_argument("--baseline", help="results JSON to compare against; exit 1 on regression")
     r.add_argument("--require-analyzer", action="store_true", help="exit 2 if the analyzer is missing or failing")
     r.add_argument("--capture-simulator", action="store_true",
-                   help="macOS: record the booted iOS Simulator and screenshot it after each clip")
+                   help="macOS: record the iOS Simulator while busk analyses each clip in-app, screenshot its feedback")
     r.add_argument("--simulator", default="booted", help="simctl device (default: booted)")
     r.add_argument("--visual-dir", default=str(BENCH_DIR / "results" / "visual"))
     r.add_argument("--require-visuals", action="store_true", help="exit 3 unless the simulator recording was captured")

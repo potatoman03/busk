@@ -12,7 +12,7 @@ from busk_bench.cli import compare_docs  # noqa: E402
 from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
-from busk_bench.visual import pick_device  # noqa: E402
+from busk_bench.visual import pick_device, replay_seconds  # noqa: E402
 
 TAX = load_taxonomy()
 CLIPS, _, _ = load_clips(TAX)
@@ -171,8 +171,10 @@ class RealTier(unittest.TestCase):
             self.assertFalse((Path(d) / "bad.webm").exists())
 
 
-if __name__ == "__main__":
-    unittest.main()
+class ReplayTiming(unittest.TestCase):
+    def test_frames_plus_hold(self):
+        self.assertAlmostEqual(replay_seconds({"fps": 30, "frames": [{}] * 60}), 3.5)
+        self.assertAlmostEqual(replay_seconds({"frames": [{}] * 15}), 2.0)
 
 
 class SimulatorPick(unittest.TestCase):
@@ -197,3 +199,7 @@ class SimulatorPick(unittest.TestCase):
 
     def test_nothing_booted(self):
         self.assertIsNotNone(pick_device([], "booted", {})[1])
+
+
+if __name__ == "__main__":
+    unittest.main()

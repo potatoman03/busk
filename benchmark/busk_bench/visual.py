@@ -1,8 +1,10 @@
 """Capture the iOS Simulator screen during a run (macOS only).
 
 Jonathan's rule: a benchmark run counts only with screenshots and a screen
-recording of the busk app running. `run --capture-simulator` records the booted
-simulator for the whole run and takes a screenshot after every clip.
+recording of busk analysing the benchmark's clips. `run --capture-simulator`
+records the simulator for the whole run and, for every clip with keypoints,
+relaunches busk with `-replay-keypoints` so the app analyses that clip in a live
+session, then screenshots its feedback.
 """
 from __future__ import annotations
 
@@ -44,6 +46,17 @@ def _booted_devices() -> list[dict]:
     return [d for devs in json.loads(p.stdout).get("devices", {}).values() for d in devs if d.get("state") == "Booted"]
 
 
+def replay_seconds(keypoints: dict) -> float:
+    """How long busk takes to play a clip in-app: the frames plus the 1.5 s it holds the last pose."""
+    return len(keypoints.get("frames", [])) / float(keypoints.get("fps") or 30) + 1.5
+
+
+def app_data_dir(udid: str) -> Path | None:
+    p = subprocess.run(["xcrun", "simctl", "get_app_container", udid, BUSK_BUNDLE_ID, "data"],
+                       capture_output=True, text=True)
+    return Path(p.stdout.strip()) if p.returncode == 0 and p.stdout.strip() else None
+
+
 def busk_running(udid: str) -> bool:
     p = subprocess.run(["xcrun", "simctl", "spawn", udid, "launchctl", "list"], capture_output=True, text=True)
     return p.returncode == 0 and f"UIKitApplication:{BUSK_BUNDLE_ID}[" in p.stdout
@@ -58,6 +71,8 @@ class SimulatorCapture:
         self.proc = None
         self.recording = None
         self.screenshots = []
+        self.replayed = []
+        self.data_dir = None
         self.status = "not_started"
         self.error = None
 
@@ -74,8 +89,9 @@ class SimulatorCapture:
         self.device = udid
         self.device_name = next(d["name"] for d in booted if d["udid"] == udid)
         self.app_running = running[udid]
-        if not self.app_running:
-            return f"busk ({BUSK_BUNDLE_ID}) is not running on {self.device_name}; launch it first"
+        self.data_dir = app_data_dir(udid)
+        if self.data_dir is None:
+            return f"busk ({BUSK_BUNDLE_ID}) is not installed on {self.device_name}"
         return None
 
     def start(self):
@@ -95,6 +111,22 @@ class SimulatorCapture:
         self.log(f"recording {self.device_name} ({self.device}) to {self.recording}")
         return True
 
+    def replay(self, name: str, keypoints: Path):
+        """Have busk analyse this clip in-app, then screenshot its feedback."""
+        if self.status != "recording":
+            return None
+        dest = self.data_dir / "Documents" / "benchmark" / f"{name}.keypoints.json"
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(keypoints, dest)
+        p = subprocess.run(["xcrun", "simctl", "launch", "--terminate-running-process", self.device, BUSK_BUNDLE_ID,
+                            "-replay-keypoints", str(dest), "-replay-label", name], capture_output=True, text=True)
+        if p.returncode != 0:
+            self.log(f"busk replay of {name} failed to launch: {p.stderr.strip()[-200:]}")
+            return None
+        time.sleep(1.5 + replay_seconds(json.loads(dest.read_text())))
+        self.replayed.append(name)
+        return self.screenshot(name)
+
     def screenshot(self, name: str):
         if self.status != "recording":
             return None
@@ -113,6 +145,8 @@ class SimulatorCapture:
             except subprocess.TimeoutExpired:
                 self.proc.kill()
             ok = self.recording is not None and self.recording.exists() and self.recording.stat().st_size > 0
+            if ok and not self.replayed:
+                ok, self.error = False, "busk analysed no clips in the simulator (none had keypoints)"
             if ok and not busk_running(self.device):
                 ok, self.error = False, "busk stopped running during the recording"
             self.status = "captured" if ok else "failed"
@@ -124,5 +158,6 @@ class SimulatorCapture:
     def summary(self):
         return {"status": self.status, "error": self.error,
                 "device": self.device, "device_name": self.device_name, "app": BUSK_BUNDLE_ID,
+                "mode": "in-app replay (-replay-keypoints)", "replayed_clips": self.replayed,
                 "recording": str(self.recording) if self.status == "captured" else None,
                 "screenshots": self.screenshots}
