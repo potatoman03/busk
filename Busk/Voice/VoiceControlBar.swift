@@ -6,10 +6,23 @@ struct VoiceControlBar: View {
     @Environment(VoiceControl.self) private var voice: VoiceControl?
     /// The commands that do something on this screen, first one used as the hint.
     let commands: [VoiceCommand]
+    /// Short landscape column: put the buttons beside the status when they fit.
+    var compact = false
 
     var body: some View {
         if let voice, voice.state != .off {
-            VStack(spacing: 6) {
+            if compact {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 6) { content(voice) }
+                    VStack(spacing: 6) { content(voice) }
+                }
+            } else {
+                VStack(spacing: 6) { content(voice) }
+            }
+        }
+    }
+
+    @ViewBuilder private func content(_ voice: VoiceControl) -> some View {
                 Label(statusText(voice), systemImage: icon(voice))
                     .font(.caption.bold())
                     .lineLimit(1)
@@ -26,8 +39,6 @@ struct VoiceControlBar: View {
                         }
                     }
                 }
-            }
-        }
     }
 
     private func statusText(_ voice: VoiceControl) -> String {

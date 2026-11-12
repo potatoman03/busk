@@ -121,7 +121,8 @@ struct LiveSessionView: View {
                             .accessibilityIdentifier("lastSpokenCue")
                     }
                     if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
-                    VoiceControlBar(commands: [.status, .end])
+                    // Keep the voice buttons on screen in the short landscape column; the banner shrinks instead.
+                    VoiceControlBar(commands: [.status, .end], compact: compact).layoutPriority(1)
     }
 
     private var topBar: some View {
@@ -164,8 +165,9 @@ struct LiveSessionView: View {
         Text(session.bannerText)
             .font(compact ? .title3.bold() : .title2.bold())
             .multilineTextAlignment(.center)
-            .minimumScaleFactor(0.7)
-            .fixedSize(horizontal: false, vertical: true)
+            .minimumScaleFactor(compact ? 0.5 : 0.7)
+            .lineLimit(compact ? 3 : nil)
+            .fixedSize(horizontal: false, vertical: !compact)
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
