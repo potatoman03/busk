@@ -3,8 +3,8 @@
   "benchmark": {
     "taxonomy_version": "1.0.0",
     "taxonomy_sha256": "5545c16a720b7e721fd8cf861fd1fb140a859dcda2b5cf5c4e861c0a72725660",
-    "dataset_version": "1.0.0",
-    "dataset_sha256": "28953711a99ce715022e6a6fe4cc0cc139971cc22ee7d380c28f9a976cc1ac46",
+    "dataset_version": "1.0.0+real1",
+    "dataset_sha256": "98e8551e63a5726e07501b0b7b61741cc5a3ec388cc32d5f3bd413504173f455",
     "renderer": "595ca9f87a5d",
     "clip_ids": [
       "beginner_chest_push__side",
@@ -34,20 +34,25 @@
       "elite_durant_high_release__side",
       "elite_durant_high_release__front",
       "elite_lefty__side",
-      "elite_lefty__front"
+      "elite_lefty__front",
+      "real__mcandrew_free_throw__front",
+      "real__kobe_bryant_warmup_free_throw__front",
+      "real__tolo_free_throw__front",
+      "real__research_jump_shot__side"
     ]
   },
   "run": {
-    "started_at": "2026-11-12T07:34:46+00:00",
-    "duration_s": 7.3,
-    "git_sha": "9bba7e63de61548cdd05dd39d265e6066e16a819",
+    "started_at": "2026-11-12T07:47:14+00:00",
+    "duration_s": 0.1,
+    "git_sha": "0a29b31aefe65bed8ecbda955abad5f5e98380b4",
     "git_ref": "devin/1794468500-shot-feedback-benchmark",
     "analyzer_command": null,
     "analyzer_source": "not_found",
     "analyzer_status": "missing",
     "clip_statuses": {
-      "analyzer_missing": 28
+      "analyzer_missing": 32
     },
+    "real_unavailable": {},
     "keypoints_provided": true,
     "analyzer_build_error": null,
     "visual_evidence": {
@@ -56,7 +61,7 @@
   },
   "summary": {
     "overall_score": 0.0,
-    "clips": 28,
+    "clips": 32,
     "tiers": {
       "beginner": {
         "score": 0.0,
@@ -68,21 +73,21 @@
       },
       "advanced": {
         "score": 0.0,
-        "clips": 4
+        "clips": 6
       },
       "elite": {
         "score": 0.0,
-        "clips": 8
+        "clips": 10
       }
     },
     "views": {
       "front": {
         "score": 0.0,
-        "clips": 14
+        "clips": 17
       },
       "side": {
         "score": 0.0,
-        "clips": 14
+        "clips": 15
       }
     },
     "flawed_clip_score": 0.0,
@@ -207,6 +212,10 @@
       }
     ]
   },
+  "set_scores": {
+    "synthetic": 0.0,
+    "real": 0.0
+  },
   "clips": [
     {
       "score": 0.0,
@@ -220,6 +229,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_chest_push__side",
+      "set": "synthetic",
       "archetype": "beginner_chest_push",
       "tier": "beginner",
       "view": "side",
@@ -251,6 +261,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_chest_push__front",
+      "set": "synthetic",
       "archetype": "beginner_chest_push",
       "tier": "beginner",
       "view": "front",
@@ -284,6 +295,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_flailing_jumper__side",
+      "set": "synthetic",
       "archetype": "beginner_flailing_jumper",
       "tier": "beginner",
       "view": "side",
@@ -313,6 +325,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_flailing_jumper__front",
+      "set": "synthetic",
       "archetype": "beginner_flailing_jumper",
       "tier": "beginner",
       "view": "front",
@@ -344,6 +357,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_two_motion__side",
+      "set": "synthetic",
       "archetype": "beginner_two_motion",
       "tier": "beginner",
       "view": "side",
@@ -373,6 +387,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "beginner_two_motion__front",
+      "set": "synthetic",
       "archetype": "beginner_two_motion",
       "tier": "beginner",
       "view": "front",
@@ -402,6 +417,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_elbow_out__side",
+      "set": "synthetic",
       "archetype": "rec_elbow_out",
       "tier": "intermediate",
       "view": "side",
@@ -423,6 +439,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_elbow_out__front",
+      "set": "synthetic",
       "archetype": "rec_elbow_out",
       "tier": "intermediate",
       "view": "front",
@@ -448,6 +465,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_flat_shot__side",
+      "set": "synthetic",
       "archetype": "rec_flat_shot",
       "tier": "intermediate",
       "view": "side",
@@ -473,6 +491,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_flat_shot__front",
+      "set": "synthetic",
       "archetype": "rec_flat_shot",
       "tier": "intermediate",
       "view": "front",
@@ -494,6 +513,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_lazy_finish__side",
+      "set": "synthetic",
       "archetype": "rec_lazy_finish",
       "tier": "intermediate",
       "view": "side",
@@ -521,6 +541,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_lazy_finish__front",
+      "set": "synthetic",
       "archetype": "rec_lazy_finish",
       "tier": "intermediate",
       "view": "front",
@@ -548,6 +569,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_fader__side",
+      "set": "synthetic",
       "archetype": "rec_fader",
       "tier": "intermediate",
       "view": "side",
@@ -575,6 +597,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_fader__front",
+      "set": "synthetic",
       "archetype": "rec_fader",
       "tier": "intermediate",
       "view": "front",
@@ -602,6 +625,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_guide_thumb__side",
+      "set": "synthetic",
       "archetype": "rec_guide_thumb",
       "tier": "intermediate",
       "view": "side",
@@ -627,6 +651,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "rec_guide_thumb__front",
+      "set": "synthetic",
       "archetype": "rec_guide_thumb",
       "tier": "intermediate",
       "view": "front",
@@ -654,6 +679,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "advanced_solid__side",
+      "set": "synthetic",
       "archetype": "advanced_solid",
       "tier": "advanced",
       "view": "side",
@@ -675,6 +701,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "advanced_solid__front",
+      "set": "synthetic",
       "archetype": "advanced_solid",
       "tier": "advanced",
       "view": "front",
@@ -696,6 +723,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "advanced_slight_flare__side",
+      "set": "synthetic",
       "archetype": "advanced_slight_flare",
       "tier": "advanced",
       "view": "side",
@@ -717,6 +745,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "advanced_slight_flare__front",
+      "set": "synthetic",
       "archetype": "advanced_slight_flare",
       "tier": "advanced",
       "view": "front",
@@ -742,6 +771,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_curry_one_motion__side",
+      "set": "synthetic",
       "archetype": "elite_curry_one_motion",
       "tier": "elite",
       "view": "side",
@@ -763,6 +793,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_curry_one_motion__front",
+      "set": "synthetic",
       "archetype": "elite_curry_one_motion",
       "tier": "elite",
       "view": "front",
@@ -784,6 +815,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_klay_textbook__side",
+      "set": "synthetic",
       "archetype": "elite_klay_textbook",
       "tier": "elite",
       "view": "side",
@@ -805,6 +837,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_klay_textbook__front",
+      "set": "synthetic",
       "archetype": "elite_klay_textbook",
       "tier": "elite",
       "view": "front",
@@ -826,6 +859,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_durant_high_release__side",
+      "set": "synthetic",
       "archetype": "elite_durant_high_release",
       "tier": "elite",
       "view": "side",
@@ -847,6 +881,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_durant_high_release__front",
+      "set": "synthetic",
       "archetype": "elite_durant_high_release",
       "tier": "elite",
       "view": "front",
@@ -868,6 +903,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_lefty__side",
+      "set": "synthetic",
       "archetype": "elite_lefty",
       "tier": "elite",
       "view": "side",
@@ -889,6 +925,7 @@
       "unknown_flaw_ids": [],
       "status_reason": "no_output",
       "clip": "elite_lefty__front",
+      "set": "synthetic",
       "archetype": "elite_lefty",
       "tier": "elite",
       "view": "front",
@@ -897,6 +934,114 @@
       "seconds": 0.0,
       "labeled_flaws": [],
       "expected_advice": []
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__mcandrew_free_throw__front",
+      "set": "real",
+      "archetype": "real__mcandrew_free_throw",
+      "tier": "advanced",
+      "view": "front",
+      "handedness": "right",
+      "status": "analyzer_missing",
+      "seconds": 0.0,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:20240301_Jackson_McAndrew_free_throw_video_01.webm",
+        "license": "CC BY 4.0",
+        "credit": "TonyTheTiger (Wikimedia Commons)"
+      }
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__kobe_bryant_warmup_free_throw__front",
+      "set": "real",
+      "archetype": "real__kobe_bryant_warmup_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "analyzer_missing",
+      "seconds": 0.0,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Kobe_Bryant.ogv",
+        "license": "CC BY 2.0",
+        "credit": "Flickr: see source page"
+      }
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__tolo_free_throw__front",
+      "set": "real",
+      "archetype": "real__tolo_free_throw",
+      "tier": "elite",
+      "view": "front",
+      "handedness": "right",
+      "status": "analyzer_missing",
+      "seconds": 0.0,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Marianna_Tolo-lancer_franc-Open_LFB_2014.ogv",
+        "license": "CC BY-SA 4.0",
+        "credit": "Chris93"
+      }
+    },
+    {
+      "score": 0.0,
+      "detection": 0.0,
+      "advice": 0.0,
+      "priority": 0.0,
+      "detected": [],
+      "advised": [],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "status_reason": "no_output",
+      "clip": "real__research_jump_shot__side",
+      "set": "real",
+      "archetype": "real__research_jump_shot",
+      "tier": "advanced",
+      "view": "side",
+      "handedness": "right",
+      "status": "analyzer_missing",
+      "seconds": 0.0,
+      "labeled_flaws": [],
+      "expected_advice": [],
+      "source": {
+        "page": "https://commons.wikimedia.org/wiki/File:Basketball-Shot-Types-and-Shot-Success-in-Different-Levels-of-Competitive-Basketball-pone.0128885.s001.ogv",
+        "license": "CC BY 4.0",
+        "credit": "Er\u010dulj F, \u0160trumbelj E"
+      }
     }
   ]
 }
