@@ -8,10 +8,14 @@ final class ShooterTracker {
     private var center: CGPoint?
     private var size: CGFloat = 0
     private var missed = 0
+    /// Frames left after the shooter had a hand up: right after a shot nobody else takes over.
+    private var justShot = 0
+    var shotHold = 90
     /// Frames without a match before the followed person is considered gone.
     var patience = 15
 
     func select(_ people: [[Joint: CGPoint]]) -> [Joint: CGPoint]? {
+        justShot = max(justShot - 1, 0)
         let people = people.filter { $0.count >= 4 }
         guard !people.isEmpty else { return lost() }
 
@@ -19,7 +23,7 @@ final class ShooterTracker {
         if let c = center {
             let near = people.min { Geometry.distance(Self.center($0), c) < Geometry.distance(Self.center($1), c) }!
             let ratio = Self.size(near) / max(size, 0.01)
-            if Geometry.distance(Self.center(near), c) < Double(max(size, 0.1)) * 0.3, ratio > 0.6, ratio < 1.6 { followed = near }
+            if Geometry.distance(Self.center(near), c) < Double(max(size, 0.1)) * min(0.12 + 0.04 * Double(missed), 0.4), ratio > 0.6, ratio < 1.6 { followed = near }
         }
         // Someone in the stands with a hand up isn't the shooter: a raiser has to be about as big as the followed person
         // and stand on the same floor (feet below the followed person's head).
@@ -30,13 +34,15 @@ final class ShooterTracker {
         }.max { Self.size($0) < Self.size($1) }
         let pick: [Joint: CGPoint]?
         if let f = followed {
-            pick = raiser != nil && !Self.handRaised(f) ? raiser : f
-        } else if center != nil, missed + 1 < patience {
+            pick = raiser != nil && justShot == 0 && !Self.handRaised(f) ? raiser : f
+        } else if center != nil, missed + 1 < patience || justShot > 0 {
+            // Briefly lost, or blurred landing right after the shot: wait for them rather than grab someone else.
             return lost()
         } else {
             pick = raiser ?? people.max { Self.size($0) < Self.size($1) }
         }
         guard let chosen = pick else { return lost() }
+        if Self.handRaised(chosen) { justShot = shotHold }
         center = Self.center(chosen)
         size = Self.size(chosen)
         missed = 0
@@ -46,11 +52,12 @@ final class ShooterTracker {
     func reset() {
         center = nil
         missed = 0
+        justShot = 0
     }
 
     private func lost() -> [Joint: CGPoint]? {
         missed += 1
-        if missed >= patience { center = nil }
+        if missed >= patience, justShot == 0 { center = nil }
         return nil
     }
 

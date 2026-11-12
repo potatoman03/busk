@@ -42,4 +42,13 @@ final class ShooterTrackerTests: XCTestCase {
         XCTAssertNil(tracker.select([person(x: 0.2, height: 0.45)]), "doesn't jump to someone else for one missed frame")
         XCTAssertEqual(tracker.select([shooter]), shooter)
     }
+
+    func testStaysOnTheShooterAfterTheShotWhenSomeoneElseRaisesAHand() {
+        let tracker = ShooterTracker()
+        let shooter = person(x: 0.5, height: 0.4, handUp: true)
+        XCTAssertEqual(tracker.select([shooter]), shooter)
+        let landed = person(x: 0.5, height: 0.4)
+        let defender = person(x: 0.7, height: 0.42, handUp: true)
+        for _ in 0..<30 { XCTAssertEqual(tracker.select([landed, defender]), landed) }
+    }
 }
