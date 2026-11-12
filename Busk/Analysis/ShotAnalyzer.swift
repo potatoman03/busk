@@ -185,14 +185,16 @@ final class ShotAnalyzer {
             while setIdx > lo && speed[setIdx - 1] <= speed[setIdx] { setIdx -= 1 }
             if setIdx <= lo || speed[setIdx] < pushSpeed * 0.5 { break }
         }
-        // The pause lasts as long as the hand stays put next to the shoulder (a radius, not a speed, so pose jitter
-        // during a long hold doesn't cut it short).
+        // The pause: the longest stretch the hand stays put (within a radius, so pose jitter during a long hold doesn't
+        // cut it short) with the ball up at the set point (or as high as it gets on a low set), wherever in the gather.
         let hand = { (i: Int) in CGPoint(x: samples[i].wrist.x - samples[i].shoulder.x, y: samples[i].wrist.y - samples[i].shoulder.y) }
-        let still = { (i: Int) in Double(hypot(hand(i).x - hand(setIdx).x, hand(i).y - hand(setIdx).y)) / H < self.config.pauseRadius }
-        var a = setIdx, b = setIdx
-        while a > lo && still(a - 1) { a -= 1 }
-        while b < rel - 1 && still(b + 1) { b += 1 }
-        let hitch = speed[setIdx] < config.pauseSpeed ? Double(b - a + 1) * dt : 0
+        let setLift = max(lift(setIdx) - 0.05, -0.15) // never a hold down at the waist
+        var hitch = 0.0
+        for a in lo..<rel where lift(a) > 0 || lift(a) >= setLift {
+            var b = a
+            while b + 1 < rel && Double(hypot(hand(b + 1).x - hand(a).x, hand(b + 1).y - hand(a).y)) / H < config.pauseRadius { b += 1 }
+            hitch = max(hitch, Double(b - a + 1) * dt)
+        }
         let set = samples[setIdx]
         let setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
 

@@ -109,7 +109,7 @@ struct FormEvaluator {
 
     struct Thresholds {
         var setPoint = Limit(ok: 0.06, bad: 0.0)
-        var releaseTiming = Limit(ok: 0.20, bad: 0.33)
+        var releaseTiming = Limit(ok: 0.20, bad: 0.30)
         var drift = Limit(ok: 0.11, bad: 0.16)
         var hitch = Limit(ok: 0.22, bad: 0.30)
         var elbow = Limit(ok: 0.055, bad: 0.075)
