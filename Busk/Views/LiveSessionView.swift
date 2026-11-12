@@ -39,8 +39,8 @@ struct LiveSessionView: View {
                     Theme.court.ignoresSafeArea()
                 }
                 SkeletonOverlay(pose: session.latestPose, handedness: session.handedness,
-                                aspectRatio: session.source.aspectRatio, phase: session.phase,
-                                fill: session.source is CameraPoseSource)
+                                aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
+                                phase: session.phase, fill: session.source is CameraPoseSource)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
                     topBar

@@ -8,8 +8,14 @@ protocol PoseSource: AnyObject {
     /// Aspect ratio (width / height) of the source image, for laying out the overlay.
     var aspectRatio: CGFloat { get }
     var isDemo: Bool { get }
+    /// Normalized x the overlay centres on when the image is wider than the screen.
+    var displayCenterX: CGFloat { get }
     func start()
     func stop()
+}
+
+extension PoseSource {
+    var displayCenterX: CGFloat { 0.5 }
 }
 
 /// Replays synthetic shots on a loop so the whole app works without a camera.

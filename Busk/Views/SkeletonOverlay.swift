@@ -4,6 +4,7 @@ struct SkeletonOverlay: View {
     let pose: PoseFrame?
     let handedness: Handedness
     let aspectRatio: CGFloat
+    var centerX: CGFloat = 0.5
     let phase: ShotPhase
     /// Aspect-fill to line up with a full-screen camera preview; otherwise fit so the whole body stays visible.
     var fill = true
@@ -20,7 +21,7 @@ struct SkeletonOverlay: View {
     var body: some View {
         Canvas { ctx, size in
             guard let pose else { return }
-            let map = Self.mapper(size: size, aspectRatio: aspectRatio, fill: fill)
+            let map = Self.mapper(size: size, aspectRatio: aspectRatio, centerX: centerX, fill: fill)
             let shooting: Set<Joint> = [handedness.shoulder, handedness.elbow, handedness.wrist]
             let accent = phase == .waiting ? Color.white : Theme.orange
             for (a, b) in Self.bones {
@@ -43,13 +44,15 @@ struct SkeletonOverlay: View {
         .accessibilityHidden(true)
     }
 
-    /// Maps normalized image points into the view, matching aspect-fill or aspect-fit.
-    static func mapper(size: CGSize, aspectRatio: CGFloat, fill: Bool = true) -> (CGPoint) -> CGPoint {
+    /// Maps normalized image points into the view, matching aspect-fill (a cropped wide image is centred on `centerX`)
+    /// or aspect-fit.
+    static func mapper(size: CGSize, aspectRatio: CGFloat, centerX: CGFloat = 0.5, fill: Bool = true) -> (CGPoint) -> CGPoint {
         let ar = max(aspectRatio, 0.01)
         let viewAR = size.width / max(size.height, 1)
         let w: CGFloat, h: CGFloat
         if (viewAR > ar) == fill { w = size.width; h = size.width / ar } else { h = size.height; w = size.height * ar }
-        let ox = (size.width - w) / 2, oy = (size.height - h) / 2
+        let ox = fill ? min(0, max(size.width - w, size.width / 2 - centerX * w)) : (size.width - w) / 2
+        let oy = (size.height - h) / 2
         return { CGPoint(x: ox + $0.x * w, y: oy + $0.y * h) }
     }
 }

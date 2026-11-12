@@ -6,7 +6,7 @@ struct BuskApp: App {
     let container: ModelContainer
 
     init() {
-        let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting)
+        let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil)
         do {
             container = try ModelContainer(for: SessionRecord.self, configurations: config)
         } catch {
@@ -20,9 +20,15 @@ struct BuskApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .tint(Theme.orange)
-                .preferredColorScheme(.dark)
+            Group {
+                if let path = AppEnvironment.replayKeypointsPath {
+                    ReplaySessionView(path: path, label: AppEnvironment.replayLabel)
+                } else {
+                    HomeView()
+                }
+            }
+            .tint(Theme.orange)
+            .preferredColorScheme(.dark)
         }
         .modelContainer(container)
     }

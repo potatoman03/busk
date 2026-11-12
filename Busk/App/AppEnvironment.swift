@@ -18,6 +18,14 @@ enum AppEnvironment {
     }
     /// Shows a record of every spoken cue on screen (simulator, UI tests, or `-showSpokenCues`).
     static var showSpokenCues: Bool { isUITesting || isSimulator || arguments.contains("-showSpokenCues") }
+    /// Benchmark: replay this keypoint file in a live session instead of showing the home screen.
+    static var replayKeypointsPath: String? { value(after: "-replay-keypoints") }
+    static var replayLabel: String? { value(after: "-replay-label") }
+
+    private static func value(after flag: String) -> String? {
+        guard let i = arguments.firstIndex(of: flag), arguments.indices.contains(i + 1) else { return nil }
+        return arguments[i + 1]
+    }
 }
 
 enum SettingsKey {
