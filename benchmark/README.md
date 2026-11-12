@@ -18,8 +18,10 @@ headless: clips are rendered deterministically on first use and cached in `bench
 
 | flag | meaning |
 |---|---|
-| `--analyzer CMD` | analyzer command (default `$BUSK_ANALYZER_CMD`, then `swift run busk-analyze` when `Package.swift` declares it). Relative paths resolve from the repo root |
-| `--clips IDS` | comma-separated clip ids, archetypes or tiers (e.g. `elite,rec_fader`) |
+| `--analyzer CMD` | analyzer command (default `$BUSK_ANALYZER_CMD`, then busk's native `busk-analyze` from `Package.swift`, built with `swift build -c release`). Relative paths resolve from the repo root |
+| `--set all\|synthetic\|heldout\|real` | which clips to score (default `all`) |
+| `--heldout-seed N` | draw a fresh held-out set instead of the pinned one (not comparable with the baseline) |
+| `--clips IDS` | comma-separated clip ids, archetypes, tiers or sets (e.g. `elite,rec_fader`) |
 | `--no-keypoints` | give the analyzer only the video, so it must run its own pose detection |
 | `--baseline FILE` | compare against a previous results file; exit 1 on regression |
 | `--require-analyzer` | exit 2 if the analyzer is missing or fails on any clip |
@@ -32,8 +34,10 @@ busk exposes its form analysis as one command line tool. The default is a SwiftP
 named `busk-analyze`; any other command works through `BUSK_ANALYZER_CMD`. For each clip the benchmark runs:
 
 ```
-busk-analyze --video CLIP.mp4 --handedness right|left --output OUT.json [--keypoints CLIP.keypoints.json]
+busk-analyze --video CLIP.mp4 --handedness right|left --view side|front --output OUT.json [--keypoints CLIP.keypoints.json]
 ```
+
+* `--view`: the labelled camera view of the clip, as a user picks it in the app.
 
 * `--video`: an H.264 MP4, 1280x720 at 30 fps, holding one jump shot filmed from the side or the front.
 * `--keypoints` (passed unless `--no-keypoints`): ground-truth 2D pose for every frame
@@ -105,14 +109,15 @@ view where it is visible: elbow flare and guide-hand push are front-view only, a
 * `clips`: per clip score, labeled flaws, expected advice, what busk said, misses and false alarms.
 
 `compare` flags a regression (exit 1) when the overall score drops more than 2 points, a tier drops more
-than 5, a flaw's advice rate drops more than 20 points, or more clean clips get false alarms. Thresholds are
-flags (`--max-overall-drop`, `--max-tier-drop`, `--max-flaw-drop`). Use `--json` or `--report FILE` to get
+than 5, a set (`synthetic`, `heldout`, `real`) drops more than 2, a flaw's advice rate drops more than 20 points,
+or more clean clips get false alarms. Thresholds are flags (`--max-overall-drop`, `--max-tier-drop`,
+`--max-set-drop`, `--max-flaw-drop`). Use `--json` or `--report FILE` to get
 the comparison as JSON.
 
 ## Reference analyzers
 
 `reference_analyzers/` holds three stand-ins that implement the contract. They are used to validate the
-scorer and are not busk:
+scorer and are not busk (scores on the core synthetic set, `--set synthetic`):
 
 | analyzer | overall | beginner | intermediate | advanced | elite |
 |---|---|---|---|---|---|
@@ -129,7 +134,10 @@ benchmark/run.sh --analyzer "python3 benchmark/reference_analyzers/keypoint_heur
 `.github/workflows/shot-feedback-benchmark.yml` runs the benchmark on every push to `main`, on pull
 requests and on manual dispatch. It runs on macOS so a Swift and Vision analyzer can build. It compares the
 run with the last successful `main` run (or `baselines/main.json`), uploads `shot-feedback-results`
-(`latest.json` plus `compare.json`) and writes a job summary. On a regression the job fails.
+(`latest.json` plus `compare.json`) and writes a job summary. On a regression, or when the native
+`busk-analyze` fails to build or run, the job fails. It also scores a fresh held-out draw seeded by the run id
+and reports it next to the pinned held-out score (informational: a pinned score far above fresh draws means
+the analyzer has been fitted to the pinned shooters).
 
 ## Visual evidence
 
@@ -169,13 +177,29 @@ running when the recording stopped.
 
 Gaps: no openly licensed Steph Curry footage and no usable beginner shooting footage turned up on Commons, so the real tier only checks that good form isn't "corrected". Beginner fixes are covered by the synthetic set. Labels are one reviewer's judgement (`label_confidence` per clip).
 
+## Held-out tier
+
+The 28 core clips are the ones busk's thresholds were tuned against, so they saturate (busk scores ~99 on
+them). The held-out tier scores shooters busk has never been tuned on: `busk_bench/heldout.py` draws 48 random
+shooters (96 clips, side and front) from the ranges in [`heldout.json`](heldout.json): body height, tempo,
+jump, handedness, look and any 0 to 4 flaws at random severities. Labels come from the taxonomy label rules
+applied to the drawn parameters, and every range keeps a gap around its threshold so no label is borderline.
+Severity (which flaw busk should mention first) follows how far past its threshold each flaw is.
+
+Only the generator and ranges are checked in, not the shooters. The pinned `seed` keeps runs comparable
+for CI; `--heldout-seed N` draws a new set, so a fitted analyzer can always be checked against shooters
+nobody has looked at. Changing the seed, ranges or generator changes the dataset hash, so the next comparison
+is marked not comparable.
+
+`set_scores` reports each set and `generalization_gap` is the synthetic score minus the held-out score.
+
+Native `busk-analyze` (main, pinned seed): synthetic 98.6, held-out 82.1, real 87.5 (gap +16.5); fresh seeds
+1 to 3 score 88.5, 89.6, 89.7 on held-out. Simulating a regression by dropping busk's `hitch_at_set_point`
+cue drops held-out 2.2 and fails the comparison.
+
 ## Running against busk's own analysis
 
-`benchmark/adapters/busk-analyze/run.sh` builds busk's real `ShotAnalyzer` + `FormEvaluator` (copied from `Busk/`) into a `busk-analyze` CLI that follows the contract, feeding it the benchmark keypoints instead of Vision (works on macOS and Linux; on Linux a small shim supplies the CoreGraphics types):
-
-```bash
-BUSK_ANALYZER_CMD=benchmark/adapters/busk-analyze/run.sh benchmark/run.sh
-```
-
-It reports what busk would say (`feedback` = the spoken cue) and maps each "needs work" area to a taxonomy flaw (elbow→`elbow_flare`, low arc→`flat_arc`, release point→`low_set_point`, follow-through→`no_follow_through`, legs→`no_leg_drive`). It needs keypoints, so real clips score 0 through it until the app exposes video-in analysis with Vision.
-
+The default analyzer is busk's native `busk-analyze` (`Tools/busk-analyze`, built from the app's own
+`Busk/` sources by the root `Package.swift`). It uses the benchmark keypoints when given, and Vision pose
+detection on the video otherwise, so real clips are scored too. `benchmark/run.sh` builds it first; no setup
+is needed beyond Xcode or a Swift toolchain on macOS.
