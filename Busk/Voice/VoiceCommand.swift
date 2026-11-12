@@ -2,7 +2,7 @@ import Foundation
 
 /// What a player can say from the shooting spot.
 enum VoiceCommand: String, CaseIterable, Sendable {
-    case start, end, status
+    case start, end, status, make, miss
 
     /// Phrases that trigger each command, lowercased without punctuation.
     var phrases: [String] {
@@ -13,6 +13,8 @@ enum VoiceCommand: String, CaseIterable, Sendable {
                            "end shooting", "stop shooting", "im done", "we are done", "were done"]
         case .status: return ["how am i doing", "how am i shooting", "hows my form", "how is my form", "how did i do",
                               "how m i doing", "give me a summary"]
+        case .make: return ["made it", "make", "swish", "bucket", "count it", "that went in"]
+        case .miss: return ["missed it", "miss", "missed", "brick", "no good"]
         }
     }
 
@@ -45,6 +47,6 @@ enum VoiceCommandParser {
 
     /// Hints for the speech recognizer, so it favours command words.
     static var contextualStrings: [String] {
-        ["start session", "end session", "how am I doing", "stop session", "I'm done"]
+        ["start session", "end session", "how am I doing", "stop session", "I'm done", "made it", "missed it", "swish"]
     }
 }

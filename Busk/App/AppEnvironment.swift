@@ -24,6 +24,8 @@ enum AppEnvironment {
     /// No microphone in the simulator or UI tests: voice commands come from on-screen buttons (`-simulateVoice` forces this).
     static var simulateVoiceInput: Bool { isUITesting || isSimulator || arguments.contains("-simulateVoice") }
     static var replayKeypointsPath: String? { value(after: "-replay-keypoints") }
+    /// `-seed-practice N`: fills History with N days of sample sessions (UI tests and screenshots only).
+    static var seedPracticeDays: Int? { isUITesting ? value(after: "-seed-practice").flatMap(Int.init) : nil }
     static var replayLabel: String? { value(after: "-replay-label") }
     static var replayStatusPath: String? { value(after: "-replay-status") }
 
@@ -41,4 +43,6 @@ enum SettingsKey {
     static let hasSeenSetupTips = "hasSeenSetupTips"
     /// Prototype, off by default; `-voiceCommands YES` turns it on for simulator runs.
     static let voiceCommands = "voiceCommands"
+    /// Shots a day the practice tracker counts toward.
+    static let dailyShotGoal = "dailyShotGoal"
 }
