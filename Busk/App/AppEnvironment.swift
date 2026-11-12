@@ -35,5 +35,6 @@ enum SettingsKey {
     static let voiceEnabled = "voiceEnabled"
     static let handedness = "handedness"
     static let cameraView = "cameraView"
+    static let ghostReplay = "ghostReplay"
     static let hasSeenSetupTips = "hasSeenSetupTips"
 }
