@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import OSLog
 
 /// Runs one coaching session: pose frames in, shots and spoken cues out.
 @MainActor
@@ -15,6 +16,8 @@ final class CoachSession {
     private(set) var phase: ShotPhase = .waiting
     private(set) var bannerText = "Step into frame"
     private(set) var bodyVisible = false
+    /// Every cue the coach said (or would have said while muted), newest last.
+    private(set) var spokenLog: [SpokenCue] = []
 
     var voiceEnabled: Bool {
         didSet { voice.enabled = voiceEnabled }
@@ -68,7 +71,7 @@ final class CoachSession {
             if visible && !announcedVisible {
                 announcedVisible = true
                 bannerText = "Got you. Shoot when ready"
-                voice.say("Got you. Shoot when ready")
+                speak("Got you. Shoot when ready")
             } else if !visible && shots.isEmpty {
                 bannerText = "Step into frame"
             }
@@ -78,8 +81,22 @@ final class CoachSession {
             let result = evaluator.evaluate(metrics)
             shots.append(result)
             bannerText = result.cue
-            voice.say(result.cue)
+            speak(result.cue)
         }
         phase = analyzer.phase
     }
+
+    private func speak(_ text: String) {
+        let cue = SpokenCue(text: text, muted: !voiceEnabled)
+        spokenLog.append(cue)
+        Self.log.notice("\(cue.muted ? "muted" : "spoken", privacy: .public) cue #\(self.spokenLog.count, privacy: .public): \(text, privacy: .public)")
+        voice.say(text)
+    }
+
+    private static let log = Logger(subsystem: "com.potatoman03.busk", category: "voice")
+}
+
+struct SpokenCue: Equatable {
+    let text: String
+    let muted: Bool
 }

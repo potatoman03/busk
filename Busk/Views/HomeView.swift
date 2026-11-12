@@ -61,9 +61,7 @@ struct HomeView: View {
             .navigationTitle("Busk")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    NavigationLink {
-                        HistoryView()
-                    } label: {
+                    NavigationLink(value: HomeRoute.history) {
                         Image(systemName: "clock.arrow.circlepath")
                     }
                     .accessibilityLabel("History")
@@ -76,6 +74,7 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(for: SessionRecord.self) { SummaryView(record: $0) }
+            .navigationDestination(for: HomeRoute.self) { _ in HistoryView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
             .fullScreenCover(isPresented: $showSetup) { SetupFlowView() }
         }
@@ -89,6 +88,10 @@ struct HomeView: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
+
+enum HomeRoute: Hashable {
+    case history
 }
 
 struct SessionRow: View {

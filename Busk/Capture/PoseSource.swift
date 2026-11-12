@@ -8,8 +8,14 @@ protocol PoseSource: AnyObject {
     /// Aspect ratio (width / height) of the source image, for laying out the overlay.
     var aspectRatio: CGFloat { get }
     var isDemo: Bool { get }
+    /// Normalized x the overlay centres on when the image is wider than the screen.
+    var displayCenterX: CGFloat { get }
     func start()
     func stop()
+}
+
+extension PoseSource {
+    var displayCenterX: CGFloat { 0.5 }
 }
 
 /// Replays synthetic shots on a loop so the whole app works without a camera.
@@ -25,6 +31,7 @@ final class DemoPoseSource: PoseSource {
     private var timer: Timer?
     private var clock: TimeInterval = 0
     private var styleIndex = 0
+    private var wallStart: Date?
 
     init(handedness: Handedness = .right, view: CameraView = .side, styles: [ShotSimulator.Style]? = nil, gap: Double = 0.8) {
         var sim = ShotSimulator()
@@ -38,6 +45,7 @@ final class DemoPoseSource: PoseSource {
     func start() {
         stop()
         queue = simulator.idleFrames(seconds: 0.5, start: clock)
+        wallStart = Date().addingTimeInterval(-clock)
         timer = Timer.scheduledTimer(withTimeInterval: 1 / simulator.fps, repeats: true) { [weak self] _ in
             self?.tick()
         }
@@ -48,7 +56,13 @@ final class DemoPoseSource: PoseSource {
         timer = nil
     }
 
+    /// Emits every frame that is due, so a busy main thread delays frames but never slows the replay clock.
     private func tick() {
+        let now = Date().timeIntervalSince(wallStart ?? Date())
+        repeat { emitNext() } while clock <= now
+    }
+
+    private func emitNext() {
         if queue.isEmpty {
             let style = styles[styleIndex % styles.count]
             styleIndex += 1

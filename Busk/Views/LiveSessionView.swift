@@ -26,21 +26,50 @@ struct LiveSessionView: View {
 
     private var live: some View {
         GeometryReader { geo in
+            let landscape = geo.size.width > geo.size.height
+            let hudWidth = landscape ? min(380, geo.size.width * 0.45) : 0
+            // In landscape the cue and form card sit in a right-hand column so they never cover the shooter.
+            let poseInset = session.source is CameraPoseSource ? 0 : hudWidth
             ZStack {
                 Color.black.ignoresSafeArea()
                 if let camera = session.source as? CameraPoseSource {
                     CameraPreview(source: camera).ignoresSafeArea()
+                } else if let video = session.source as? VideoPoseSource {
+                    Theme.court.ignoresSafeArea()
+                    if let image = video.currentImage {
+                        Image(decorative: image, scale: 1).resizable().scaledToFit()
+                            .padding(.trailing, poseInset).ignoresSafeArea()
+                    }
+                    if video.visionUnavailable {
+                        Text("Vision body pose isn't available here. Run scripts/vision-keypoints.swift on the clip to make a keypoints file.")
+                            .font(.footnote).multilineTextAlignment(.center).padding()
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                            .padding(.horizontal, 24)
+                            .accessibilityIdentifier("visionUnavailable")
+                    }
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
                 SkeletonOverlay(pose: session.latestPose, handedness: session.handedness,
-                                aspectRatio: session.source.aspectRatio, phase: session.phase)
+                                aspectRatio: session.source.aspectRatio, centerX: session.source.displayCenterX,
+                                phase: session.phase, fill: session.source is CameraPoseSource)
+                    .padding(.trailing, poseInset)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
                     topBar
-                    Spacer()
-                    banner
-                    if let shot = session.lastShot { ShotCard(shot: shot) }
+                    if landscape {
+                        HStack {
+                            Spacer(minLength: 0)
+                            VStack(spacing: 12) {
+                                Spacer(minLength: 0)
+                                feedback
+                            }
+                            .frame(width: hudWidth)
+                        }
+                    } else {
+                        Spacer()
+                        feedback
+                    }
                 }
                 .padding()
             }
@@ -50,6 +79,19 @@ struct LiveSessionView: View {
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
+    }
+
+    @ViewBuilder private var feedback: some View {
+                    banner
+                    if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
+                        Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
+                              systemImage: cue.muted ? "speaker.slash" : "waveform")
+                            .font(.caption.monospaced())
+                            .padding(.horizontal, 10).padding(.vertical, 4)
+                            .background(.ultraThinMaterial, in: Capsule())
+                            .accessibilityIdentifier("lastSpokenCue")
+                    }
+                    if let shot = session.lastShot { ShotCard(shot: shot) }
     }
 
     private var topBar: some View {
@@ -139,7 +181,7 @@ struct ShotCard: View {
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }

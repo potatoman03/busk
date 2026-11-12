@@ -11,7 +11,7 @@ final class CameraPoseSource: NSObject, PoseSource {
     let session = AVCaptureSession()
     private let output = AVCaptureVideoDataOutput()
     private let videoQueue = DispatchQueue(label: "busk.camera", qos: .userInitiated)
-    private let request = VNDetectHumanBodyPoseRequest()
+    private let detector = VisionPoseDetector()
     private var configured = false
     private var rotationAngle: CGFloat = 90
 
@@ -83,14 +83,13 @@ extension CameraPoseSource: AVCaptureVideoDataOutputSampleBufferDelegate {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
         let w = CGFloat(CVPixelBufferGetWidth(pixelBuffer)), h = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
         let ts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: .up)
-        try? handler.perform([request])
-        guard let observation = VisionPose.largest(request.results ?? []) else { return }
+        guard let joints = detector.joints(in: pixelBuffer) else { return }
         let ratio = h > 0 ? w / h : aspectRatio
-        let frame = PoseFrame(timestamp: ts, joints: VisionPose.joints(from: observation), aspect: ratio)
+        let frame = PoseFrame(timestamp: ts, joints: joints, aspect: ratio)
         DispatchQueue.main.async { [weak self] in
             self?.aspectRatio = ratio
             self?.onFrame?(frame)
         }
     }
+
 }
