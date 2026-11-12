@@ -120,18 +120,18 @@ struct LiveSessionView: View {
     @ViewBuilder private func feedback(compact: Bool) -> some View {
         if compact, let voice, voice.state != .off {
             // The landscape column is short: when a long cue leaves no room for the voice bar, drop the spoken-cue
-            // log, then the form card, so the cue and the voice buttons stay whole.
+            // log, then shrink the form card to its score, so the cue, the score and the voice buttons stay whole.
             ViewThatFits(in: .vertical) {
-                feedbackStack(compact: true, cueLog: true, card: true)
-                feedbackStack(compact: true, cueLog: false, card: true)
-                feedbackStack(compact: true, cueLog: false, card: false)
+                feedbackStack(compact: true, cueLog: true, card: .full)
+                feedbackStack(compact: true, cueLog: false, card: .full)
+                feedbackStack(compact: true, cueLog: false, card: .scoreOnly)
             }
         } else {
-            feedbackStack(compact: compact, cueLog: true, card: true)
+            feedbackStack(compact: compact, cueLog: true, card: .full)
         }
     }
 
-    private func feedbackStack(compact: Bool, cueLog: Bool, card: Bool) -> some View {
+    private func feedbackStack(compact: Bool, cueLog: Bool, card: ShotCard.Style) -> some View {
         VStack(spacing: 12) {
                     banner(compact: compact)
                     if cueLog, AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
@@ -144,7 +144,7 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if card, let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
+                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact, style: card) }
                     VoiceControlBar(commands: [.status, .end], compact: compact)
         }
     }
@@ -232,7 +232,36 @@ struct ShotCard: View {
     let shot: ShotResult
     /// The landscape side column is short, so show fewer, single-line areas there.
     var compact = false
+    enum Style { case full, scoreOnly }
+    /// `scoreOnly` keeps the score and the weakest area on one row for when the column has no room for more.
+    var style = Style.full
     var body: some View {
+        switch style {
+        case .full: fullCard
+        case .scoreOnly: scoreRow
+        }
+    }
+
+    private var scoreRow: some View {
+        HStack(spacing: 10) {
+            Text("\(shot.score)").font(.title2.bold().monospacedDigit())
+                .foregroundStyle(Theme.color(forScore: shot.score))
+                .accessibilityIdentifier("lastShotScore")
+            Text("form").font(.caption2).foregroundStyle(.secondary)
+            if let worst = shot.areas.max(by: { $0.grade < $1.grade }) {
+                Circle().fill(Theme.color(for: worst.grade)).frame(width: 8, height: 8)
+                Text(worst.area.title).font(.caption.bold())
+                Text(worst.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14).padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("lastShotCard")
+    }
+
+    private var fullCard: some View {
         HStack(spacing: 14) {
             VStack {
                 Text("\(shot.score)").font(.largeTitle.bold().monospacedDigit())
