@@ -84,8 +84,8 @@ extension CameraPoseSource: AVCaptureVideoDataOutputSampleBufferDelegate {
         let w = CGFloat(CVPixelBufferGetWidth(pixelBuffer)), h = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
         let ts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
         guard let joints = detector.joints(in: pixelBuffer) else { return }
-        let frame = PoseFrame(timestamp: ts, joints: joints)
         let ratio = h > 0 ? w / h : aspectRatio
+        let frame = PoseFrame(timestamp: ts, joints: joints, aspect: ratio)
         DispatchQueue.main.async { [weak self] in
             self?.aspectRatio = ratio
             self?.onFrame?(frame)

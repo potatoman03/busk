@@ -38,7 +38,7 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(count.waitForExistence(timeout: 5))
         let twoShots = NSPredicate(format: "label.integerValue >= 2")
         expectation(for: twoShots, evaluatedWith: count)
-        waitForExpectations(timeout: 45)
+        waitForExpectations(timeout: 60)
         XCTAssertTrue(app.staticTexts["lastShotScore"].exists)
         XCTAssertTrue(app.staticTexts["cueBanner"].exists)
         let spoken = app.staticTexts["lastSpokenCue"]

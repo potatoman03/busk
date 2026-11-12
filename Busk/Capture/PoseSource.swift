@@ -33,11 +33,12 @@ final class DemoPoseSource: PoseSource {
     private var styleIndex = 0
     private var wallStart: Date?
 
-    init(handedness: Handedness = .right, styles: [ShotSimulator.Style] = ShotSimulator.Style.demoRotation, gap: Double = 0.8) {
+    init(handedness: Handedness = .right, view: CameraView = .side, styles: [ShotSimulator.Style]? = nil, gap: Double = 0.8) {
         var sim = ShotSimulator()
         sim.handedness = handedness
+        sim.view = view
         simulator = sim
-        self.styles = styles
+        self.styles = styles ?? ShotSimulator.Style.demoRotation(for: view)
         self.gap = gap
     }
 
@@ -65,7 +66,7 @@ final class DemoPoseSource: PoseSource {
         if queue.isEmpty {
             let style = styles[styleIndex % styles.count]
             styleIndex += 1
-            queue = simulator.frames(for: style, start: clock) + simulator.idleFrames(seconds: gap, start: clock + 2.5)
+            queue = simulator.frames(for: style, start: clock) + simulator.idleFrames(seconds: gap, start: clock + 3)
             // Re-time contiguously.
             for i in queue.indices { queue[i].timestamp = clock + Double(i) / simulator.fps }
         }

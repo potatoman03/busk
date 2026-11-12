@@ -29,6 +29,9 @@ jobs:
           xcodegen generate
           git diff --exit-code -- Busk.xcodeproj
 
+      - name: Build busk-analyze (benchmark CLI)
+        run: swift build -c release
+
       - name: Build and run unit + UI tests
         run: |
           mkdir -p build

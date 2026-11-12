@@ -93,7 +93,7 @@ struct SetupFlowView: View {
     private func begin() async {
         let source: PoseSource
         if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
-            source = DemoPoseSource(handedness: handedness)
+            source = DemoPoseSource(handedness: handedness, view: cameraView)
         } else {
             guard await CameraPoseSource.requestAccess() else {
                 cameraDenied = true

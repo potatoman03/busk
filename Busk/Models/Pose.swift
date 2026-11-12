@@ -3,7 +3,7 @@ import Foundation
 
 /// Body joints Busk uses. Coordinates are normalized image space: x right, y down, 0...1.
 enum Joint: String, CaseIterable, Codable, Sendable {
-    case nose, neck
+    case nose, neck, root
     case leftShoulder, rightShoulder
     case leftElbow, rightElbow
     case leftWrist, rightWrist
@@ -41,8 +41,21 @@ enum CameraView: String, CaseIterable, Codable, Identifiable, Sendable {
 struct PoseFrame: Sendable {
     var timestamp: TimeInterval
     var joints: [Joint: CGPoint]
+    /// Image width / height. Analysis multiplies x by this so angles and distances are measured in true proportions.
+    var aspect: CGFloat = 1
 
     subscript(_ joint: Joint) -> CGPoint? { joints[joint] }
+
+    /// Joint position with x scaled by the aspect ratio (units of image height). The root falls back to the hip midpoint.
+    func point(_ joint: Joint) -> CGPoint? {
+        guard let p = joints[joint] ?? (joint == .root ? midpoint(.leftHip, .rightHip) : nil) else { return nil }
+        return CGPoint(x: p.x * aspect, y: p.y)
+    }
+
+    private func midpoint(_ a: Joint, _ b: Joint) -> CGPoint? {
+        guard let p = joints[a], let q = joints[b] else { return joints[a] ?? joints[b] }
+        return CGPoint(x: (p.x + q.x) / 2, y: (p.y + q.y) / 2)
+    }
 }
 
 enum Geometry {

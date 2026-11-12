@@ -36,7 +36,7 @@ struct HomeView: View {
 
                     Card {
                         Text("What Busk coaches").font(.headline)
-                        ForEach([FormArea.elbow, .arc, .releaseHeight, .followThrough], id: \.self) { area in
+                        ForEach([FormArea.setPoint, .elbow, .guideHand, .arc, .releaseTiming, .followThrough], id: \.self) { area in
                             Label {
                                 VStack(alignment: .leading) {
                                     Text(area.title).bold()

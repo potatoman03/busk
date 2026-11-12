@@ -14,6 +14,7 @@ final class VideoPoseSource: PoseSource {
     let isDemo = false
     let url: URL
     private(set) var aspectRatio: CGFloat = 9.0 / 16.0
+    private var poseAspect: CGFloat = 9.0 / 16.0
     /// The frame currently on screen, for drawing behind the skeleton.
     private(set) var currentImage: CGImage?
     private(set) var failed = false
@@ -68,6 +69,7 @@ final class VideoPoseSource: PoseSource {
         let orientation = Self.orientation(for: track.preferredTransform)
         let size = track.naturalSize.applying(track.preferredTransform)
         let ratio = abs(size.width) / max(abs(size.height), 1)
+        poseAspect = ratio
         DispatchQueue.main.async { self.aspectRatio = ratio }
 
         let wallStart = Date()
@@ -82,7 +84,7 @@ final class VideoPoseSource: PoseSource {
                                                 from: CIImage(cvPixelBuffer: pixels).oriented(orientation).extent)
             let wait = t - Date().timeIntervalSince(wallStart)
             if wait > 0 { Thread.sleep(forTimeInterval: wait) }
-            let frame = PoseFrame(timestamp: offset + t, joints: joints)
+            let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect)
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running else { return }
                 self.currentImage = image
@@ -104,7 +106,7 @@ final class VideoPoseSource: PoseSource {
         while running, t <= Self.holdSeconds {
             let wait = clipEnd + t - Date().timeIntervalSince(wallStart)
             if wait > 0 { Thread.sleep(forTimeInterval: wait) }
-            let frame = PoseFrame(timestamp: t0 + t, joints: joints)
+            let frame = PoseFrame(timestamp: t0 + t, joints: joints, aspect: poseAspect)
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running else { return }
                 self.onFrame?(frame)

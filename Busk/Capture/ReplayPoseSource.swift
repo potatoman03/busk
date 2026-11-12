@@ -87,7 +87,7 @@ final class ReplayPoseSource: PoseSource {
             return
         }
         let joints = clip.frames[min(index, clip.frames.count - 1)]
-        onFrame?(PoseFrame(timestamp: Double(index) / clip.fps, joints: joints))
+        onFrame?(PoseFrame(timestamp: Double(index) / clip.fps, joints: joints, aspect: clip.aspectRatio))
         if index < clip.frames.count { framesPlayed = index + 1 }
         index += 1
     }

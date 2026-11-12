@@ -11,7 +11,7 @@ detection (Vision) and speaks feedback on your elbow, arc, release and follow-th
 
 ## Debug launch modes
 
-- `-videoPath /path/clip.mp4`: opens straight into a live session on the clip (it loops). Vision runs on each frame. The iOS Simulator has no body pose model, so there the pose comes from `clip.keypoints.json` next to the clip. Make that file with `swift scripts/vision-keypoints.swift clip.mp4 --view side --handedness right`, which runs Apple Vision on the Mac.
+- `-videoPath /path/clip.mp4`: opens straight into a live session on the clip (it loops). Vision runs on each frame. The iOS Simulator has no body pose model, so there the pose comes from `clip.keypoints.json` next to the clip. Make that file with `swift scripts/vision-keypoints.swift clip.mp4 --view side --handedness right`, which runs Apple Vision on the Mac. `busk-analyze --video clip.mp4 --handedness right --output out.json --save-keypoints clip.keypoints.json` writes the same file with the shooter tracked out of a crowd (and letterbox bars cropped), matching what the analyzer sees.
 - `-replay-keypoints clip.keypoints.json -replay-label ID`: plays a benchmark keypoint clip through a live session.
 - Every spoken cue is logged (`com.potatoman03.busk` subsystem). In the simulator, UI tests and with `-showSpokenCues`, the last cue is also shown on screen (`lastSpokenCue`).
 
@@ -22,4 +22,4 @@ the unit and UI tests on every PR.
 
 ## Shooting feedback benchmark
 
-`benchmark/run.sh` scores busk's form feedback on labeled shots from beginner to elite. See [benchmark/README.md](benchmark/README.md) for the analyzer contract busk must implement.
+`benchmark/run.sh` scores busk's form feedback on labeled shots from beginner to elite. See [benchmark/README.md](benchmark/README.md) for the analyzer contract, which `busk-analyze` implements: `swift build -c release` then `.build/release/busk-analyze --video CLIP.mp4 --handedness right --output out.json`.

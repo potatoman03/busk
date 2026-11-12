@@ -1,22 +1,32 @@
 import CoreGraphics
 import Foundation
 
-/// Raw measurements for one detected jump shot.
+/// Raw measurements for one detected jump shot. Lengths are in body heights; times in seconds.
+/// Optional values are nil when the camera angle or the visible joints can't show them.
 struct ShotMetrics: Codable, Equatable, Sendable {
-    /// Tightest elbow angle while loading the ball (degrees).
-    var setElbowAngle: Double
-    /// Horizontal elbow-to-wrist offset at the set point, as a fraction of forearm length. 0 = elbow straight under the ball.
-    var elbowOffset: Double
-    /// Most extended elbow angle around release (degrees). 180 = locked out.
-    var releaseElbowAngle: Double
-    /// Wrist height above the nose at release, in torso lengths.
-    var releaseHeight: Double
-    /// Shoulder-to-wrist elevation at release in degrees above horizontal; proxy for launch arc. Side view only.
-    var releaseAngle: Double?
-    /// Seconds the shooting hand stayed up near its peak after release.
+    /// Nil when the camera angle is unknown: only checks that work from any angle are measured.
+    var view: CameraView?
+    /// Shooting wrist height above the shooting shoulder at the set point. Negative = pushing from the chest.
+    var setPointHeight: Double
+    /// Front view: sideways elbow-to-wrist offset at the set point. 0 = elbow straight under the ball.
+    var elbowFlare: Double?
+    /// Side view: shoulder-to-wrist elevation at release, degrees above horizontal.
+    var armAngle: Double?
+    /// Time the shooting hand stayed above the head after release.
     var followThrough: Double
-    /// Tightest knee angle during the dip (degrees), if legs were visible.
-    var kneeAngle: Double?
+    /// How far the hips sank toward the ankles in the dip.
+    var legDrive: Double?
+    /// Release time relative to the jump's peak, in half air-times: 0 = at the peak, 1 = on landing. Nil without a jump.
+    var releaseTiming: Double?
+    /// Time the ball stopped at the set point before the release.
+    var hitch: Double
+    /// Distance between the takeoff and landing spots.
+    var drift: Double?
+    /// Front view: guide hand travel just after release.
+    var guideHandPush: Double?
+
+    /// Estimated launch angle: the ball leaves about 20° flatter than the arm points.
+    var launchAngle: Double? { armAngle.map { $0 - 20 } }
 }
 
 enum ShotPhase: String, Sendable {
@@ -26,40 +36,31 @@ enum ShotPhase: String, Sendable {
     case recovering = "Reset"
 }
 
-/// Turns a stream of pose frames into detected shots.
+/// Turns a stream of pose frames into detected shots. Each shot is measured over the whole
+/// buffered motion (dip, set, release, follow-through and landing) once it has finished.
 final class ShotAnalyzer {
     struct Config {
+        var releaseMinElbowAngle: Double = 140
         var gatherMaxElbowAngle: Double = 130
-        var releaseMinElbowAngle: Double = 150
-        var maxGatherDuration: TimeInterval = 2.5
-        var releaseWindow: TimeInterval = 0.25
+        /// Seconds of motion kept before the release.
+        var lookback: TimeInterval = 2.0
+        /// Seconds after the release before the shot is measured (lets the landing happen).
+        var settle: TimeInterval = 0.9
         var maxFollowThrough: TimeInterval = 1.5
-        var dipLookback: TimeInterval = 1.2
-        /// How far (degrees about the shoulder) the arm may drop from its peak and still count as holding the follow-through.
-        var holdDropDegrees: Double = 10
-        var peakToleranceDegrees: Double = 3
+        /// Wrist speed (body heights / s) below which the ball counts as stopped.
+        var pauseSpeed: Double = 0.08
     }
 
     let handedness: Handedness
-    let view: CameraView
+    let view: CameraView?
     var config = Config()
 
     private(set) var phase: ShotPhase = .waiting
-
     private var history: [PoseFrame] = []
-    private var gatherStart: TimeInterval = 0
-    private var setElbowAngle = Double.infinity
-    private var setElbowOffset = 0.0
-    private var setElbowLifted = false
-    private var setElbowOffsetAngle = Double.infinity
-    private var minKnee: Double?
-    private var releaseTime: TimeInterval = 0
-    private var releaseElbow = 0.0
-    private var releaseHeight = -Double.infinity
-    private var releaseAngle: Double?
-    private var holdSamples: [(t: TimeInterval, elevation: Double, aboveHead: Bool)] = []
+    private var releaseTime: TimeInterval?
+    private var armDropped = false
 
-    init(handedness: Handedness, view: CameraView) {
+    init(handedness: Handedness, view: CameraView?) {
         self.handedness = handedness
         self.view = view
     }
@@ -67,113 +68,164 @@ final class ShotAnalyzer {
     func reset() {
         phase = .waiting
         history.removeAll()
+        releaseTime = nil
     }
 
     /// Feeds one frame; returns metrics when a shot completes.
     func process(_ frame: PoseFrame) -> ShotMetrics? {
-        guard let s = frame[handedness.shoulder], let e = frame[handedness.elbow], let w = frame[handedness.wrist],
-              let head = frame[.nose] ?? frame[.neck] else { return nil }
-
         history.append(frame)
-        history.removeAll { frame.timestamp - $0.timestamp > config.dipLookback + config.maxGatherDuration }
-
         let t = frame.timestamp
+        history.removeAll { t - $0.timestamp > config.lookback + config.maxFollowThrough + 0.5 }
+        let s = frame.point(handedness.shoulder), w = frame.point(handedness.wrist)
+        if let rt = releaseTime {
+            if let s, let w, w.y > s.y { armDropped = true }
+            guard t - rt >= config.maxFollowThrough || (armDropped && t - rt >= config.settle) else { return nil }
+            releaseTime = nil
+            phase = armDropped ? .waiting : .recovering
+            return measure(release: rt)
+        }
+        guard let s, let w, let e = frame.point(handedness.elbow), let head = frame.point(.nose) ?? frame.point(.neck) else { return nil }
         let elbowAngle = Geometry.angle(s, e, w)
-        let wristAboveShoulder = w.y < s.y
-        let wristAboveHead = w.y < head.y
-
         switch phase {
-        case .waiting:
-            if wristAboveShoulder && elbowAngle < config.gatherMaxElbowAngle {
-                phase = .gathering
-                gatherStart = t
-                setElbowAngle = .infinity
-                setElbowLifted = false
-                setElbowOffsetAngle = .infinity
-                minKnee = kneeAngle(in: history.filter { t - $0.timestamp <= config.dipLookback })
-                trackGather(elbowAngle: elbowAngle, shoulder: s, elbow: e, wrist: w, frame: frame)
-            }
-        case .gathering:
-            trackGather(elbowAngle: elbowAngle, shoulder: s, elbow: e, wrist: w, frame: frame)
-            if elbowAngle >= config.releaseMinElbowAngle && wristAboveHead {
+        case .waiting, .gathering:
+            if w.y < head.y && elbowAngle >= config.releaseMinElbowAngle && phase == .gathering {
                 phase = .followThrough
                 releaseTime = t
-                releaseElbow = elbowAngle
-                releaseHeight = -.infinity
-                releaseAngle = nil
-                holdSamples = [(t, Geometry.elevation(from: s, to: w), wristAboveHead)]
-                trackRelease(elbowAngle: elbowAngle, shoulder: s, wrist: w, head: head, frame: frame)
-            } else if t - gatherStart > config.maxGatherDuration || !wristAboveShoulder && elbowAngle > config.gatherMaxElbowAngle {
+                armDropped = false
+            } else if elbowAngle < config.gatherMaxElbowAngle, let hip = frame.point(handedness.hip), w.y < (s.y + hip.y) / 2 {
+                phase = .gathering
+            } else if phase == .gathering, w.y > (frame.point(handedness.hip)?.y ?? 1) {
                 phase = .waiting
             }
         case .followThrough:
-            if t - releaseTime <= config.releaseWindow {
-                trackRelease(elbowAngle: elbowAngle, shoulder: s, wrist: w, head: head, frame: frame)
-            }
-            holdSamples.append((t, Geometry.elevation(from: s, to: w), wristAboveHead))
-            if !wristAboveShoulder || t - releaseTime >= config.maxFollowThrough {
-                phase = wristAboveShoulder ? .recovering : .waiting
-                return ShotMetrics(
-                    setElbowAngle: setElbowAngle,
-                    elbowOffset: setElbowOffset,
-                    releaseElbowAngle: releaseElbow,
-                    releaseHeight: releaseHeight,
-                    releaseAngle: releaseAngle,
-                    followThrough: holdDuration(),
-                    kneeAngle: minKnee
-                )
-            }
+            break
         case .recovering:
-            if !wristAboveShoulder { phase = .waiting }
+            if w.y > s.y { phase = .waiting }
         }
         return nil
     }
 
-    private func trackGather(elbowAngle: Double, shoulder: CGPoint, elbow: CGPoint, wrist: CGPoint, frame: PoseFrame) {
-        if let k = kneeAngle(in: [frame]) { minKnee = min(minKnee ?? k, k) }
-        setElbowAngle = min(setElbowAngle, elbowAngle)
-        // Set point: the most loaded arm once the elbow has lifted to shoulder height.
-        let lifted = elbow.y <= shoulder.y
-        if lifted && !setElbowLifted {
-            setElbowLifted = true
-            setElbowOffsetAngle = .infinity
+    // MARK: - Measurement
+
+    private struct Sample {
+        var t: TimeInterval
+        var shoulder: CGPoint, elbow: CGPoint, wrist: CGPoint, head: CGPoint
+        var guide: CGPoint?, root: CGPoint?, ankle: CGPoint?
+        var span: Double? // nose-to-ankle height
+    }
+
+    private func measure(release rt: TimeInterval) -> ShotMetrics? {
+        let guideSide: Handedness = handedness == .right ? .left : .right
+        let samples: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
+            guard let s = f.point(handedness.shoulder), let e = f.point(handedness.elbow), let w = f.point(handedness.wrist),
+                  let head = f.point(.nose) ?? f.point(.neck) else { return nil }
+            let ankles = [f.point(.leftAnkle), f.point(.rightAnkle)].compactMap { $0 }
+            let ankle = ankles.isEmpty ? nil : CGPoint(x: ankles.map(\.x).reduce(0, +) / CGFloat(ankles.count),
+                                                       y: ankles.map(\.y).reduce(0, +) / CGFloat(ankles.count))
+            return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist),
+                          root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) })
         }
-        guard lifted == setElbowLifted, elbowAngle < setElbowOffsetAngle else { return }
-        setElbowOffsetAngle = elbowAngle
-        let forearm = max(Geometry.distance(elbow, wrist), 0.0001)
-        setElbowOffset = Double(abs(elbow.x - wrist.x)) / forearm
-    }
+        guard samples.count >= 8 else { return nil }
+        let n = samples.count
+        let dt = max((samples[n - 1].t - samples[0].t) / Double(n - 1), 1.0 / 120)
 
-    private func trackRelease(elbowAngle: Double, shoulder: CGPoint, wrist: CGPoint, head: CGPoint, frame: PoseFrame) {
-        releaseElbow = max(releaseElbow, elbowAngle)
-        let torso = torsoLength(frame) ?? 0.22
-        let height = Double(head.y - wrist.y) / torso
-        if height > releaseHeight {
-            releaseHeight = height
-            if view == .side { releaseAngle = Geometry.elevation(from: shoulder, to: wrist) }
+        // Body height: nose-to-ankle is ~87% of standing height. Fall back to the torso when the feet are out of frame.
+        let spans = samples.compactMap(\.span)
+        let height: Double
+        if spans.count >= n / 2, let tall = spans.sorted().dropFirst(spans.count / 10).last {
+            height = tall / 0.87
+        } else {
+            let t = samples.compactMap { s in s.root.map { Double(abs($0.y - s.shoulder.y)) } }.sorted()
+            height = (t.isEmpty ? 0.25 : t[t.count / 2]) / 0.29
         }
-    }
+        let H = max(height, 0.05)
 
-    /// Time the arm stayed up at its finish: from reaching the peak to dropping away from it.
-    private func holdDuration() -> Double {
-        guard let peak = holdSamples.map(\.elevation).max(),
-              let start = holdSamples.firstIndex(where: { $0.elevation >= peak - config.peakToleranceDegrees }) else { return 0 }
-        var end = start
-        while end + 1 < holdSamples.count, holdSamples[end + 1].aboveHead,
-              holdSamples[end + 1].elevation >= peak - config.holdDropDegrees { end += 1 }
-        return holdSamples[end].t - holdSamples[start].t
-    }
+        // Release: the first frame the shooting wrist reaches the top of its extension.
+        // The trigger can fire early (from the front, a bent arm can look straight), so look ahead for the real top.
+        let around = samples.indices.filter { samples[$0].t >= rt - 0.3 && samples[$0].t <= rt + 0.6 }
+        let lift = { (i: Int) in Double(samples[i].shoulder.y - samples[i].wrist.y) / H }
+        let peak = around.map(lift).max() ?? 0
+        let rel = around.first { lift($0) >= peak - 0.02 } ?? (samples.firstIndex { $0.t >= rt } ?? n / 2)
 
-    private func torsoLength(_ frame: PoseFrame) -> Double? {
-        guard let s = frame[handedness.shoulder], let h = frame[handedness.hip] else { return nil }
-        let d = Geometry.distance(s, h)
-        return d > 0.01 ? d : nil
-    }
+        // Wrist speed relative to the shoulder, in body heights per second.
+        var speed = [Double](repeating: 9, count: n)
+        for i in 1..<(n - 1) {
+            let a = samples[i - 1], b = samples[i + 1]
+            let dx = Double((b.wrist.x - b.shoulder.x) - (a.wrist.x - a.shoulder.x))
+            let dy = Double((b.wrist.y - b.shoulder.y) - (a.wrist.y - a.shoulder.y))
+            speed[i] = hypot(dx, dy) / H / (2 * dt)
+        }
 
-    private func kneeAngle(in frames: [PoseFrame]) -> Double? {
-        frames.compactMap { f -> Double? in
-            guard let h = f[handedness.hip], let k = f[handedness.knee], let a = f[handedness.ankle] else { return nil }
-            return Geometry.angle(h, k, a)
-        }.min()
+        // Set point: walk back from the fastest moment of the release push to where the ball last stopped.
+        let lo = max(1, rel - Int(0.8 / dt))
+        let pushStart = max(lo, rel - Int(0.27 / dt))
+        var setIdx = (pushStart..<max(pushStart + 1, rel)).max { speed[$0] < speed[$1] } ?? max(lo, rel - 1)
+        while setIdx > lo && speed[setIdx - 1] <= speed[setIdx] { setIdx -= 1 }
+        var a = setIdx, b = setIdx
+        while a > lo && speed[a - 1] < config.pauseSpeed { a -= 1 }
+        while b < rel - 1 && speed[b + 1] < config.pauseSpeed { b += 1 }
+        let hitch = speed[setIdx] < config.pauseSpeed ? Double(b - a + 1) * dt : 0
+        let set = samples[setIdx]
+        let setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
+
+        let elbowFlare = view == .front ? Double(abs(set.elbow.x - set.wrist.x)) / H : nil
+
+        var armAngle: Double?
+        if view == .side {
+            armAngle = (max(0, rel - 2)...min(n - 1, rel + 3)).map { Geometry.elevation(from: samples[$0].shoulder, to: samples[$0].wrist) }.max()
+        }
+
+        // Follow-through lasts until the shooting hand is first seen back below the head (frames Vision missed don't end it).
+        let follow = Array(samples[rel...])
+        let dropped = follow.indices.first { i in
+            i + 1 < follow.count && follow[i].wrist.y >= follow[i].head.y && follow[i + 1].wrist.y >= follow[i + 1].head.y
+                && follow[i].t - samples[rel].t <= 1.0
+        }.map { follow[$0] }
+        // If the hand is never seen coming down (the person was lost from view), the finish isn't judged as short.
+        let followThrough = min(1.0, (dropped?.t ?? .infinity) - samples[rel].t)
+
+        // Legs: how far the hips sink toward the ankles before the release.
+        var legDrive: Double?
+        let legs = samples[..<rel].compactMap { s -> Double? in
+            guard let r = s.root, let k = s.ankle else { return nil }
+            return Double(k.y - r.y) / H
+        }
+        if legs.count >= 5, let hi = legs.max(), let low = legs.min() { legDrive = hi - low }
+
+        // Jump: frames where the feet are clearly off the floor. Timing and drift are only judged on a real jump.
+        var releaseTiming: Double?
+        var drift: Double?
+        let feet = samples.map { s in s.ankle.map { -Double($0.y) / H } }
+        let known = feet.indices.filter { feet[$0] != nil }
+        if let firstFoot = known.first, let lastFoot = known.last,
+           let top = known.max(by: { feet[$0]! < feet[$1]! }), feet[top]! > feet[firstFoot]! + 0.012 {
+            let floor0 = feet[firstFoot]!, floor1 = feet[lastFoot]!
+            var s0 = top, s1 = top
+            while s0 > 0, let f = feet[s0 - 1], f > floor0 + 0.012 { s0 -= 1 }
+            while s1 < n - 1, let f = feet[s1 + 1], f > floor1 + 0.012 { s1 += 1 }
+            let air = s1 - s0 + 1
+            if air >= 3, rel >= s0 - 2, rel <= s1 + 2 {
+                releaseTiming = Double(rel - top) / (Double(air) / 2)
+                let takeoff = samples[..<s0].last { $0.ankle != nil } ?? samples[firstFoot]
+                let settled = samples.last { $0.ankle != nil && $0.t <= samples[s1].t + 0.6 } ?? samples[lastFoot]
+                if let a0 = takeoff.ankle, let a1 = settled.ankle {
+                    var d = Double(abs(a1.x - a0.x)) / H
+                    if view == .front, let h0 = takeoff.span, let h1 = settled.span, h1 > 0 {
+                        d = max(d, abs(1 - h0 / h1) * 3.1) // getting bigger or smaller = moving toward or away from the camera
+                    }
+                    drift = d
+                }
+            }
+        }
+
+        var guideHandPush: Double?
+        if view == .front, rel + 4 < n, let g0 = samples[rel].guide, let g1 = samples[rel + 4].guide,
+           let r0 = samples[rel].root, let r1 = samples[rel + 4].root {
+            guideHandPush = hypot(Double((g1.x - g0.x) - (r1.x - r0.x)), Double((g1.y - g0.y) - (r1.y - r0.y))) / H
+        }
+
+        return ShotMetrics(view: view, setPointHeight: setPointHeight, elbowFlare: elbowFlare, armAngle: armAngle,
+                           followThrough: followThrough, legDrive: legDrive, releaseTiming: releaseTiming,
+                           hitch: hitch, drift: drift, guideHandPush: guideHandPush)
     }
 }
