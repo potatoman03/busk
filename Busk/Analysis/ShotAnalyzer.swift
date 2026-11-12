@@ -40,7 +40,7 @@ enum ShotPhase: String, Sendable {
 /// buffered motion (dip, set, release, follow-through and landing) once it has finished.
 final class ShotAnalyzer {
     struct Config {
-        var releaseMinElbowAngle: Double = 140
+        var releaseMinElbowAngle: Double = 130
         var gatherMaxElbowAngle: Double = 130
         /// Seconds of motion kept before the release.
         var lookback: TimeInterval = 2.0
@@ -49,6 +49,8 @@ final class ShotAnalyzer {
         var maxFollowThrough: TimeInterval = 1.5
         /// Wrist speed (body heights / s) below which the ball counts as stopped.
         var pauseSpeed: Double = 0.08
+        /// How far (body heights) the hand can wander and still count as stopped at the set point.
+        var pauseRadius: Double = 0.02
     }
 
     let handedness: Handedness
@@ -183,9 +185,13 @@ final class ShotAnalyzer {
             while setIdx > lo && speed[setIdx - 1] <= speed[setIdx] { setIdx -= 1 }
             if setIdx <= lo || speed[setIdx] < pushSpeed * 0.5 { break }
         }
+        // The pause lasts as long as the hand stays put next to the shoulder (a radius, not a speed, so pose jitter
+        // during a long hold doesn't cut it short).
+        let hand = { (i: Int) in CGPoint(x: samples[i].wrist.x - samples[i].shoulder.x, y: samples[i].wrist.y - samples[i].shoulder.y) }
+        let still = { (i: Int) in Double(hypot(hand(i).x - hand(setIdx).x, hand(i).y - hand(setIdx).y)) / H < self.config.pauseRadius }
         var a = setIdx, b = setIdx
-        while a > lo && speed[a - 1] < config.pauseSpeed { a -= 1 }
-        while b < rel - 1 && speed[b + 1] < config.pauseSpeed { b += 1 }
+        while a > lo && still(a - 1) { a -= 1 }
+        while b < rel - 1 && still(b + 1) { b += 1 }
         let hitch = speed[setIdx] < config.pauseSpeed ? Double(b - a + 1) * dt : 0
         let set = samples[setIdx]
         let setPointHeight = Double(set.shoulder.y - set.wrist.y) / H

@@ -111,7 +111,7 @@ struct FormEvaluator {
         var setPoint = Limit(ok: 0.06, bad: 0.0)
         var releaseTiming = Limit(ok: 0.20, bad: 0.33)
         var drift = Limit(ok: 0.11, bad: 0.16)
-        var hitch = Limit(ok: 0.10, bad: 0.15)
+        var hitch = Limit(ok: 0.22, bad: 0.30)
         var elbow = Limit(ok: 0.05, bad: 0.07)
         var guideHand = Limit(ok: 0.025, bad: 0.035)
         var armAngle = Limit(ok: 64, bad: 59)
