@@ -121,7 +121,7 @@ final class ShotAnalyzer {
             return r.x - l.x
         }
         let usual = view == .front ? history.compactMap(order).reduce(0) { $0 + ($1 > 0 ? 1 : -1) } : 0
-        let samples: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
+        let all: [Sample] = history.filter { $0.timestamp >= rt - config.lookback }.compactMap { f in
             let flipped = usual != 0 && order(f).map { ($0 > 0) != (usual > 0) } == true
             let hand: Handedness = flipped ? (handedness == .right ? .left : .right) : handedness
             let guideSide: Handedness = hand == .right ? .left : .right
@@ -133,9 +133,14 @@ final class ShotAnalyzer {
             return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist), guideShoulder: f.point(guideSide.shoulder),
                           root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) })
         }
+        // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
+        // would otherwise mix in a pose from somewhere else).
+        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.3 && all[$0].t <= rt } ?? 0
+        let samples = Array(all[cut...])
         guard samples.count >= 8 else { return nil }
         let n = samples.count
-        let dt = max((samples[n - 1].t - samples[0].t) / Double(n - 1), 1.0 / 120)
+        let gaps = zip(samples.dropFirst(), samples).map { $0.t - $1.t }.sorted()
+        let dt = max(gaps[gaps.count / 2], 1.0 / 120)
 
         // Body height: nose-to-ankle is ~87% of standing height. Fall back to the torso when the feet are out of frame.
         let spans = samples.compactMap(\.span)

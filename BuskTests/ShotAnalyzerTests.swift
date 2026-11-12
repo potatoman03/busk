@@ -102,6 +102,23 @@ final class ShotAnalyzerTests: XCTestCase {
         XCTAssertTrue(frames.compactMap { analyzer.process($0) }.isEmpty)
     }
 
+    func testLoopedClipMeasuresTheSameEachTime() {
+        let sim = ShotSimulator()
+        let analyzer = ShotAnalyzer(handedness: .right, view: .front)
+        let shot = sim.frames(for: .good, start: 0)
+        let still = Array(repeating: shot.last!, count: 45)
+        var frames: [PoseFrame] = []
+        var offset = 0.0
+        for _ in 0..<3 {
+            for (i, f) in (shot + still).enumerated() { var f = f; f.timestamp = offset + Double(i) / sim.fps; frames.append(f) }
+            offset = frames.last!.timestamp + 1
+        }
+        let shots = frames.compactMap { analyzer.process($0) }
+        XCTAssertEqual(shots.count, 3)
+        XCTAssertEqual(Set(shots.map { $0.elbowFlare }).count, 1)
+        XCTAssertEqual(Set(shots.map { $0.setPointHeight }).count, 1)
+    }
+
     func testConsecutiveShots() {
         let sim = ShotSimulator()
         let analyzer = ShotAnalyzer(handedness: .right, view: .side)
