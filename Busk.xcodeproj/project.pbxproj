@@ -25,6 +25,7 @@
 		5C55C0F6B56C5440C313EA0B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */; };
 		67C875A227B99B5FB958B794 /* GhostReplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724B42E247B1A97CCCC019EB /* GhostReplayView.swift */; };
 		682FB2EAA8A3546C6D4DFB78 /* ShotReplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4596C5E53E132A0036E46BF /* ShotReplay.swift */; };
+		6AA1EBA7C20D24F1989E25CD /* ShotDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC5608745B752F23ED3D60E7 /* ShotDetailView.swift */; };
 		6EADCFDB1FA1C35165DE78D8 /* ShooterTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C546EF77059F8216B42B15C /* ShooterTracker.swift */; };
 		7BAFAFED8EF0B38E5F6B7FB5 /* SkeletonOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4259846F864FD15E04404A69 /* SkeletonOverlay.swift */; };
 		7BCB8D86A49B61B9C1598F59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F85A461764938FFD9187B340 /* Assets.xcassets */; };
@@ -106,6 +107,7 @@
 		C01FBEF0E8E1F703F6D1250D /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		C387F68209C9B4B01916BED0 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		C3B912433003821C359BC2EC /* BuskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuskApp.swift; sourceTree = "<group>"; };
+		CC5608745B752F23ED3D60E7 /* ShotDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotDetailView.swift; sourceTree = "<group>"; };
 		CEF434FA39404A1A61C286B7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DAF5D4BBAA797440073B1B52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				86DA3443491BD21A4E263EC6 /* ReplaySessionView.swift */,
 				CEF434FA39404A1A61C286B7 /* SettingsView.swift */,
 				689250600A941C98DB79ADF2 /* SetupFlowView.swift */,
+				CC5608745B752F23ED3D60E7 /* ShotDetailView.swift */,
 				4259846F864FD15E04404A69 /* SkeletonOverlay.swift */,
 				98E1C4F5960C2298FC8F9AB6 /* SummaryView.swift */,
 				BC39FDBCC4809B51848A0D15 /* Theme.swift */,
@@ -423,6 +426,7 @@
 				B4834B5098CF91645F875D68 /* SetupFlowView.swift in Sources */,
 				6EADCFDB1FA1C35165DE78D8 /* ShooterTracker.swift in Sources */,
 				E516177751EAF6EF7CC06C49 /* ShotAnalyzer.swift in Sources */,
+				6AA1EBA7C20D24F1989E25CD /* ShotDetailView.swift in Sources */,
 				682FB2EAA8A3546C6D4DFB78 /* ShotReplay.swift in Sources */,
 				D0C8D0AF644FD8E86E423B6D /* ShotSimulator.swift in Sources */,
 				7BAFAFED8EF0B38E5F6B7FB5 /* SkeletonOverlay.swift in Sources */,

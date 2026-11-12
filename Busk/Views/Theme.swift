@@ -27,3 +27,11 @@ struct Card<Content: View>: View {
             .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
+
+extension View {
+    /// Scrolled content never shows through the title bar.
+    func opaqueNavigationBar() -> some View {
+        toolbarBackground(Color(red: 0.16, green: 0.08, blue: 0.04), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+    }
+}
