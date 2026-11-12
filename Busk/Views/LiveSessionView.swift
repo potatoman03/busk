@@ -111,16 +111,16 @@ struct LiveSessionView: View {
     }
 
     @ViewBuilder private func feedback(compact: Bool) -> some View {
-        if compact {
-            // The landscape column is short: when a long cue doesn't leave room, drop the spoken-cue log, then the
-            // form card, so the cue and the voice buttons stay whole.
+        if compact, let voice, voice.state != .off {
+            // The landscape column is short: when a long cue leaves no room for the voice bar, drop the spoken-cue
+            // log, then the form card, so the cue and the voice buttons stay whole.
             ViewThatFits(in: .vertical) {
                 feedbackStack(compact: true, cueLog: true, card: true)
                 feedbackStack(compact: true, cueLog: false, card: true)
                 feedbackStack(compact: true, cueLog: false, card: false)
             }
         } else {
-            feedbackStack(compact: false, cueLog: true, card: true)
+            feedbackStack(compact: compact, cueLog: true, card: true)
         }
     }
 
