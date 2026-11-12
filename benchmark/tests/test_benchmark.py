@@ -12,6 +12,7 @@ from busk_bench.cli import compare_docs  # noqa: E402
 from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
+from busk_bench.visual import pick_device  # noqa: E402
 
 TAX = load_taxonomy()
 CLIPS, _, _ = load_clips(TAX)
@@ -172,3 +173,27 @@ class RealTier(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SimulatorPick(unittest.TestCase):
+    A = {"udid": "A", "name": "iPhone 17"}
+    B = {"udid": "B", "name": "iPhone 17 Pro"}
+
+    def test_prefers_the_simulator_running_busk(self):
+        self.assertEqual(pick_device([self.A, self.B], "booted", {"B": True}), ("B", None))
+
+    def test_single_booted_simulator(self):
+        self.assertEqual(pick_device([self.A], "booted", {}), ("A", None))
+
+    def test_ambiguous_without_busk_is_an_error(self):
+        udid, err = pick_device([self.A, self.B], "booted", {})
+        self.assertIsNone(udid)
+        self.assertIn("--simulator", err)
+
+    def test_explicit_device_by_name_or_udid(self):
+        self.assertEqual(pick_device([self.A, self.B], "iPhone 17 Pro", {}), ("B", None))
+        self.assertEqual(pick_device([self.A, self.B], "A", {}), ("A", None))
+        self.assertIsNotNone(pick_device([self.A], "C", {})[1])
+
+    def test_nothing_booted(self):
+        self.assertIsNotNone(pick_device([], "booted", {})[1])

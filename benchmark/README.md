@@ -138,6 +138,11 @@ running in a booted simulator, add `--capture-simulator --require-visuals`. The 
 `results/visual/simulator.mp4` and takes one screenshot per clip, and lists their paths under
 `run.visual_evidence` and in each clip's `screenshot`. Attach them to the PR or report.
 
+The capture records the booted simulator that is running busk (`com.potatoman03.busk`), so a second
+booted device doesn't get recorded by mistake; `--simulator NAME|UDID` picks one explicitly. With
+`--require-visuals` the run exits 3 if busk isn't running there for the whole recording. In the simulator
+busk uses its demo shooter, so start a demo session (Start shooting, then Start demo session) before the run.
+
 ## Limits
 
 * The clips are synthetic. They test the coaching logic exactly and repeatably, not robustness to real
