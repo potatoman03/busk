@@ -60,6 +60,22 @@ struct VoiceControlBar: View {
     }
 }
 
+/// The voice bar docked under a scrolling screen, on an opaque strip so the content never shows through it.
+struct VoiceDock: View {
+    @Environment(VoiceControl.self) private var voice: VoiceControl?
+    let commands: [VoiceCommand]
+
+    var body: some View {
+        if let voice, voice.state != .off {
+            VoiceControlBar(commands: commands)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 10).padding(.bottom, 4)
+                .background(Color(red: 0.03, green: 0.015, blue: 0.01).ignoresSafeArea(edges: .bottom))
+                .overlay(alignment: .top) { Divider() }
+        }
+    }
+}
+
 private extension String {
     var capitalizedFirst: String { prefix(1).uppercased() + dropFirst() }
 }
