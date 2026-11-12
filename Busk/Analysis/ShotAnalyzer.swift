@@ -118,11 +118,17 @@ final class ShotAnalyzer {
 
     // MARK: - Measurement
 
+    /// How far the ball's centre sits above the shooting hand under it, in body heights (a ball's radius), so a set
+    /// point measured from the ball reads on the same scale as one measured from the wrist.
+    static let ballAboveHand = 0.06
+
     private struct Sample {
         var t: TimeInterval
         var shoulder: CGPoint, elbow: CGPoint, wrist: CGPoint, head: CGPoint
         var guide: CGPoint?, guideShoulder: CGPoint?, root: CGPoint?, ankle: CGPoint?
         var span: Double? // nose-to-ankle height
+        /// Ball centre, only while it is in the shooting hand.
+        var ball: CGPoint?
     }
 
     private func measure(release rt: TimeInterval) -> ShotMetrics? {
@@ -146,8 +152,10 @@ final class ShotAnalyzer {
             let ankles = [f.point(.leftAnkle), f.point(.rightAnkle)].compactMap { $0 }
             let ankle = ankles.isEmpty ? nil : CGPoint(x: ankles.map(\.x).reduce(0, +) / CGFloat(ankles.count),
                                                        y: ankles.map(\.y).reduce(0, +) / CGFloat(ankles.count))
+            // In the hand: the wrist sits against the ball, within a ball's width of its centre.
+            let ball = f.ballPoint.flatMap { b in f.ball.map { Geometry.distance(b, w) <= 2.5 * max($0.radius, 0.01) } == true ? b : nil }
             return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist), guideShoulder: f.point(guideSide.shoulder),
-                          root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) })
+                          root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) }, ball: ball)
         }
         let all = window.compactMap { sample($0, keepArm: false) }
         // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
@@ -221,17 +229,38 @@ final class ShotAnalyzer {
         }
         let set = samples[setIdx]
         var setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
+        var setFrame = setIdx
+        let bend = { (i: Int) in Geometry.angle(samples[i].shoulder, samples[i].elbow, samples[i].wrist) }
         if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 || speed[setIdx] > 0.5 {
             // From the front, a ball carried up toward the camera without stopping hides the set point, so the slowest
             // frame is the bottom of the dip, or a hand that only slowed on the way up (still moving half a body height a
             // second) in a one-motion shot. The ball is loaded where the elbow bends most with the wrist above it,
             // once the forearm is within 45° of upright: tipped further, it is still turning over on the way up.
-            let bend = { (i: Int) in Geometry.angle(samples[i].shoulder, samples[i].elbow, samples[i].wrist) }
             let above = (setIdx..<rel).filter { samples[$0].wrist.y < samples[$0].elbow.y }
             let upright = above.filter { abs(samples[$0].elbow.x - samples[$0].wrist.x) <= samples[$0].elbow.y - samples[$0].wrist.y }
-            if let loaded = (upright.isEmpty ? above : upright).min(by: { bend($0) < bend($1) }) {
-                setPointHeight = max(setPointHeight, lift(loaded))
+            if let loaded = (upright.isEmpty ? above : upright).min(by: { bend($0) < bend($1) }), lift(loaded) > setPointHeight {
+                setPointHeight = lift(loaded)
+                setFrame = loaded
             }
+        }
+        // Judged by the ball itself when it is seen in the hand: the wrist is beside or under it, and the hand alone
+        // reads the same at the shoulders whether the ball is in front of the chin or the chest. A hand that never stays
+        // put for a tenth of a second at the slowest frame only slowed passing through: in that one-motion shot the
+        // ball is set where the push starts, at the tightest elbow bend before the release.
+        let ballLift = { (i: Int) in samples[i].ball.map { Double(samples[i].shoulder.y - $0.y) / H - Self.ballAboveHand } }
+        let atSet = [setFrame, setFrame - 1, setFrame + 1, setFrame - 2, setFrame + 2].first { $0 >= 0 && $0 < rel && samples[$0].ball != nil }
+        let still = { (i: Int) in Double(hypot(hand(i).x - hand(setIdx).x, hand(i).y - hand(setIdx).y)) / H < self.config.pauseRadius }
+        var first = setIdx, last = setIdx
+        while first > lo && still(first - 1) { first -= 1 }
+        while last + 1 < rel && still(last + 1) { last += 1 }
+        var loaded: Int?
+        if Double(last - first + 1) * dt < 0.09 {
+            let held = (setIdx..<rel).filter { samples[$0].ball != nil && samples[$0].wrist.y < samples[$0].elbow.y }
+            let upright = held.filter { abs(samples[$0].elbow.x - samples[$0].wrist.x) <= samples[$0].elbow.y - samples[$0].wrist.y }
+            loaded = (upright.isEmpty ? held : upright).min { bend($0) < bend($1) }
+        }
+        if let height = [atSet, loaded].compactMap({ $0.flatMap(ballLift) }).max() {
+            setPointHeight = height
         }
 
         // Elbow: sideways elbow-to-wrist offset over the third of a second before the release (the median, so one

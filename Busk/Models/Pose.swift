@@ -38,11 +38,19 @@ enum CameraView: String, CaseIterable, Codable, Identifiable, Sendable {
     }
 }
 
+/// The basketball as seen in one frame: centre in the same normalized, top-left-origin coordinates as the joints,
+/// radius in image heights.
+struct Ball: Sendable, Equatable {
+    var center: CGPoint
+    var radius: CGFloat
+}
+
 struct PoseFrame: Sendable {
     var timestamp: TimeInterval
     var joints: [Joint: CGPoint]
     /// Image width / height. Analysis multiplies x by this so angles and distances are measured in true proportions.
     var aspect: CGFloat = 1
+    var ball: Ball?
 
     subscript(_ joint: Joint) -> CGPoint? { joints[joint] }
 
@@ -51,6 +59,9 @@ struct PoseFrame: Sendable {
         guard let p = joints[joint] ?? (joint == .root ? midpoint(.leftHip, .rightHip) : nil) else { return nil }
         return CGPoint(x: p.x * aspect, y: p.y)
     }
+
+    /// Ball centre with x scaled by the aspect ratio, like `point(_:)`.
+    var ballPoint: CGPoint? { ball.map { CGPoint(x: $0.center.x * aspect, y: $0.center.y) } }
 
     private func midpoint(_ a: Joint, _ b: Joint) -> CGPoint? {
         guard let p = joints[a], let q = joints[b] else { return joints[a] ?? joints[b] }

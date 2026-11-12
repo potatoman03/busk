@@ -7,6 +7,7 @@ import Vision
 final class VisionPoseDetector {
     private let request = VNDetectHumanBodyPoseRequest()
     private let tracker = ShooterTracker()
+    private let ballDetector = BallDetector()
     var minimumConfidence: Float = 0.3
 
     func rewind() { tracker.rewind() }
@@ -20,5 +21,11 @@ final class VisionPoseDetector {
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation)
         try handler.perform([request])
         return tracker.select((request.results ?? []).map { VisionPose.joints(from: $0, minConfidence: minimumConfidence) })
+    }
+
+    /// The ball in the shooter's hands on the same frame (see `BallDetector`), found from the joints `detect` returned.
+    func ball(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation = .up, joints: [Joint: CGPoint],
+              at t: TimeInterval) -> Ball? {
+        joints.isEmpty ? nil : ballDetector.detect(in: pixelBuffer, orientation: orientation, joints: joints, at: t)
     }
 }

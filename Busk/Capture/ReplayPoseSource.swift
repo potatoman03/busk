@@ -10,6 +10,8 @@ final class ReplayPoseSource: PoseSource {
         var handedness: Handedness
         var aspectRatio: CGFloat
         var frames: [[Joint: CGPoint]]
+        /// The sidecar's ball per frame (`[x, y, radius in image widths]`), when it has one.
+        var balls: [Ball?] = []
     }
 
     var onFrame: ((PoseFrame) -> Void)?
@@ -53,10 +55,14 @@ final class ReplayPoseSource: PoseSource {
             }
             return joints
         }
+        let aspect = CGFloat(width / height)
+        let balls = raw.map { f in
+            (f["ball"] as? [Double]).flatMap { b in b.count >= 3 ? Ball(center: CGPoint(x: b[0], y: b[1]), radius: CGFloat(b[2]) * aspect) : nil }
+        }
         return Clip(fps: doc["fps"] as? Double ?? 30,
                     view: CameraView(rawValue: doc["view"] as? String ?? "") ?? .side,
                     handedness: Handedness(rawValue: doc["handedness"] as? String ?? "") ?? .right,
-                    aspectRatio: CGFloat(width / height), frames: frames)
+                    aspectRatio: aspect, frames: frames, balls: balls)
     }
 
     static func joint(snakeCase name: String) -> Joint? {
@@ -86,8 +92,9 @@ final class ReplayPoseSource: PoseSource {
             onFinished = nil
             return
         }
-        let joints = clip.frames[min(index, clip.frames.count - 1)]
-        onFrame?(PoseFrame(timestamp: Double(index) / clip.fps, joints: joints, aspect: clip.aspectRatio))
+        let i = min(index, clip.frames.count - 1)
+        let ball = i < clip.balls.count ? clip.balls[i] : nil
+        onFrame?(PoseFrame(timestamp: Double(index) / clip.fps, joints: clip.frames[i], aspect: clip.aspectRatio, ball: ball))
         if index < clip.frames.count { framesPlayed = index + 1 }
         index += 1
     }
