@@ -9,7 +9,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from .dataset import BENCH_DIR, Clip, Taxonomy, _sha
+from .dataset import BENCH_DIR, Clip, Taxonomy, _sha, coaching_order
 
 REAL_PATH = BENCH_DIR / "real_clips.json"
 USER_AGENT = "busk-bench/1.0 (+https://github.com/potatoman03/busk; shooting-feedback benchmark)"
@@ -18,7 +18,6 @@ REQUIRED_SOURCE = ("page", "url", "sha1", "license", "credit")
 
 def load_real_clips(tax: Taxonomy, path: Path = REAL_PATH) -> tuple[list[Clip], str, str]:
     raw = json.loads(path.read_text())
-    order = {fid: i for i, fid in enumerate(tax.flaws)}
     clips = []
     for r in raw["clips"]:
         missing = [k for k in REQUIRED_SOURCE if not r.get("source", {}).get(k)]
@@ -28,7 +27,7 @@ def load_real_clips(tax: Taxonomy, path: Path = REAL_PATH) -> tuple[list[Clip], 
             if f["id"] not in tax.flaws:
                 raise ValueError(f"{r['id']}: unknown flaw {f['id']}")
         obs = [f for f in r["flaws"] if r["view"] in tax.flaws[f["id"]].views]
-        obs.sort(key=lambda f: (-f["severity"], order[f["id"]]))
+        obs.sort(key=coaching_order(tax))
         clips.append(Clip(
             id=f"real__{r['id']}__{r['view']}", archetype=f"real__{r['id']}", tier=r["tier"], view=r["view"],
             handedness=r["handedness"], description=r["description"], params={}, look={},

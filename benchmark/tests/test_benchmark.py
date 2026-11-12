@@ -10,7 +10,7 @@ sys.path.insert(0, str(BENCH))
 from busk_bench.analyzer import resolve_command, run_clip  # noqa: E402
 from busk_bench.cli import compare_docs  # noqa: E402
 from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
-from busk_bench.heldout import load_heldout_clips  # noqa: E402
+from busk_bench.heldout import HELDOUT_PATH, label, load_heldout_clips  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
 from busk_bench.visual import coaching_timeout, coached, pick_device, replay_seconds, save_keypoints, wait_for_coaching  # noqa: E402
@@ -85,6 +85,17 @@ class Heldout(unittest.TestCase):
             self.assertEqual(seen, {fid for fid, f in TAX.flaws.items() if view in f.views}, view)
             self.assertTrue(any(not c.flaws for c in clips))
         self.assertTrue(any(c.handedness == "left" for c in self.CLIPS))
+
+    HCFG = json.loads(HELDOUT_PATH.read_text())
+
+    def test_primary_flaw_is_clearly_bad_and_top_coaching_priority(self):
+        for c in self.CLIPS + CLIPS:
+            if c.observable:
+                labels = {f["id"]: f for f in label(c.params, self.HCFG, TAX)}
+                key = lambda fid: (not labels[fid]["clear"], TAX.flaws[fid].coaching_priority)
+                self.assertEqual(key(c.primary), min(key(f["id"]) for f in c.observable), c.id)
+        thumb = next(c for c in CLIPS if c.id == "rec_guide_thumb__front")
+        self.assertEqual(thumb.primary, "guide_hand_interference")
 
     def test_perfect_feedback_scores_100(self):
         for c in self.CLIPS:

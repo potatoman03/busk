@@ -50,6 +50,32 @@ final class FormEvaluatorTests: XCTestCase {
         XCTAssertEqual(r.score, 60)
     }
 
+    func testChestPushIsToldToRaiseTheSetPointFirst() {
+        var side = good
+        side.followThrough = 0.133
+        side.setPointHeight = -0.076
+        side.legDrive = 0.002
+        XCTAssertEqual(FormEvaluator().evaluate(side).focus, .setPoint)
+        var front = side
+        front.guideHandPush = 0.071
+        front.elbowFlare = 0.081
+        XCTAssertEqual(FormEvaluator().evaluate(front).fixes, [.setPoint, .legs, .guideHand, .elbow, .followThrough])
+    }
+
+    func testClearlyBadGuideHandBeatsAMarginalHitch() {
+        var m = good
+        m.guideHandPush = 0.067
+        m.hitch = 0.40
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.guideHand, .rhythm])
+    }
+
+    func testFollowThroughWaitsForTheBase() {
+        var m = good
+        m.followThrough = 0.0
+        m.drift = 0.17
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.balance, .followThrough])
+    }
+
     func testMinorIssueIsNotCorrected() {
         var m = good
         m.followThrough = 0.3

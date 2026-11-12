@@ -12,7 +12,7 @@ import math
 import random
 from pathlib import Path
 
-from .dataset import BENCH_DIR, Clip, Taxonomy, _sha
+from .dataset import BENCH_DIR, Clip, Taxonomy, _sha, coaching_order
 from .kinematics import ShotParams
 
 HELDOUT_PATH = BENCH_DIR / "heldout.json"
@@ -53,7 +53,7 @@ def draw_shooter(rng: random.Random, cfg: dict, tax: Taxonomy) -> tuple[dict, st
 
 
 def label(params: dict, cfg: dict, tax: Taxonomy) -> list[dict]:
-    """Flaws by the taxonomy's label rules. Severity follows how far past its threshold each flaw is."""
+    """Flaws by the taxonomy's label rules, in `coaching_order`. The first is severity 3; the rest by margin."""
     p = ShotParams.from_dict(params)
     found = []
     for fid, f in tax.flaws.items():
@@ -63,8 +63,10 @@ def label(params: dict, cfg: dict, tax: Taxonomy) -> list[dict]:
             continue
         lo, hi = cfg["flaw_params"][fid]["flawed"]
         far = max(abs(lo - thr), abs(hi - thr))
-        found.append({"id": fid, "margin": round(min(1.0, abs(v - thr) / far), 3) if far else 0.6})
-    found.sort(key=lambda f: -f["margin"])
+        bad = rule["bad"]
+        found.append({"id": fid, "margin": round(min(1.0, abs(v - thr) / far), 3) if far else 0.6,
+                      "clear": v == bad or OPS[rule["op"]](v, bad), "severity": 0})
+    found.sort(key=coaching_order(tax, {f["id"]: f for f in found}))
     for i, f in enumerate(found):
         f["severity"] = 3 if i == 0 else 2 if f["margin"] >= 0.6 else 1
     return found
@@ -79,7 +81,6 @@ def load_heldout_clips(tax: Taxonomy, seed: int | None = None, path: Path = HELD
     cfg = json.loads(path.read_text())
     seed = cfg["seed"] if seed is None else seed
     rng = random.Random(seed)
-    order = {fid: i for i, fid in enumerate(tax.flaws)}
     clips = []
     for i in range(cfg["shooters"]):
         params, hand = draw_shooter(rng, cfg, tax)
@@ -90,7 +91,7 @@ def load_heldout_clips(tax: Taxonomy, seed: int | None = None, path: Path = HELD
         desc = "Held-out random shooter: " + (", ".join(f["id"] for f in flaws) or "clean form")
         for view in cfg["views"]:
             obs = [f for f in flaws if view in tax.flaws[f["id"]].views]
-            obs.sort(key=lambda f: (-f["severity"], -f["margin"], order[f["id"]]))
+            obs.sort(key=coaching_order(tax, {f["id"]: f for f in flaws}))
             clips.append(Clip(id=f"{aid}__{view}", archetype=aid, tier=tier(flaws), view=view, handedness=hand,
                               description=desc, params=params, look=look, flaws=flaws, observable=obs,
                               set="heldout"))
