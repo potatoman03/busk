@@ -15,6 +15,7 @@ from pathlib import Path
 from . import SCHEMA_VERSION
 from .analyzer import prebuild, resolve_command, run_clip
 from .dataset import BENCH_DIR, load_clips, load_taxonomy
+from .heldout import load_heldout_clips
 from .real import fetch as fetch_real, load_real_clips
 from .scoring import score_clip, summarize
 from .visual import SimulatorCapture
@@ -65,6 +66,7 @@ def render_all(clips, cache: Path, jobs: int):
 def cmd_render(a):
     tax = load_taxonomy()
     clips, _, _ = load_clips(tax)
+    clips += load_heldout_clips(tax, a.heldout_seed)[0]
     clips = _filter(clips, a.clips)
     paths = render_all(clips, Path(a.cache), a.jobs)
     for cid, (v, k) in paths.items():
@@ -76,24 +78,26 @@ def _filter(clips, spec):
     if not spec:
         return clips
     want = [s.strip() for s in spec.split(",") if s.strip()]
-    return [c for c in clips if any(c.id == w or c.archetype == w or c.tier == w for w in want)]
+    return [c for c in clips if any(w in (c.id, c.archetype, c.tier, c.set) for w in want)]
 
 
 def cmd_run(a):
     started = time.time()
     tax = load_taxonomy()
-    clips, ds_version, ds_sha = load_clips(tax)
-    if a.set == "real":
-        clips = []
-    if a.set in ("real", "all"):
-        real, rv, rsha = load_real_clips(tax)
-        clips += real
-        ds_version = f"{ds_version}+real{rv}" if a.set == "all" else f"real{rv}"
-        ds_sha = hashlib.sha256(f"{ds_sha if a.set == 'all' else ''}:{rsha}".encode()).hexdigest()
+    sets = ["synthetic", "heldout", "real"] if a.set == "all" else [a.set]
+    clips, versions, shas = [], [], []
+    for name in sets:
+        got, v, sha = {"synthetic": lambda: load_clips(tax), "heldout": lambda: load_heldout_clips(tax, a.heldout_seed),
+                       "real": lambda: load_real_clips(tax)}[name]()
+        clips += got
+        versions.append(v if name == "synthetic" else f"{name}{v}")
+        shas.append(sha)
+    ds_version = "+".join(versions)
+    ds_sha = shas[0] if sets == ["synthetic"] else hashlib.sha256(":".join(shas).encode()).hexdigest()
     clips = _filter(clips, a.clips)
     cache = Path(a.cache)
-    synthetic = [c for c in clips if c.set == "synthetic"]
-    log(f"rendering {len(synthetic)} synthetic clips (cached in {cache})")
+    synthetic = [c for c in clips if c.set != "real"]
+    log(f"rendering {len(synthetic)} synthetic and held-out clips (cached in {cache})")
     paths = render_all(synthetic, cache, a.jobs)
     unavailable = {}
     for c in [c for c in clips if c.set == "real"]:
@@ -162,7 +166,10 @@ def cmd_run(a):
     sets = {}
     for c in clips:
         sets.setdefault(c.set, []).append(results[c.id]["score"])
-    agg["set_scores"] = {k: round(sum(v) / len(v), 1) for k, v in sets.items()}
+    agg["set_scores"] = {k: round(sum(v) / len(v), 4) for k, v in sets.items()}
+    if "synthetic" in sets and "heldout" in sets:
+        # Core clips the analyzer was tuned on minus clips it has never seen: a widening gap means overfitting.
+        agg["generalization_gap"] = round(agg["set_scores"]["synthetic"] - agg["set_scores"]["heldout"], 1)
     doc = {
         "schema_version": SCHEMA_VERSION,
         "benchmark": {
@@ -188,6 +195,7 @@ def cmd_run(a):
     out_path.write_text(json.dumps(doc, indent=2) + "\n")
     print_summary(doc)
     print("  sets    " + "  ".join(f"{k} {v:5.1f}" for k, v in doc["set_scores"].items())
+          + (f"   gap {doc['generalization_gap']:+.1f}" if "generalization_gap" in doc else "")
           + (f"   ({len(unavailable)} real clips unavailable)" if unavailable else ""))
     log(f"wrote {out_path}")
     rc = 0
@@ -218,7 +226,7 @@ def print_summary(doc):
 
 # ---- compare -------------------------------------------------------------
 
-def compare_docs(old, new, max_overall_drop=2.0, max_tier_drop=5.0, max_flaw_drop=0.2):
+def compare_docs(old, new, max_overall_drop=2.0, max_tier_drop=5.0, max_flaw_drop=0.2, max_set_drop=2.0):
     comparable = old["benchmark"].get("taxonomy_sha256") == new["benchmark"].get("taxonomy_sha256") and \
         old["benchmark"].get("dataset_sha256") == new["benchmark"].get("dataset_sha256") and \
         old["benchmark"].get("clip_ids") == new["benchmark"].get("clip_ids")
@@ -231,6 +239,7 @@ def compare_docs(old, new, max_overall_drop=2.0, max_tier_drop=5.0, max_flaw_dro
         "delta": {
             "overall": d(so["overall_score"], sn["overall_score"]),
             "tiers": {t: d(so["tiers"].get(t, {}).get("score"), v["score"]) for t, v in sn["tiers"].items()},
+            "sets": {k: d(old.get("set_scores", {}).get(k), v) for k, v in new.get("set_scores", {}).items()},
             "flaws_advice": {f: d(old["flaws"].get(f, {}).get("advice_rate"), v["advice_rate"]) for f, v in new["flaws"].items()},
             "false_alarms_per_clip": d(so["false_alarms_per_clip"], sn["false_alarms_per_clip"]),
         },
@@ -255,6 +264,9 @@ def compare_docs(old, new, max_overall_drop=2.0, max_tier_drop=5.0, max_flaw_dro
     for t, v in dl["tiers"].items():
         if v is not None and v < -max_tier_drop:
             r.append(f"{t} tier dropped {-v:.1f} (limit {max_tier_drop})")
+    for k, v in dl["sets"].items():
+        if v is not None and v < -max_set_drop:
+            r.append(f"{k} set dropped {-v:.1f} (limit {max_set_drop})")
     for f, v in dl["flaws_advice"].items():
         if v is not None and v < -max_flaw_drop:
             r.append(f"advice rate for {f} dropped {-100 * v:.0f} pts (limit {100 * max_flaw_drop:.0f})")
@@ -266,7 +278,7 @@ def compare_docs(old, new, max_overall_drop=2.0, max_tier_drop=5.0, max_flaw_dro
 
 def compare_files(old_p: Path, new_p: Path, a) -> int:
     old, new = json.loads(old_p.read_text()), json.loads(new_p.read_text())
-    rep = compare_docs(old, new, a.max_overall_drop, a.max_tier_drop, a.max_flaw_drop)
+    rep = compare_docs(old, new, a.max_overall_drop, a.max_tier_drop, a.max_flaw_drop, a.max_set_drop)
     if getattr(a, "report", None):
         Path(a.report).write_text(json.dumps(rep, indent=2) + "\n")
     print(json.dumps(rep, indent=2) if getattr(a, "json", False) else _compare_text(rep))
@@ -299,15 +311,18 @@ def main(argv=None):
     def thresholds(sp):
         sp.add_argument("--max-overall-drop", type=float, default=2.0)
         sp.add_argument("--max-tier-drop", type=float, default=5.0)
+        sp.add_argument("--max-set-drop", type=float, default=2.0, help="max drop in a set's score (synthetic/heldout/real)")
         sp.add_argument("--max-flaw-drop", type=float, default=0.2, help="max drop in a flaw's advice rate (0-1)")
         sp.add_argument("--report", help="also write the comparison JSON here")
         sp.add_argument("--json", action="store_true", help="print the comparison as JSON")
 
     r = sub.add_parser("run", help="render clips, run busk's analyzer on each, score, write results JSON")
-    r.add_argument("--analyzer", help="analyzer command (default: $BUSK_ANALYZER_CMD, then `swift run busk-analyze`)")
+    r.add_argument("--analyzer", help="analyzer command (default: $BUSK_ANALYZER_CMD, then the native "
+                   "`busk-analyze` from Package.swift)")
     r.add_argument("--out", default=str(DEFAULT_OUT))
-    r.add_argument("--set", choices=["all", "synthetic", "real"], default="all",
-                   help="synthetic rendered clips, fetched real footage, or both (default)")
+    r.add_argument("--set", choices=["all", "synthetic", "heldout", "real"], default="all",
+                   help="core synthetic clips, held-out random shooters, fetched real footage, or all three (default)")
+    r.add_argument("--heldout-seed", type=int, help="draw a fresh held-out set (default: the pinned seed in heldout.json)")
     r.add_argument("--clips", help="comma-separated clip ids, archetypes or tiers")
     r.add_argument("--cache", default=str(DEFAULT_CACHE))
     r.add_argument("--jobs", type=int, default=min(4, os.cpu_count() or 1))
@@ -331,6 +346,7 @@ def main(argv=None):
 
     rd = sub.add_parser("render", help="render the clips only and print their paths")
     rd.add_argument("--clips")
+    rd.add_argument("--heldout-seed", type=int)
     rd.add_argument("--cache", default=str(DEFAULT_CACHE))
     rd.add_argument("--jobs", type=int, default=min(4, os.cpu_count() or 1))
     rd.set_defaults(fn=cmd_render)

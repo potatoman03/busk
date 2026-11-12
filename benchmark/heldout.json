@@ -1,0 +1,27 @@
+{
+  "version": "1",
+  "about": "Held-out tier: random shooters drawn from these ranges with a seeded generator (busk_bench/heldout.py). Only the generator and its ranges are checked in, never the drawn shooters, so busk cannot be tuned on clip-specific labels; `--heldout-seed N` draws a fresh set at any time. Labels come from the taxonomy label rules applied to the drawn parameters. Ranges keep a gap around every threshold so no label is borderline.",
+  "seed": 20261112,
+  "shooters": 48,
+  "views": ["side", "front"],
+  "left_handed_share": 0.15,
+  "flaw_count_weights": {"0": 0.25, "1": 0.3, "2": 0.2, "3": 0.15, "4": 0.1},
+  "flaw_params": {
+    "no_leg_drive":              {"param": "knee_bend_deg",     "clean": [32, 55],     "flawed": [8, 20]},
+    "low_set_point":             {"param": "set_height",        "clean": [0.9, 1.05],  "flawed": [0.7, 0.81]},
+    "elbow_flare":               {"param": "elbow_flare_deg",   "clean": [0, 14],      "flawed": [26, 38]},
+    "flat_arc":                  {"param": "release_angle_deg", "clean": [44, 52],     "flawed": [30, 36]},
+    "no_follow_through":         {"param": "follow_hold_s",     "clean": [0.3, 0.75],  "flawed": [0.0, 0.09]},
+    "guide_hand_interference":   {"param": "guide_push",        "clean": [0, 0],       "flawed": [1, 1]},
+    "releasing_on_the_way_down": {"param": "release_timing",    "clean": [-0.4, 0.15], "flawed": [0.45, 0.85]},
+    "hitch_at_set_point":        {"param": "hitch_s",           "clean": [0, 0.08],    "flawed": [0.38, 0.6]},
+    "off_balance_drift":         {"param": "drift_m",           "clean": [0, 0.12],    "flawed": [0.42, 0.65]}
+  },
+  "body": {
+    "height_m": [1.6, 2.1],
+    "tempo": [0.75, 1.35],
+    "jump_height_m": [0.08, 0.26],
+    "jump_height_m_no_leg_drive": [0.0, 0.08],
+    "lean_deg_drift": [6, 15]
+  }
+}
