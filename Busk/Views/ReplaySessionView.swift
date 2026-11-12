@@ -60,7 +60,7 @@ struct ReplaySessionView: View {
         do {
             let source = try ReplayPoseSource(contentsOf: URL(fileURLWithPath: path))
             let s = CoachSession(cameraView: source.clip.view, handedness: source.clip.handedness, source: source,
-                                 voiceEnabled: false)
+                                 voiceEnabled: UserDefaults.standard.object(forKey: SettingsKey.voiceEnabled) as? Bool ?? true)
             var status = ReplayStatus(label: label, path: path, frames: source.clip.frames.count)
             status.write()
             source.onFinished = { [weak source] in
