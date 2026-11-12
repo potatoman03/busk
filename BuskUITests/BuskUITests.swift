@@ -35,7 +35,7 @@ final class BuskUITests: XCTestCase {
     }
 
     func testHomeScreen() {
-        XCTAssertTrue(app.navigationBars["Busk"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["startButton"].exists)
         XCTAssertTrue(app.buttons["settingsButton"].exists)
         XCTAssertTrue(app.buttons["historyButton"].exists)

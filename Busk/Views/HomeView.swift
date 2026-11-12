@@ -62,6 +62,8 @@ struct HomeView: View {
             .navigationTitle("Busk")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // "Busk" stays the back-button title; the header below is the only heading on screen.
+                ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink(value: HomeRoute.history) {
                         // The toolbar draws a Label as its icon alone; spell it out so History is findable.
