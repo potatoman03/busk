@@ -234,7 +234,9 @@ final class ShotAnalyzer {
         // Arc: the arm's elevation while it is fully extended at the release (earlier frames still show the set point).
         var armAngle: Double?
         if view == .side {
-            let window = Array(max(0, rel - 2)...min(n - 1, rel + 4))
+            // A releasing arm points up: a hand seen below the shoulder (the arm already dropped, the next loop's
+            // gather, a front-on clip filmed as side) would win on reach and read as a launch near -90°.
+            let window = Array(max(0, rel - 2)...min(n - 1, rel + 4)).filter { samples[$0].wrist.y < samples[$0].shoulder.y }
             let reach = { (i: Int) in Geometry.distance(samples[i].shoulder, samples[i].wrist) }
             let longest = window.map(reach).max() ?? 0
             let extended = window.filter { reach($0) >= longest * 0.97 }
