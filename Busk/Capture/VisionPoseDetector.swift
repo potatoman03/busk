@@ -10,7 +10,10 @@ final class VisionPoseDetector {
     private let ballDetector = BallDetector()
     var minimumConfidence: Float = 0.3
 
-    func rewind() { tracker.rewind() }
+    func rewind() {
+        tracker.rewind()
+        ballDetector.reset()
+    }
 
     func joints(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation = .up) -> [Joint: CGPoint]? {
         try? detect(in: pixelBuffer, orientation: orientation)

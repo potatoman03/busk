@@ -141,7 +141,7 @@ enum VideoPoses {
         return frames.enumerated().map { i, f in (f.t, pick?.frames[i] ?? [:]) }
     }
 
-    private static func orientationOf(_ t: CGAffineTransform) -> (CGImagePropertyOrientation, Bool) {
+    static func orientationOf(_ t: CGAffineTransform) -> (CGImagePropertyOrientation, Bool) {
         switch (t.a, t.b, t.c, t.d) {
         case (0, 1, -1, 0): return (.right, true)
         case (0, -1, 1, 0): return (.left, true)

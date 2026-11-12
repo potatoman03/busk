@@ -36,6 +36,17 @@ final class ShotAnalyzerTests: XCTestCase {
         XCTAssertEqual(FormEvaluator().evaluate(m).cue, FormEvaluator().evaluate(try XCTUnwrap(run(.good).first)).cue)
     }
 
+    func testShooterPickedUpJustBeforeTheReleaseIsStillTimed() throws {
+        // At the start of a session or clip Vision may only find the shooter part-way up the shot: the last half
+        // second at full frame rate still shows the set point.
+        let original = shot(.good, view: .side)
+        let analyzer = ShotAnalyzer(handedness: .right, view: .side)
+        _ = original.compactMap { analyzer.process($0) }
+        let release = try XCTUnwrap(analyzer.lastShotClip?.release)
+        let late = original.filter { $0.timestamp >= release - 0.55 }
+        XCTAssertNotNil(try XCTUnwrap(measure(late, view: .side)).setPointHeight)
+    }
+
     func testReleaseRightAfterDroppedFramesDoesNotCrash() {
         // Vision losing the shooter through the whole gather leaves no frames before the release to measure.
         let sim = ShotSimulator()

@@ -57,8 +57,9 @@ final class BallDetector {
         context.render(small, toBitmap: &rgba, rowBytes: w * 4, bounds: CGRect(x: 0, y: 0, width: w, height: h),
                        format: .RGBA8, colorSpace: nil)
 
-        let mask = Self.orangeMask(rgba, width: w, height: h)
-        let blobs = Self.blobs(mask, width: w, height: h)
+        // Skin or a tan wall touching the ball can pass the loosest orange test and merge with it into one bigger,
+        // off-centre blob: stricter saturation splits them, and the roundest, best-sized blob of any pass wins.
+        let blobs = Self.saturations.flatMap { Self.blobs(Self.orangeMask(rgba, width: w, height: h, saturation: $0), width: w, height: h) }
         let expected = r0 * s
         let toImage = { (x: CGFloat, y: CGFloat) in CGPoint(x: area.minX + x / s, y: area.minY + y / s) }
         var best: (score: Double, ball: Ball)?
@@ -83,12 +84,14 @@ final class BallDetector {
 
     /// Basketball orange: red the strongest channel, hue between a little past red and orange, clearly saturated
     /// (skin, wooden floors and sand-coloured courts are paler or yellower), neither black nor blown out.
-    static func orangeMask(_ rgba: [UInt8], width w: Int, height h: Int) -> [Bool] {
+    static let saturations = [38, 50, 62]
+
+    static func orangeMask(_ rgba: [UInt8], width w: Int, height h: Int, saturation: Int = 38) -> [Bool] {
         var mask = [Bool](repeating: false, count: w * h)
         for i in 0..<(w * h) {
             let r = Int(rgba[4 * i]), g = Int(rgba[4 * i + 1]), b = Int(rgba[4 * i + 2])
             let hi = max(r, g, b), lo = min(r, g, b), d = hi - lo
-            guard hi == r, hi >= 40, d * 100 >= hi * 38 else { continue }
+            guard hi == r, hi >= 40, d * 100 >= hi * saturation else { continue }
             let hue = 60 * Double(g - b) / Double(d)
             mask[i] = hue >= -15 && hue <= 32
         }
