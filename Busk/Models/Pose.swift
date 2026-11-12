@@ -33,7 +33,7 @@ enum CameraView: String, CaseIterable, Codable, Identifiable, Sendable {
     var hint: String {
         switch self {
         case .side: return "Phone 3-4 m away, level with your waist, looking at your shooting side. Best for arc and follow-through."
-        case .front: return "Phone 3-4 m in front of you, looking straight at you. Best for elbow alignment."
+        case .front: return "Phone 3-4 m in front of you, level with your waist, looking straight at you. Best for elbow alignment."
         }
     }
 }

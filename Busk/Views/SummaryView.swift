@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct SummaryView: View {
@@ -14,6 +15,16 @@ struct SummaryContent: View {
     let date: Date
     let isDemo: Bool
     @State private var lesson: Lesson?
+    @Query(sort: \SessionRecord.date) private var records: [SessionRecord]
+
+    /// Once the plan has a baseline, the next focus is the plan's, so Summary and Coach never disagree.
+    private var nextFocus: (plan: Bool, focus: FormArea?) {
+        if !isDemo || AppEnvironment.demoCountsForPlan {
+            let plan = CoachPlan(sessions: records.coachingSessions)
+            if plan.totalShots >= CoachPlan.baselineShots { return (true, plan.focus) }
+        }
+        return (false, summary.topFocus)
+    }
 
     var body: some View {
         ScrollView {
@@ -43,12 +54,21 @@ struct SummaryContent: View {
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("summaryFocus")
-                } else if let focus = summary.topFocus {
+                } else if let focus = nextFocus.focus {
                     Card {
                         Label("Next session focus", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
-                        Text(focus.title).font(.title2.bold())
+                        Text(focus.title).font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
                         Text(focus.cue).foregroundStyle(.secondary)
                         lessonButton(focus)
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("summaryFocus")
+                } else if nextFocus.plan {
+                    Card {
+                        Label("Next session focus", systemImage: "checkmark.seal").font(.caption).foregroundStyle(.secondary)
+                        Text("Nothing to fix right now").font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
+                        Text("Every area Busk measures is solid. Keep shooting: if one slips, Busk makes it your focus.")
+                            .foregroundStyle(.secondary)
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("summaryFocus")
