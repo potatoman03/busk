@@ -139,7 +139,7 @@ struct ShotCard: View {
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(2).fixedSize(horizontal: false, vertical: true)
                     }
                 }
             }
