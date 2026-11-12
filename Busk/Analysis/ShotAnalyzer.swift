@@ -134,9 +134,12 @@ final class ShotAnalyzer {
         let window = history.filter { $0.timestamp >= rt - config.lookback }
         // Only this shot's frames vote: a pose left over from before (a held frame, the last shot) can't flip it.
         let usual = view == .front ? window.compactMap(order).reduce(0) { $0 + ($1 > 0 ? 1 : -1) } : 0
-        let all: [Sample] = window.compactMap { f in
+        func sample(_ f: PoseFrame, keepArm: Bool) -> Sample? {
             let flipped = usual != 0 && order(f).map { ($0 > 0) != (usual > 0) } == true
-            let hand: Handedness = flipped ? (handedness == .right ? .left : .right) : handedness
+            var hand: Handedness = flipped ? (handedness == .right ? .left : .right) : handedness
+            // Shoulders seen nearly edge-on swap order from frame to frame; when the swapped side has no arm in view,
+            // the labelled one is the only arm there is.
+            if keepArm, flipped, f.point(hand.wrist) == nil || f.point(hand.elbow) == nil { hand = handedness }
             let guideSide: Handedness = hand == .right ? .left : .right
             guard let s = f.point(hand.shoulder), let e = f.point(hand.elbow), let w = f.point(hand.wrist),
                   let head = f.point(.nose) ?? f.point(.neck) else { return nil }
@@ -146,6 +149,7 @@ final class ShotAnalyzer {
             return Sample(t: f.timestamp, shoulder: s, elbow: e, wrist: w, head: head, guide: f.point(guideSide.wrist), guideShoulder: f.point(guideSide.shoulder),
                           root: f.point(.root), ankle: ankle, span: ankle.map { Double($0.y - head.y) })
         }
+        let all = window.compactMap { sample($0, keepArm: false) }
         // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
         // would otherwise mix in a pose from somewhere else).
         let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.5 && all[$0].t <= rt } ?? 0
@@ -245,7 +249,8 @@ final class ShotAnalyzer {
         }
 
         // Follow-through lasts until the shooting hand is first seen back below the head (frames Vision missed don't end it).
-        let follow = Array(samples[rel...])
+        // Frames dropped above for a swapped shoulder order still show the arm coming down: a fast drop can be all in those.
+        let follow = window.filter { $0.timestamp >= samples[rel].t }.compactMap { sample($0, keepArm: true) }
         let dropped = follow.indices.first { i in
             i + 1 < follow.count && follow[i].wrist.y >= follow[i].head.y && follow[i + 1].wrist.y >= follow[i + 1].head.y
                 && follow[i].t - samples[rel].t <= 1.0
@@ -271,7 +276,8 @@ final class ShotAnalyzer {
             // Off the floor: a fifth of the way up the jump, so slow drift of the feet in the frame isn't counted as air time.
             // The floor is measured near the jump: the shooter can step or the camera tilt elsewhere in the clip.
             let reach = Int(0.8 / dt)
-            let floor0 = (max(firstFoot, top - reach)...top).compactMap { feet[$0] }.min() ?? feet[firstFoot]!
+            // Takeoff comes off the stance just before the rise: a step earlier in the run-up isn't the floor.
+            let floor0 = (max(firstFoot, top - Int(0.5 / dt))...top).compactMap { feet[$0] }.min() ?? feet[firstFoot]!
             let floor1 = (top...min(lastFoot, top + reach)).compactMap { feet[$0] }.min() ?? feet[lastFoot]!
             let level0 = floor0 + max(0.012, (feet[top]! - floor0) * 0.2)
             let level1 = floor1 + max(0.012, (feet[top]! - floor1) * 0.2)
