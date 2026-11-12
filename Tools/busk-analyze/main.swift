@@ -36,7 +36,11 @@ if let kpPath = opts["keypoints"] {
             guard let j = Joint(rawValue: camel), let xy = v as? [Double], xy.count >= 2 else { continue }
             joints[j] = CGPoint(x: xy[0], y: xy[1])
         }
-        return PoseFrame(timestamp: (f["t"] as? Double) ?? Double(i) / fps, joints: joints, aspect: aspect)
+        // Sidecar ball: [x, y, radius in image widths].
+        let ball = (f["ball"] as? [Double]).flatMap { b in
+            b.count >= 3 ? Ball(center: CGPoint(x: b[0], y: b[1]), radius: CGFloat(b[2]) * aspect) : nil
+        }
+        return PoseFrame(timestamp: (f["t"] as? Double) ?? Double(i) / fps, joints: joints, aspect: aspect, ball: ball)
     }
     poseSource = "benchmark-keypoints"
 } else {
@@ -73,7 +77,9 @@ if let dump = opts["save-keypoints"] ?? opts["dump-poses"] {
         "width": Double(frames.first?.aspect ?? 1), "height": 1.0,
         "view": cameraView?.rawValue ?? "unknown", "handedness": handedness.rawValue,
         "frames": frames.map { f in
-            ["t": f.timestamp, "joints": Dictionary(uniqueKeysWithValues: f.joints.map { (names[$0.key]!, [Double($0.value.x), Double($0.value.y)]) })] as [String: Any]
+            var out: [String: Any] = ["t": f.timestamp, "joints": Dictionary(uniqueKeysWithValues: f.joints.map { (names[$0.key]!, [Double($0.value.x), Double($0.value.y)]) })]
+            if let b = f.ball { out["ball"] = [Double(b.center.x), Double(b.center.y), Double(b.radius / max(f.aspect, 0.01))] }
+            return out
         },
     ]
     try? JSONSerialization.data(withJSONObject: doc, options: [.sortedKeys]).write(to: URL(fileURLWithPath: dump))
@@ -103,7 +109,7 @@ for frame in frames {
         ] as [String: Any],
     ])
 }
-let doc: [String: Any] = ["shots": shots, "pose_source": poseSource, "view": cameraView?.rawValue ?? "unknown"]
+let doc: [String: Any] = ["shots": shots, "pose_source": poseSource, "ball_frames": frames.filter { $0.ball != nil }.count, "view": cameraView?.rawValue ?? "unknown"]
 do {
     let out = try JSONSerialization.data(withJSONObject: doc, options: [.prettyPrinted, .sortedKeys])
     try out.write(to: URL(fileURLWithPath: output))

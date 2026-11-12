@@ -33,6 +33,12 @@ struct SkeletonOverlay: View {
                 ctx.stroke(path, with: .color(hot ? accent : .white.opacity(0.75)),
                            style: StrokeStyle(lineWidth: hot ? 6 : 3.5, lineCap: .round))
             }
+            if let ball = pose.ball {
+                let c = map(ball.center)
+                let r = max(map(CGPoint(x: ball.center.x, y: ball.center.y + ball.radius)).y - c.y, 4)
+                ctx.stroke(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)),
+                           with: .color(Theme.orange), style: StrokeStyle(lineWidth: 3, dash: [6, 4]))
+            }
             for (joint, p) in pose.joints {
                 let c = map(p)
                 let r: CGFloat = shooting.contains(joint) ? 7 : 4.5

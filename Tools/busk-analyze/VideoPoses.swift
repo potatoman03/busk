@@ -43,13 +43,38 @@ enum VideoPoses {
             }
             candidates.append((t, people.filter { $0.count >= 4 }))
         }
-        let tracker = ShooterTracker()
-        let followed = live
-            ? candidates.compactMap { c in tracker.select(c.people).map { (t: c.t, joints: $0) } }
-            : followShooter(candidates, handedness: handedness)
-        let frames = followed.map { PoseFrame(timestamp: $0.t, joints: $0.joints, aspect: aspect) }
         if reader.status == .failed { throw Failure("decode failed: \(reader.error?.localizedDescription ?? "")") }
-        return frames
+        let tracker = ShooterTracker()
+        let followed: [(i: Int, t: TimeInterval, joints: [Joint: CGPoint])] = live
+            ? candidates.enumerated().compactMap { i, c in tracker.select(c.people).map { (i, c.t, $0) } }
+            : followShooter(candidates, handedness: handedness).enumerated().map { ($0, $1.t, $1.joints) }
+        let balls = try findBalls(url, orientation: orientation, joints: Dictionary(followed.map { ($0.i, $0.joints) }) { a, _ in a })
+        return followed.map { PoseFrame(timestamp: $0.t, joints: $0.joints, aspect: aspect, ball: balls[$0.i]) }
+    }
+
+    /// Second pass over the video: the ball near the followed shooter's hands in each frame, as the app's
+    /// `BallDetector` finds it live.
+    static func findBalls(_ url: URL, orientation: CGImagePropertyOrientation, joints: [Int: [Joint: CGPoint]]) throws -> [Int: Ball] {
+        let asset = AVURLAsset(url: url)
+        guard let track = asset.tracks(withMediaType: .video).first else { return [:] }
+        let reader = try AVAssetReader(asset: asset)
+        let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+        ])
+        reader.add(output)
+        guard reader.startReading() else { return [:] }
+        let detector = BallDetector()
+        var balls: [Int: Ball] = [:]
+        var i = 0
+        while let sample = output.copyNextSampleBuffer() {
+            guard let pixels = CMSampleBufferGetImageBuffer(sample) else { continue }
+            if let j = joints[i], !j.isEmpty {
+                let t = CMSampleBufferGetPresentationTimeStamp(sample).seconds
+                balls[i] = detector.detect(in: pixels, orientation: orientation, joints: j, at: t)
+            }
+            i += 1
+        }
+        return balls
     }
 
     /// The picture inside black letterbox / pillarbox bars (top-left origin, pixels), or nil when there are no bars.
