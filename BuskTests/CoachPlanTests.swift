@@ -105,6 +105,7 @@ final class CoachPlanTests: XCTestCase {
             let line = FormArea.legs.praise(n)
             XCTAssertNil(line.range(of: "that legs"), line)
             XCTAssertNil(line.range(of: "the legs"), line)
+            XCTAssertNil(line.range(of: "legs was"), line)
         }
     }
 

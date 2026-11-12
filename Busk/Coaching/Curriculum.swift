@@ -347,7 +347,7 @@ extension FormArea {
     func praise(_ n: Int) -> String {
         let name = title.lowercased()
         let lines = ["Good \(name) that time. Same again", "That's it on your \(name). Keep it", "\(title) looked right. Again",
-                     "Yes, your \(name) was right. Repeat it"]
+                     "Yes, spot on with your \(name). Repeat it"]
         return lines[abs(n) % lines.count]
     }
 }

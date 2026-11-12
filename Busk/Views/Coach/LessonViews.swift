@@ -261,13 +261,33 @@ struct BallPositionsPicture: View {
         }
     }
 
+    /// A demo-shooter pose with the shooting arm placed by hand, so the ball sits exactly where the panel says.
     static func pose(_ panel: Panel) -> PoseFrame {
         let frames = ShotSimulator().frames(for: panel.style)
-        return frames[min(frames.count - 1, Int(panel.time * 30))]
+        var pose = frames[min(frames.count - 1, Int(panel.time * 30))]
+        guard let shoulder = pose[.rightShoulder], let hip = pose[.rightHip] else { return pose }
+        let elbow: CGPoint, wrist: CGPoint, ball: CGPoint
+        switch panel.id {
+        case "pocket":
+            elbow = CGPoint(x: shoulder.x - 0.01, y: shoulder.y + 0.105)
+            wrist = CGPoint(x: elbow.x + 0.07, y: hip.y - 0.02)
+            ball = CGPoint(x: wrist.x + 0.035, y: wrist.y - 0.015)
+        case "chest":
+            elbow = CGPoint(x: shoulder.x + 0.01, y: shoulder.y + 0.10)
+            wrist = CGPoint(x: elbow.x + 0.09, y: elbow.y - 0.035)
+            ball = CGPoint(x: wrist.x + 0.035, y: wrist.y - 0.01)
+        default:
+            guard let w = pose[.rightWrist] else { return pose }
+            pose.ball = Ball(center: CGPoint(x: w.x + 0.012, y: w.y - 0.03), radius: 0.03)
+            return pose
+        }
+        pose.joints[.rightElbow] = elbow
+        pose.joints[.rightWrist] = wrist
+        pose.ball = Ball(center: ball, radius: 0.03)
+        return pose
     }
 }
 
-/// A stick figure with the ball at the shooting hand, scaled to fit.
 struct PoseFigure: View {
     let pose: PoseFrame
     var color: Color = .white
@@ -275,7 +295,7 @@ struct PoseFigure: View {
     var body: some View {
         Canvas { ctx, size in
             guard let wrist = pose[.rightWrist] else { return }
-            let ball = CGPoint(x: wrist.x + 0.012, y: wrist.y - 0.03), radius: CGFloat = 0.03
+            let ball = pose.ball?.center ?? CGPoint(x: wrist.x + 0.012, y: wrist.y - 0.03), radius = pose.ball?.radius ?? 0.03
             let points = Array(pose.joints.values) + [CGPoint(x: ball.x, y: ball.y - radius), CGPoint(x: ball.x + radius, y: ball.y)]
             let minX = points.map(\.x).min()!, maxX = points.map(\.x).max()!
             let minY = points.map(\.y).min()!, maxY = points.map(\.y).max()!
