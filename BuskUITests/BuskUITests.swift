@@ -171,7 +171,8 @@ final class BuskUITests: XCTestCase {
         snapshot("03b-live-landscape")
 
         end.tap()
-        XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
+        // Ending saves the session and releases the audio session, which is slow on CI simulators.
+        XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 15))
         XCUIDevice.shared.orientation = .portrait
         XCTAssertGreaterThanOrEqual(Int(app.staticTexts["summaryShotCount"].label) ?? 0, 2)
         snapshot("04-summary")
