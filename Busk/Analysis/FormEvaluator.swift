@@ -13,11 +13,20 @@ enum Grade: Int, Codable, Comparable, Sendable {
 }
 
 /// The form areas Busk coaches. Each matches one flaw in the shooting-feedback benchmark taxonomy.
-/// Declaration order breaks ties when two areas are equally far off.
+/// Busk coaches in `coachingPriority` order, the taxonomy's `coaching_priority`; within a rank the
+/// area furthest off goes first, then declaration order.
 enum FormArea: String, Codable, CaseIterable, Identifiable, Sendable {
     case setPoint, balance, releaseTiming, rhythm, elbow, guideHand, arc, legs, followThrough
     var id: String { rawValue }
     var priority: Int { FormArea.allCases.firstIndex(of: self) ?? 0 }
+    var coachingPriority: Int {
+        switch self {
+        case .setPoint, .rhythm: return 1
+        case .legs, .balance: return 2
+        case .releaseTiming, .elbow, .guideHand: return 3
+        case .arc, .followThrough: return 4
+        }
+    }
     var title: String {
         switch self {
         case .setPoint: return "Set point"
@@ -118,8 +127,7 @@ struct FormEvaluator {
         var guideHand = Limit(ok: 0.025, bad: 0.035, worst: 0.042)
         var armAngle = Limit(ok: 64, bad: 59, worst: 55)
         var legDrive = Limit(ok: 0.028, bad: 0.016, worst: 0.004)
-        // Pose tracking reads any hold shorter than ~0.13 s as ~0.13 s, so that is as bad as it can look.
-        var followThrough = Limit(ok: 0.40, bad: 0.25, worst: 0.13)
+        var followThrough = Limit(ok: 0.40, bad: 0.25, worst: 0.19)
     }
 
     var thresholds = Thresholds()
@@ -146,7 +154,10 @@ struct FormEvaluator {
         let penalty = areas.map { (r: AreaResult) -> Int in r.grade == .needsWork ? 20 : r.grade == .ok ? 7 : 0 }.reduce(0, +)
         let needsWork: [AreaResult] = areas.filter { $0.grade == .needsWork }
         let fixes: [FormArea] = needsWork.sorted { (a: AreaResult, b: AreaResult) -> Bool in
-            a.severity != b.severity ? a.severity > b.severity : a.area.priority < b.area.priority
+            if a.area.coachingPriority != b.area.coachingPriority {
+                return a.area.coachingPriority < b.area.coachingPriority
+            }
+            return a.severity != b.severity ? a.severity > b.severity : a.area.priority < b.area.priority
         }.map(\.area)
         let focus = fixes.first
         return ShotResult(metrics: m, areas: areas, score: max(0, 100 - penalty),

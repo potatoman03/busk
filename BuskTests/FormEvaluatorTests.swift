@@ -51,11 +51,22 @@ final class FormEvaluatorTests: XCTestCase {
     }
 
     func testChestPushIsToldToRaiseTheSetPointFirst() {
+        var side = good
+        side.followThrough = 0.133
+        side.setPointHeight = -0.076
+        side.legDrive = 0.002
+        XCTAssertEqual(FormEvaluator().evaluate(side).focus, .setPoint)
+        var front = side
+        front.guideHandPush = 0.071
+        front.elbowFlare = 0.081
+        XCTAssertEqual(FormEvaluator().evaluate(front).fixes, [.setPoint, .legs, .guideHand, .elbow, .followThrough])
+    }
+
+    func testFollowThroughWaitsForTheBase() {
         var m = good
-        m.followThrough = 0.133 // what tracking reads for no hold at all
-        m.setPointHeight = -0.09
-        m.legDrive = 0.002
-        XCTAssertEqual(FormEvaluator().evaluate(m).focus, .setPoint)
+        m.followThrough = 0.0
+        m.drift = 0.17
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.balance, .followThrough])
     }
 
     func testMinorIssueIsNotCorrected() {
