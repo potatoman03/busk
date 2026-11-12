@@ -74,6 +74,34 @@ final class BuskUITests: XCTestCase {
         snapshot("11-progress-empty")
     }
 
+    func testCountingWholeSessionCanGoBackToMarks() {
+        app.buttons["startButton"].tap()
+        XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+        app.buttons["goLiveButton"].tap()
+        XCTAssertTrue(app.buttons["markMadeButton"].waitForExistence(timeout: 30))
+        app.buttons["endSessionButton"].tap()
+
+        let summaryMakes = app.staticTexts["summaryMakes"]
+        XCTAssertTrue(summaryMakes.waitForExistence(timeout: 5))
+        let stepper = app.steppers["makesStepper"]
+        XCTAssertTrue(stepper.exists, "nothing marked, so the whole session can be counted")
+        let firstMark = app.buttons["shotMark-1"]
+        XCTAssertTrue(firstMark.exists)
+        stepper.buttons.element(boundBy: 1).tap()
+        XCTAssertEqual(summaryMakes.label, "1")
+        XCTAssertFalse(firstMark.exists, "a whole-session count hides the shot marks")
+        XCTAssertTrue(app.buttons["useShotMarksButton"].exists, "a counted session can always go back to shot marks")
+        stepper.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(firstMark.waitForExistence(timeout: 2), "counting back to 0 brings the shot marks back")
+        XCTAssertFalse(app.buttons["useShotMarksButton"].exists)
+
+        stepper.buttons.element(boundBy: 1).tap()
+        app.buttons["useShotMarksButton"].tap()
+        XCTAssertTrue(firstMark.waitForExistence(timeout: 2))
+        XCTAssertEqual(firstMark.label, "Not marked")
+        snapshot("13c-summary-count-way-back")
+    }
+
     func testMarkingMakesDuringSession() {
         app.buttons["startButton"].tap()
         XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
