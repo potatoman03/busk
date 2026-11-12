@@ -223,9 +223,12 @@ final class ShotAnalyzer {
         // frame where the forearm is turned toward the camera doesn't count as a flare).
         var elbowFlare: Double?
         if view == .front {
-            let offsets = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }.map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
+            let push = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }
+            // Only once the ball is up past the shoulder: on the way up out of the dip the forearm is still turning over.
+            let loaded = push.filter { $0.wrist.y < $0.shoulder.y }
+            let offsets = (loaded.count >= 4 ? loaded : push).map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
             // With only a few frames (Vision dropping the arm, a slow camera) one turned forearm is the median: not judged.
-            elbowFlare = offsets.count >= 6 ? offsets[offsets.count / 2] : nil
+            elbowFlare = push.count >= 6 ? offsets[offsets.count / 2] : nil
         }
 
         // Arc: the arm's elevation while it is fully extended at the release (earlier frames still show the set point).
@@ -315,7 +318,8 @@ final class ShotAnalyzer {
                             d = max(d, abs(1 - t0 / t1) * 3.1)
                         }
                     }
-                    drift = d
+                    // Most of a body height is the tracker landing on someone else's feet, not a drift.
+            drift = d <= 0.8 ? d : nil
                 }
             }
         }
