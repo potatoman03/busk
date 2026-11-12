@@ -75,6 +75,31 @@ final class BuskUITests: XCTestCase {
         snapshot("05b-history-summary")
     }
 
+    /// A replayed clip ends like a live session: Summary then Done lands on Home, and the clip is in History.
+    func testReplayDoneReturnsHomeWithHistory() {
+        let clip = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/side.keypoints.json").path
+        app.terminate()
+        app.launchArguments = ["-ui-testing", "-replay-keypoints", clip, "-replay-label", "side-real"]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["replayComplete"].waitForExistence(timeout: 30))
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        XCTAssertTrue(app.staticTexts["cueBanner"].waitForExistence(timeout: 5))
+        snapshot("06-replay-landscape")
+        XCUIDevice.shared.orientation = .portrait
+        snapshot("06b-replay-complete")
+        app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.buttons["summaryDoneButton"].waitForExistence(timeout: 5))
+        snapshot("06c-replay-summary")
+        app.buttons["summaryDoneButton"].tap()
+        XCTAssertTrue(app.buttons["historyButton"].waitForExistence(timeout: 5))
+        app.buttons["historyButton"].tap()
+        XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
+        snapshot("06d-replay-history")
+    }
+
     func testEndingWithoutShotsReturnsHome() {
         // On a slow runner the demo shooter can land a shot before End is tapped, so keep it idle.
         app.terminate()
