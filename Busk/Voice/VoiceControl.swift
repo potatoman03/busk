@@ -125,6 +125,11 @@ final class VoiceControl {
         state = .off
     }
 
+    /// Forgets the last command once the screen it was for has gone, so the bar shows the hint again.
+    func clearHeard() {
+        lastHeard = nil
+    }
+
     /// Feeds a transcript through the same path as the microphone. Used by the simulator buttons and tests.
     func inject(_ transcript: String) {
         heard(transcript)

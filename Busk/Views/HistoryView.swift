@@ -24,5 +24,6 @@ struct HistoryView: View {
         }
         .background(Theme.court.ignoresSafeArea())
         .navigationTitle("History")
+        .opaqueNavigationBar()
     }
 }
