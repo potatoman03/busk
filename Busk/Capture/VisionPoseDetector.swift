@@ -9,6 +9,8 @@ final class VisionPoseDetector {
     private let tracker = ShooterTracker()
     var minimumConfidence: Float = 0.3
 
+    func rewind() { tracker.rewind() }
+
     func joints(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation = .up) -> [Joint: CGPoint]? {
         try? detect(in: pixelBuffer, orientation: orientation)
     }

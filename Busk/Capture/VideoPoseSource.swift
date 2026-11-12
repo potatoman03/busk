@@ -47,6 +47,7 @@ final class VideoPoseSource: PoseSource {
     private func playLoop() {
         var offset: TimeInterval = 0
         while running {
+            if offset > 0 { detector.rewind() }
             guard let played = playOnce(offset: offset), played > 0 else {
                 DispatchQueue.main.async { self.failed = true }
                 return
@@ -95,7 +96,7 @@ final class VideoPoseSource: PoseSource {
                 if let image {
                     self.currentImage = image
                     // Bridge single dropped detections so the skeleton doesn't flicker, but never draw a stale body.
-                    if !frame.joints.isEmpty || (self.currentImagePose.map { frame.timestamp - $0.timestamp > 0.15 } ?? true) {
+                    if !frame.joints.isEmpty || (self.currentImagePose.map { frame.timestamp - $0.timestamp > Self.bridgeSeconds } ?? true) {
                         self.currentImagePose = frame
                     }
                 }
@@ -111,6 +112,8 @@ final class VideoPoseSource: PoseSource {
     private static let maxLag: TimeInterval = 0.1
     /// Even when live Vision keeps playback behind on every frame, the picture still updates this often.
     static let minDrawInterval: TimeInterval = 0.2
+    /// A drawn frame with no detection keeps the last body this long; covers one missed detection at `minDrawInterval`.
+    static let bridgeSeconds: TimeInterval = 0.3
 
     static func shouldDraw(at t: TimeInterval, behind: Bool, lastDrawn: TimeInterval?) -> Bool {
         guard behind, let lastDrawn else { return true }

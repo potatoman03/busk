@@ -118,9 +118,9 @@ final class BuskUITests: XCTestCase {
         app.buttons["simulateVoice-status"].tap()
         // Wait on the answer first: it only holds the cue log for a few seconds before the next shot's cue.
         let spoken = app.staticTexts["lastSpokenCue"]
-        expectation(for: NSPredicate(format: "label CONTAINS 'average form'"), evaluatedWith: spoken)
+        // The answer is spoken, not muted; checked in the same match since the next shot's cue can replace it at once.
+        expectation(for: NSPredicate(format: "label BEGINSWITH 'Said' AND label CONTAINS 'average form'"), evaluatedWith: spoken)
         waitForExpectations(timeout: 15)
-        XCTAssertTrue(spoken.label.hasPrefix("Said"), spoken.label)
         XCTAssertTrue(status.label.contains("how am i doing"), status.label)
         snapshot("09-voice-how-am-i-doing")
 
