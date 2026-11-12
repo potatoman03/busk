@@ -53,6 +53,7 @@ struct LiveSessionView: View {
     }
 
     private var topBar: some View {
+        VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
             Button {
                 session.stop()
@@ -66,14 +67,12 @@ struct LiveSessionView: View {
                     onClose()
                 }
             } label: {
-                Label("End", systemImage: "stop.fill").font(.headline)
+                Label("End", systemImage: "stop.fill").font(.headline).lineLimit(1).fixedSize()
             }
             .buttonStyle(.borderedProminent)
             .tint(.red)
             .accessibilityIdentifier("endSessionButton")
 
-            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
-                .accessibilityIdentifier("phaseLabel")
             Spacer()
             if session.isDemo {
                 Pill(text: "Demo", systemImage: "play.rectangle").accessibilityIdentifier("demoBadge")
@@ -95,6 +94,9 @@ struct LiveSessionView: View {
             .accessibilityLabel(session.voiceEnabled ? "Mute coach" : "Unmute coach")
             .accessibilityIdentifier("voiceToggle")
         }
+            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
+                .accessibilityIdentifier("phaseLabel")
+        }
     }
 
     private var banner: some View {
@@ -115,6 +117,8 @@ struct Pill: View {
     var body: some View {
         Label(text, systemImage: systemImage)
             .font(.caption.bold())
+            .lineLimit(1)
+            .fixedSize()
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: Capsule())
     }
