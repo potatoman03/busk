@@ -42,7 +42,7 @@ struct ReplaySessionView: View {
 
     @ViewBuilder private var badges: some View {
         if let label {
-            Pill(text: "Benchmark clip: \(label)", systemImage: "film")
+            Pill(text: "Benchmark clip: \(label)", systemImage: "film", truncates: true)
                 .accessibilityIdentifier("replayClipLabel")
         }
         if let replayed {

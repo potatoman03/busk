@@ -59,12 +59,10 @@ struct LiveSessionView: View {
                     .padding(.trailing, poseInset)
                     .ignoresSafeArea()
                 VStack(spacing: 12) {
-                    topBar(showBadges: !landscape)
+                    topBar(landscape: landscape)
                     if landscape {
                         HStack(alignment: .top, spacing: 16) {
-                            // Badges share the left column with the ghost replay, so they never add height above the cue column.
                             VStack(alignment: .leading, spacing: 8) {
-                                if let badges { badges }
                                 replayPanel
                             }
                             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -151,7 +149,12 @@ struct LiveSessionView: View {
         }
     }
 
-    private func topBar(showBadges: Bool) -> some View {
+    private var phasePill: some View {
+        Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
+            .accessibilityIdentifier("phaseLabel")
+    }
+
+    private func topBar(landscape: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
             Button(action: endSession) {
@@ -182,9 +185,16 @@ struct LiveSessionView: View {
             .accessibilityLabel(session.voiceEnabled ? "Mute coach" : "Unmute coach")
             .accessibilityIdentifier("voiceToggle")
         }
-            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
-                .accessibilityIdentifier("phaseLabel")
-            if showBadges, let badges { badges }
+            if landscape {
+                // One row beside the phase pill, so badges add no height and stay above the shooter.
+                HStack(spacing: 8) {
+                    phasePill
+                    if let badges { badges }
+                }
+            } else {
+                phasePill
+                if let badges { badges }
+            }
         }
     }
 
@@ -205,11 +215,14 @@ struct LiveSessionView: View {
 struct Pill: View {
     let text: String
     let systemImage: String
+    /// Long labels shorten in the middle instead of widening the layout.
+    var truncates = false
     var body: some View {
         Label(text, systemImage: systemImage)
             .font(.caption.bold())
             .lineLimit(1)
-            .fixedSize()
+            .truncationMode(.middle)
+            .fixedSize(horizontal: !truncates, vertical: true)
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: Capsule())
     }
