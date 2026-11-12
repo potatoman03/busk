@@ -230,7 +230,9 @@ final class ShotAnalyzer {
             let push = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }
             // Only once the ball is up past the shoulder: on the way up out of the dip the forearm is still turning over.
             let loaded = push.filter { $0.wrist.y < $0.shoulder.y }
-            let offsets = (loaded.count >= 4 ? loaded : push).map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
+            // A forearm still tipped more than 45° off vertical is turning over, not flared: the elbow shows once it's upright.
+            let upright = loaded.filter { abs($0.elbow.x - $0.wrist.x) <= $0.elbow.y - $0.wrist.y }
+            let offsets = (loaded.count < 4 ? push : upright.count >= 3 ? upright : loaded).map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
             // With only a few frames (Vision dropping the arm, a slow camera) one turned forearm is the median: not judged.
             elbowFlare = push.count >= 6 ? offsets[offsets.count / 2] : nil
         }
