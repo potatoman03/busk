@@ -76,6 +76,7 @@ struct LiveSessionView: View {
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
+                                framingCard
                                 feedback(compact: true)
                             }
                             .frame(width: hudWidth)
@@ -84,6 +85,7 @@ struct LiveSessionView: View {
                         .frame(maxHeight: .infinity)
                     } else {
                         replayPanel
+                        framingCard
                         feedback(compact: false)
                     }
                 }
@@ -210,6 +212,24 @@ struct LiveSessionView: View {
                 phasePill
                 if let badges { badges }
             }
+        }
+    }
+
+    /// Before the first shot: what the camera can and can't see, so the player can fix the setup.
+    @ViewBuilder private var framingCard: some View {
+        if let f = session.framing {
+            HStack(spacing: 14) {
+                ForEach([("Head", f.head), ("Shooting arm", f.arm), ("Feet", f.feet), ("Centred", f.centred)], id: \.0) { item in
+                    Label(item.0, systemImage: item.1 ? "checkmark.circle.fill" : "xmark.circle")
+                        .foregroundStyle(item.1 ? Color.green : Color.yellow)
+                }
+            }
+            .font(.caption.weight(.semibold))
+            .labelStyle(.titleAndIcon)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("framingCheck")
         }
     }
 

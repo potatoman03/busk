@@ -18,8 +18,10 @@ final class CoachSession {
     private(set) var latestPose: PoseFrame?
     private(set) var shots: [ShotResult] = []
     private(set) var phase: ShotPhase = .waiting
-    private(set) var bannerText = "Step into frame"
+    private(set) var bannerText = "Step in front of the camera, 3 to 4 metres away"
     private(set) var bodyVisible = false
+    /// Framing before the first shot; nil once the player has been framed or has shot.
+    private(set) var framing: FramingCheck?
     /// Every cue the coach said (or would have said while muted), newest last.
     private(set) var spokenLog: [SpokenCue] = []
 
@@ -36,6 +38,8 @@ final class CoachSession {
     @ObservationIgnored private var lastSeen: TimeInterval = 0
     @ObservationIgnored private var lastFrameTime: TimeInterval = 0
     @ObservationIgnored private var announcedVisible = false
+    @ObservationIgnored private var adviceSince: (text: String, time: TimeInterval)?
+    @ObservationIgnored private var lastAdviceSpoken: (text: String, time: TimeInterval)?
     @ObservationIgnored private var statusUntil = Date.distantPast
     @ObservationIgnored private var best: (clip: ShotClip, number: Int, score: Int)?
 
@@ -80,17 +84,8 @@ final class CoachSession {
         } else if frame.timestamp - lastSeen > 0.5 {
             latestPose = frame.joints.isEmpty ? nil : frame
         }
-        if visible != bodyVisible {
-            bodyVisible = visible
-            if visible && !announcedVisible {
-                announcedVisible = true
-                let ready = focus.map { "Got you. Focus on your \($0.title.lowercased()). Shoot when ready" } ?? "Got you. Shoot when ready"
-                bannerText = ready
-                speak(ready)
-            } else if !visible && shots.isEmpty {
-                bannerText = "Step back until you're in frame, head to feet"
-            }
-        }
+        if visible != bodyVisible { bodyVisible = visible }
+        if !announcedVisible && shots.isEmpty { checkFraming(frame) }
 
         if let metrics = analyzer.process(frame) {
             let result = evaluator.evaluate(metrics)
@@ -161,6 +156,28 @@ final class CoachSession {
     }
 
     /// Answers "how am I doing": a spoken summary of the session so far, even when the coach is muted.
+    /// Before the first shot: say how to fix the camera until the whole player is in the picture, then "Got you".
+    private func checkFraming(_ frame: PoseFrame) {
+        let check = FramingCheck(frame: frame, handedness: handedness)
+        framing = check
+        guard let advice = check.advice else {
+            announcedVisible = true
+            framing = nil
+            let ready = focus.map { "Got you. Focus on your \($0.title.lowercased()). Shoot when ready" } ?? "Got you. Shoot when ready"
+            bannerText = ready
+            speak(ready)
+            return
+        }
+        bannerText = advice
+        if adviceSince?.text != advice { adviceSince = (advice, frame.timestamp) }
+        // Speak advice once it has held for a second, and repeat it at most every 6 s.
+        guard let since = adviceSince, frame.timestamp - since.time >= 1 else { return }
+        if let last = lastAdviceSpoken, last.text == advice, frame.timestamp - last.time < 6 { return }
+        if let last = lastAdviceSpoken, frame.timestamp - last.time < 3 { return }
+        lastAdviceSpoken = (advice, frame.timestamp)
+        speak(advice)
+    }
+
     func speakStatus() {
         let text = summary.spokenStatus
         statusUntil = Date().addingTimeInterval(max(2, Double(text.split(separator: " ").count) * 0.4))
