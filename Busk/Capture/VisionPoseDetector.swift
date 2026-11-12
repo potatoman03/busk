@@ -9,8 +9,13 @@ final class VisionPoseDetector {
     var minimumConfidence: Float = 0.3
 
     func joints(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation = .up) -> [Joint: CGPoint]? {
+        try? detect(in: pixelBuffer, orientation: orientation)
+    }
+
+    /// Throws when Vision can't run at all (the simulator has no body pose model).
+    func detect(in pixelBuffer: CVPixelBuffer, orientation: CGImagePropertyOrientation = .up) throws -> [Joint: CGPoint]? {
         let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, orientation: orientation)
-        try? handler.perform([request])
+        try handler.perform([request])
         guard let observation = (request.results ?? []).max(by: { area($0) < area($1) }) else { return nil }
         return Self.joints(from: observation, minimumConfidence: minimumConfidence)
     }

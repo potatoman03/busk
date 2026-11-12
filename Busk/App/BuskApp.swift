@@ -6,7 +6,8 @@ struct BuskApp: App {
     let container: ModelContainer
 
     init() {
-        let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil)
+        let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil
+                                        || AppEnvironment.videoURL != nil)
         do {
             container = try ModelContainer(for: SessionRecord.self, configurations: config)
         } catch {
@@ -23,6 +24,8 @@ struct BuskApp: App {
             Group {
                 if let path = AppEnvironment.replayKeypointsPath {
                     ReplaySessionView(path: path, label: AppEnvironment.replayLabel)
+                } else if let video = AppEnvironment.videoURL {
+                    ReplaySessionView(video: video, label: AppEnvironment.replayLabel)
                 } else {
                     HomeView()
                 }

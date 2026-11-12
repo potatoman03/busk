@@ -35,6 +35,13 @@ struct LiveSessionView: View {
                     if let image = video.currentImage {
                         Image(decorative: image, scale: 1).resizable().scaledToFit().ignoresSafeArea()
                     }
+                    if video.visionUnavailable {
+                        Text("Vision body pose isn't available here. Run scripts/vision-keypoints.swift on the clip to make a keypoints file.")
+                            .font(.footnote).multilineTextAlignment(.center).padding()
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                            .padding(.horizontal, 24)
+                            .accessibilityIdentifier("visionUnavailable")
+                    }
                 } else {
                     Theme.court.ignoresSafeArea()
                 }
