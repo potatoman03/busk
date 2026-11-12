@@ -1,0 +1,71 @@
+name: shot-feedback-benchmark
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: shot-feedback-benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: benchmark/.cache/real
+          key: real-footage-${{ hashFiles('benchmark/real_clips.json') }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r benchmark/requirements.txt
+      - name: Unit tests
+        run: python -m unittest discover -s benchmark/tests -v
+      - name: Previous main results
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p prev
+          id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow shot-feedback-benchmark.yml --branch main \
+                 --status success --limit 1 --json databaseId -q '.[0].databaseId' || true)
+          if [ -n "$id" ] && gh run download "$id" --repo "$GITHUB_REPOSITORY" -n shot-feedback-results -D prev; then
+            echo "BASELINE=prev/latest.json" >> "$GITHUB_ENV"
+          else
+            echo "BASELINE=benchmark/baselines/main.json" >> "$GITHUB_ENV"
+          fi
+      - name: Run benchmark
+        id: bench
+        run: benchmark/run.sh --baseline "$BASELINE" --report benchmark/results/compare.json
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo '## Shot feedback benchmark'
+            echo '```'
+            python - <<'PY'
+          import json
+          d = json.load(open("benchmark/results/latest.json"))
+          s = d["summary"]
+          print("analyzer:", d["run"]["analyzer_status"], " overall:", s["overall_score"])
+          print("tiers:", {t: v["score"] for t, v in s["tiers"].items()})
+          print("weakest advice:", [(w["flaw"], w["advice_rate"]) for w in d["weakest"]["flaws_by_advice"]])
+          PY
+            [ -f benchmark/results/compare.json ] && cat benchmark/results/compare.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shot-feedback-results
+          path: |
+            benchmark/results/latest.json
+            benchmark/results/compare.json
