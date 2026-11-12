@@ -7,7 +7,8 @@ struct ShotMetrics: Codable, Equatable, Sendable {
     /// Nil when the camera angle is unknown: only checks that work from any angle are measured.
     var view: CameraView?
     /// Shooting wrist height above the shooting shoulder at the set point. Negative = pushing from the chest.
-    var setPointHeight: Double
+    /// Nil (as for `hitch` and `releaseTiming`) when too few frames came in around the release to time the shot.
+    var setPointHeight: Double?
     /// Front view: sideways elbow-to-wrist offset at the set point. 0 = elbow straight under the ball.
     var elbowFlare: Double?
     /// Side view: shoulder-to-wrist elevation at release, degrees above horizontal.
@@ -19,7 +20,7 @@ struct ShotMetrics: Codable, Equatable, Sendable {
     /// Release time relative to the jump's peak, in half air-times: 0 = at the peak, 1 = on landing. Nil without a jump.
     var releaseTiming: Double?
     /// Time the ball stopped at the set point before the release.
-    var hitch: Double
+    var hitch: Double?
     /// Distance between the takeoff and landing spots.
     var drift: Double?
     /// Front view: guide hand travel just after release.
@@ -139,7 +140,7 @@ final class ShotAnalyzer {
         }
         // Only the motion since the last break in the frames counts (a looping video or a dropped stretch of frames
         // would otherwise mix in a pose from somewhere else).
-        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.3 && all[$0].t <= rt } ?? 0
+        let cut = all.indices.last { $0 > 0 && all[$0].t - all[$0 - 1].t > 0.5 && all[$0].t <= rt } ?? 0
         let samples = Array(all[cut...])
         guard samples.count >= 8 else { return nil }
         let n = samples.count
@@ -163,6 +164,10 @@ final class ShotAnalyzer {
         let lift = { (i: Int) in Double(samples[i].shoulder.y - samples[i].wrist.y) / H }
         let peak = around.map(lift).max() ?? 0
         let rel = around.first { lift($0) >= peak - 0.02 } ?? (samples.firstIndex { $0.t >= rt } ?? n / 2)
+        guard rel >= 2 else { return nil } // no gather in view to measure
+        // A short hold at the set point or the top of the jump lasts a few frames; when the camera or Vision falls below
+        // ~20 frames a second it isn't seen, and the slowest frame left is the bottom of the dip. Don't time those shots.
+        let timed = samples[..<rel].filter { $0.t >= samples[rel].t - 0.8 }.count >= 16
 
         // Wrist speed relative to the shoulder, in body heights per second.
         var speed = [Double](repeating: 9, count: n)
@@ -211,7 +216,8 @@ final class ShotAnalyzer {
         var elbowFlare: Double?
         if view == .front {
             let offsets = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }.map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
-            elbowFlare = offsets.isEmpty ? Double(abs(set.elbow.x - set.wrist.x)) / H : offsets[offsets.count / 2]
+            // With only a few frames (Vision dropping the arm, a slow camera) one turned forearm is the median: not judged.
+            elbowFlare = offsets.count >= 6 ? offsets[offsets.count / 2] : nil
         }
 
         // Arc: the arm's elevation while it is fully extended at the release (earlier frames still show the set point).
@@ -314,8 +320,8 @@ final class ShotAnalyzer {
             guideHandPush = max(0, Double(((g1.x - g0.x) - (r1.x - r0.x)) * toward)) / H
         }
 
-        return ShotMetrics(view: view, setPointHeight: setPointHeight, elbowFlare: elbowFlare, armAngle: armAngle,
-                           followThrough: followThrough, legDrive: legDrive, releaseTiming: releaseTiming,
-                           hitch: hitch, drift: drift, guideHandPush: guideHandPush)
+        return ShotMetrics(view: view, setPointHeight: timed ? setPointHeight : nil, elbowFlare: elbowFlare, armAngle: armAngle,
+                           followThrough: followThrough, legDrive: legDrive, releaseTiming: timed ? releaseTiming : nil,
+                           hitch: timed ? hitch : nil, drift: drift, guideHandPush: guideHandPush)
     }
 }
