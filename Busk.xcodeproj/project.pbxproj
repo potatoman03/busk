@@ -41,6 +41,7 @@
 		DF38769352D2AAE707CA117B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10EE5C10464DA177167DEE90 /* HomeView.swift */; };
 		E516177751EAF6EF7CC06C49 /* ShotAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC3682D5D07C7CC9F2D902C1 /* ShotAnalyzer.swift */; };
 		F69C60EACE736B9D6C34817D /* LiveSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6F6ADC54DFC6F2E89B30BC7 /* LiveSessionView.swift */; };
+		FA5433C1FBC960F95CF8433B /* side.keypoints.json in Resources */ = {isa = PBXBuildFile; fileRef = 1DE37067CF37291196E13A21 /* side.keypoints.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +63,7 @@
 
 /* Begin PBXFileReference section */
 		10EE5C10464DA177167DEE90 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		1DE37067CF37291196E13A21 /* side.keypoints.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = side.keypoints.json; sourceTree = "<group>"; };
 		312208706C0C33B349AE0267 /* BuskTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BuskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		342209B10A8F674607296622 /* BuskUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BuskUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3490E25B77A0630BFA13BCB4 /* ReplayPoseSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayPoseSourceTests.swift; sourceTree = "<group>"; };
@@ -226,10 +228,19 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		BC979D43166D027597A6507B /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				1DE37067CF37291196E13A21 /* side.keypoints.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
 		F72600BBF898F0AB9A6B81E8 /* BuskUITests */ = {
 			isa = PBXGroup;
 			children = (
 				3FBD0B931EDB59DFFE884677 /* BuskUITests.swift */,
+				BC979D43166D027597A6507B /* Fixtures */,
 			);
 			path = BuskUITests;
 			sourceTree = "<group>";
@@ -260,6 +271,7 @@
 			buildConfigurationList = ED522C5E7736FC98A96434C1 /* Build configuration list for PBXNativeTarget "BuskUITests" */;
 			buildPhases = (
 				5FA63C325971C227C5D31411 /* Sources */,
+				ACE0EFE8CED423C5E48C72C7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -343,6 +355,14 @@
 			files = (
 				7BCB8D86A49B61B9C1598F59 /* Assets.xcassets in Resources */,
 				5C55C0F6B56C5440C313EA0B /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ACE0EFE8CED423C5E48C72C7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA5433C1FBC960F95CF8433B /* side.keypoints.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

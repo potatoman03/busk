@@ -17,6 +17,8 @@ final class VideoPoseSource: PoseSource {
     private var poseAspect: CGFloat = 9.0 / 16.0
     /// The frame currently on screen, for drawing behind the skeleton.
     private(set) var currentImage: CGImage?
+    /// The pose of the frame in `currentImage`; when drawing falls behind, the analysed pose runs ahead of the picture.
+    private(set) var currentImagePose: PoseFrame?
     private(set) var failed = false
     /// Pose comes from a keypoints sidecar rather than live Vision.
     let keypoints: ReplayPoseSource.Clip?
@@ -87,7 +89,13 @@ final class VideoPoseSource: PoseSource {
             let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect)
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running else { return }
-                if let image { self.currentImage = image }
+                if let image {
+                    self.currentImage = image
+                    // Bridge single dropped detections so the skeleton doesn't flicker, but never draw a stale body.
+                    if !frame.joints.isEmpty || (self.currentImagePose.map { frame.timestamp - $0.timestamp > 0.15 } ?? true) {
+                        self.currentImagePose = frame
+                    }
+                }
                 self.onFrame?(frame)
             }
         }

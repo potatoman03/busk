@@ -13,11 +13,24 @@ struct ReplaySessionView: View {
     /// Written on load, after every coached shot and when a keypoint clip finishes, so the benchmark's simulator
     /// capture can wait for busk's coaching instead of guessing how long the simulator takes.
     @State private var status: ReplayStatus?
+    /// Done on the summary (or End with no shots) leaves the clip for Home, where the session shows in History.
+    @State private var closed = false
 
     var body: some View {
+        if closed {
+            HomeView()
+        } else {
+            replay
+        }
+    }
+
+    private var replay: some View {
         ZStack(alignment: .top) {
             if let session {
-                LiveSessionView(session: session) { session.stop() }
+                LiveSessionView(session: session) {
+                    session.stop()
+                    closed = true
+                }
             } else {
                 Theme.court.ignoresSafeArea()
                 Text(error ?? "Loading clip").foregroundStyle(.secondary).padding(.top, 200)
