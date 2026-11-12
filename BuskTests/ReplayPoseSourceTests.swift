@@ -20,4 +20,14 @@ final class ReplayPoseSourceTests: XCTestCase {
     func testRejectsEmptyClip() {
         XCTAssertThrowsError(try ReplayPoseSource.parse(Data(#"{"frames":[]}"#.utf8)))
     }
+
+    func testWideClipOverlayCentresOnShooter() {
+        let size = CGSize(width: 400, height: 800)
+        let map = SkeletonOverlay.mapper(size: size, aspectRatio: 16.0 / 9.0, centerX: 0.34)
+        XCTAssertEqual(map(CGPoint(x: 0.34, y: 0.5)).x, 200, accuracy: 1e-6)
+        let edge = SkeletonOverlay.mapper(size: size, aspectRatio: 16.0 / 9.0, centerX: 0.0)
+        XCTAssertEqual(edge(CGPoint(x: 0, y: 0.5)).x, 0, accuracy: 1e-6)
+        let centred = SkeletonOverlay.mapper(size: size, aspectRatio: 16.0 / 9.0)
+        XCTAssertEqual(centred(CGPoint(x: 0.5, y: 0.5)).x, 200, accuracy: 1e-6)
+    }
 }

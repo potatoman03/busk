@@ -14,6 +14,11 @@ final class ReplayPoseSource: PoseSource {
 
     var onFrame: ((PoseFrame) -> Void)?
     var aspectRatio: CGFloat { clip.aspectRatio }
+    /// Benchmark clips are landscape; keep the shooter on screen instead of the frame's centre.
+    var displayCenterX: CGFloat {
+        let xs = clip.frames.flatMap { $0.values.map(\.x) }
+        return xs.isEmpty ? 0.5 : xs.reduce(0, +) / CGFloat(xs.count)
+    }
     let isDemo = true
     let clip: Clip
 
