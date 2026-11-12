@@ -1,0 +1,163 @@
+{
+  "version": "1.0.0",
+  "notes": "Flaw IDs are the contract between busk's form analysis and this benchmark. Patterns are case-insensitive Python regexes matched against each feedback line. fix_patterns credit actionable advice for a flaw; mention_patterns only identify the flaw and are used for detection when the analyzer reports no flaw IDs. label_rule documents the kinematic threshold the synthetic clips use to decide the ground-truth label.",
+  "flaws": [
+    {
+      "id": "no_leg_drive",
+      "name": "No leg drive",
+      "description": "Shooter barely bends the knees and powers the ball with the arms.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "knee_bend_deg", "op": "<", "value": 25},
+      "canonical_fix": "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+      "mention_patterns": [
+        "\\b(no|not enough|little|more|without)\\b.{0,20}\\b(leg|knee)s?\\b",
+        "\\b(arms?[- ]only|all arms|pushing with (your )?arms)\\b",
+        "\\b(stiff|straight|locked) (legs|knees)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(bend|use|load|sink|drive|power|get into)\\b.{0,30}\\b(knees?|legs?|hips)\\b",
+        "\\b(knees?|legs?)\\b.{0,30}\\b(bend|more|power|drive|load|into it)\\b",
+        "\\b(dip|sit) (down|lower|more)\\b"
+      ]
+    },
+    {
+      "id": "low_set_point",
+      "name": "Low set point",
+      "description": "The ball is pushed from the chest or chin instead of from a set point at or above the forehead.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "set_height", "op": "<", "value": 0.86},
+      "canonical_fix": "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+      "mention_patterns": [
+        "\\b(low|too low)\\b.{0,20}\\b(set ?point|release( point)?|release height)\\b",
+        "\\b(from|off) (your |the )?(chest|chin)\\b",
+        "\\bchest pass\\b|\\bpushing (it|the ball)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(set|lift|raise|bring|get)\\b.{0,30}\\b(ball|set ?point|it)\\b.{0,30}\\b(higher|up|above|forehead|eyes?)\\b",
+        "\\b(higher|raise|lift)\\b.{0,20}\\b(set ?point|release point|release)\\b",
+        "\\b(shoot|release|set)\\b.{0,20}\\b(from|above|over|at)\\b.{0,20}\\b(forehead|head|eyes?)\\b"
+      ]
+    },
+    {
+      "id": "elbow_flare",
+      "name": "Elbow flare",
+      "description": "The shooting elbow sticks out to the side instead of staying under the ball, pushing the shot off line.",
+      "views": ["front"],
+      "label_rule": {"param": "elbow_flare_deg", "op": ">", "value": 20},
+      "canonical_fix": "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
+      "mention_patterns": [
+        "\\belbow\\b.{0,30}\\b(out|flar\\w*|sticking|wide|chicken)\\b",
+        "\\bchicken wing\\b"
+      ],
+      "fix_patterns": [
+        "\\belbow\\b.{0,40}\\b(in|under|tuck\\w*|straight|aligned|in line|lined up|point\\w* (at|to) (the )?(rim|basket|hoop)|below)\\b",
+        "\\b(tuck|keep|bring|line up|align)\\b.{0,30}\\belbow\\b"
+      ]
+    },
+    {
+      "id": "flat_arc",
+      "name": "Flat arc",
+      "description": "The ball leaves on a flat trajectory (launch angle well under 45 degrees), shrinking the target at the rim.",
+      "views": ["side"],
+      "label_rule": {"param": "release_angle_deg", "op": "<", "value": 40},
+      "canonical_fix": "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
+      "mention_patterns": [
+        "\\b(flat|low|line[- ]drive)\\b.{0,20}\\b(arc|shot|trajectory|angle)\\b",
+        "\\bnot enough arc\\b"
+      ],
+      "fix_patterns": [
+        "\\b(more|higher|bigger|add|get|put)\\b.{0,20}\\b(arc|loft|air under)\\b",
+        "\\barc\\b.{0,30}\\b(higher|more|up)\\b",
+        "\\bshoot\\b.{0,20}\\b(up|higher)\\b.{0,30}\\b(over|into|rim|basket)\\b",
+        "\\b(release|launch)\\b.{0,20}\\bangle\\b.{0,30}\\b(higher|steeper|up)\\b"
+      ]
+    },
+    {
+      "id": "no_follow_through",
+      "name": "No follow-through",
+      "description": "The shooting arm drops immediately after release with no wrist snap or held finish.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "follow_hold_s", "op": "<", "value": 0.15},
+      "canonical_fix": "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
+      "mention_patterns": [
+        "\\b(no|without|missing|short|cut off|dropp\\w*)\\b.{0,20}\\b(follow[- ]?through|finish)\\b",
+        "\\b(arm|hand)s? (drops?|falls?|come down)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(hold|freeze|keep|finish)\\b.{0,30}\\b(follow[- ]?through|wrist|finish|pose|hand up|arm up)\\b",
+        "\\b(snap|flick|bend)\\b.{0,20}\\bwrist\\b",
+        "\\b(reach|hand)\\b.{0,30}\\b(cookie jar|into the (rim|basket|hoop))\\b",
+        "\\bgoose ?neck\\b"
+      ]
+    },
+    {
+      "id": "guide_hand_interference",
+      "name": "Guide hand interference",
+      "description": "The non-shooting hand pushes or flicks the ball at release, adding side spin and pushing it off line.",
+      "views": ["front"],
+      "label_rule": {"param": "guide_push", "op": ">", "value": 0.5},
+      "canonical_fix": "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
+      "mention_patterns": [
+        "\\b(guide|off|non[- ]?shooting|support|other)[- ]?hand\\b.{0,30}\\b(push\\w*|flick\\w*|interfer\\w*|involved|thumb)\\b",
+        "\\bthumb(ing)?\\b.{0,20}\\b(flick|push|ball)\\b",
+        "\\btwo[- ]hand(ed)? push\\b"
+      ],
+      "fix_patterns": [
+        "\\b(guide|off|non[- ]?shooting|support|balance|other|left|right)[- ]?hand\\b.{0,40}\\b(off|still|quiet|on the side|side|away|out of|only guides?|just guides?|come off|comes off|relax\\w*|no push|not push|don'?t push)\\b",
+        "\\b(don'?t|stop|no|avoid)\\b.{0,15}\\b(push\\w*|thumb\\w*|flick\\w*)\\b.{0,30}\\b(guide|off|other|non[- ]?shooting|support|thumb)\\b",
+        "\\bone[- ]hand(ed)? (release|push|shot)\\b"
+      ]
+    },
+    {
+      "id": "releasing_on_the_way_down",
+      "name": "Releasing on the way down",
+      "description": "The ball is released well after the peak of the jump, so leg power is lost and the shot is short.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "release_timing", "op": ">", "value": 0.3},
+      "canonical_fix": "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
+      "mention_patterns": [
+        "\\b(on the way down|while (you'?re )?falling|after the (peak|top)|late release|releas\\w* late)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(release|let (it|the ball) go|get (it|the shot|the ball) off|shoot)\\b.{0,40}\\b(earlier|sooner|at the top|at the peak|at the apex|on the way up|before (you )?(land|come down|start falling|drop))\\b",
+        "\\b(don'?t|stop|avoid|no)\\b.{0,20}\\b(wait\\w*|hang\\w*|shoot\\w* on the way down|releas\\w* on the way down)\\b",
+        "\\bearlier release\\b"
+      ]
+    },
+    {
+      "id": "hitch_at_set_point",
+      "name": "Hitch at the set point",
+      "description": "The ball stops at the set point (two-motion pause), killing rhythm and slowing the release.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "hitch_s", "op": ">", "value": 0.25},
+      "canonical_fix": "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+      "mention_patterns": [
+        "\\b(hitch|pause|two[- ]motion|stop\\w*|hesitat\\w*)\\b.{0,30}\\b(top|set ?point|head|release|shot|ball)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(one|single|smooth|continuous|fluid)[- ]?(motion|movement|rhythm|flow)\\b",
+        "\\b(don'?t|stop|avoid|no)\\b.{0,20}\\b(paus\\w*|hitch\\w*|stopp\\w*)\\b",
+        "\\b(get rid of|remove|eliminate|cut)\\b.{0,20}\\b(pause|hitch)\\b",
+        "\\bkeep (the ball|it) moving\\b"
+      ]
+    },
+    {
+      "id": "off_balance_drift",
+      "name": "Off-balance drift",
+      "description": "The shooter fades, leans or drifts in the air and lands well away from the takeoff spot.",
+      "views": ["side", "front"],
+      "label_rule": {"param": "drift_m", "op": ">", "value": 0.3},
+      "canonical_fix": "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+      "mention_patterns": [
+        "\\b(fad\\w*|lean\\w*|drift\\w*|falling (back|away|sideways)|off[- ]balance)\\b"
+      ],
+      "fix_patterns": [
+        "\\b(land|finish|come down)\\b.{0,30}\\b(same spot|where you (took off|jumped|started)|balanced|on balance|square|straight)\\b",
+        "\\b(jump|go|rise)\\b.{0,15}\\bstraight up\\b",
+        "\\b(stay|keep|be)\\b.{0,20}\\b(balanced|on balance|square|centered|vertical|straight)\\b",
+        "\\b(don'?t|stop|avoid|no)\\b.{0,20}\\b(fad\\w*|lean\\w*|drift\\w*|fall\\w* (back|away|sideways))\\b"
+      ]
+    }
+  ],
+  "praise_pattern": "^\\s*(great|nice|good|perfect|beautiful|love|excellent|solid|clean|smooth|textbook|keep (it )?up|that'?s it)\\b(?!.*\\b(but|however|though|except|try|need)\\b)"
+}

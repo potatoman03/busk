@@ -19,3 +19,7 @@ detection (Vision) and speaks feedback on your elbow, arc, release and follow-th
 `scripts/testflight.sh` archives, cloud-signs and uploads to TestFlight (internal testing only) using an
 App Store Connect API key in `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`. CI (`.github/workflows/ci.yml`) builds and runs
 the unit and UI tests on every PR.
+
+## Shooting feedback benchmark
+
+`benchmark/run.sh` scores busk's form feedback on labeled shots from beginner to elite. See [benchmark/README.md](benchmark/README.md) for the analyzer contract busk must implement.

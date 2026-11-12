@@ -1,0 +1,165 @@
+{
+  "version": "1.0.0",
+  "notes": "Each archetype is rendered once per listed camera view (clip id = <archetype>__<view>). `flaws` is the ground truth for the shooter; a flaw only counts for a clip when the taxonomy says it is observable from that view. Severity 3 is the fix a coach would give first. Elite archetypes are modeled on the named players' published mechanics; they are synthetic renders, not footage of those players.",
+  "archetypes": [
+    {
+      "id": "beginner_chest_push",
+      "tier": "beginner",
+      "description": "First-time shooter: flat-footed two-hand push from the chest, elbow out, guide hand shoving, arm drops instantly.",
+      "views": ["side", "front"],
+      "look": {"skin": "light", "jersey": [120, 120, 120], "shorts": [40, 40, 40]},
+      "params": {"height_m": 1.72, "tempo": 0.8, "knee_bend_deg": 12, "jump_height_m": 0.0, "set_height": 0.78, "elbow_flare_deg": 32, "release_angle_deg": 35, "follow_hold_s": 0.05, "guide_push": 1},
+      "flaws": [
+        {"id": "low_set_point", "severity": 3},
+        {"id": "no_leg_drive", "severity": 2},
+        {"id": "guide_hand_interference", "severity": 2},
+        {"id": "elbow_flare", "severity": 2},
+        {"id": "flat_arc", "severity": 2},
+        {"id": "no_follow_through", "severity": 1}
+      ]
+    },
+    {
+      "id": "beginner_flailing_jumper",
+      "tier": "beginner",
+      "description": "Jumps hard but lets go on the way down while fading back, elbow flared, no finish.",
+      "views": ["side", "front"],
+      "look": {"skin": "brown", "jersey": [230, 200, 40], "shorts": [20, 60, 140]},
+      "params": {"height_m": 1.80, "tempo": 0.9, "knee_bend_deg": 35, "jump_height_m": 0.22, "release_timing": 0.8, "drift_x_m": -0.4, "drift_y_m": 0.25, "lean_deg": 12, "elbow_flare_deg": 28, "follow_hold_s": 0.1, "release_angle_deg": 42, "set_height": 0.9},
+      "flaws": [
+        {"id": "releasing_on_the_way_down", "severity": 3},
+        {"id": "off_balance_drift", "severity": 2},
+        {"id": "elbow_flare", "severity": 2},
+        {"id": "no_follow_through", "severity": 1}
+      ]
+    },
+    {
+      "id": "beginner_two_motion",
+      "tier": "beginner",
+      "description": "Stops the ball above the head before shooting, barely uses the legs, flat release, guide hand pushes.",
+      "views": ["side", "front"],
+      "look": {"skin": "tan", "jersey": [40, 160, 80], "shorts": [240, 240, 240]},
+      "params": {"height_m": 1.68, "tempo": 0.75, "knee_bend_deg": 18, "jump_height_m": 0.05, "set_height": 0.92, "hitch_s": 0.5, "release_angle_deg": 38, "guide_push": 1, "follow_hold_s": 0.3},
+      "flaws": [
+        {"id": "hitch_at_set_point", "severity": 3},
+        {"id": "no_leg_drive", "severity": 2},
+        {"id": "guide_hand_interference", "severity": 2},
+        {"id": "flat_arc", "severity": 2}
+      ]
+    },
+    {
+      "id": "rec_elbow_out",
+      "tier": "intermediate",
+      "description": "Decent rhythm and legs, but the shooting elbow flares well outside the ball.",
+      "views": ["side", "front"],
+      "look": {"skin": "dark", "jersey": [200, 40, 40], "shorts": [30, 30, 30]},
+      "params": {"elbow_flare_deg": 30, "release_angle_deg": 45, "follow_hold_s": 0.45, "knee_bend_deg": 44},
+      "flaws": [
+        {"id": "elbow_flare", "severity": 3}
+      ]
+    },
+    {
+      "id": "rec_flat_shot",
+      "tier": "intermediate",
+      "description": "Line-drive shooter: good base but the ball comes out flat at about 36 degrees.",
+      "views": ["side", "front"],
+      "look": {"skin": "light", "jersey": [250, 140, 30], "shorts": [20, 20, 90]},
+      "params": {"release_angle_deg": 36, "set_height": 0.9, "follow_hold_s": 0.35, "knee_bend_deg": 40},
+      "flaws": [
+        {"id": "flat_arc", "severity": 3}
+      ]
+    },
+    {
+      "id": "rec_lazy_finish",
+      "tier": "intermediate",
+      "description": "Arm drops straight after release and the legs are only lightly involved.",
+      "views": ["side", "front"],
+      "look": {"skin": "tan", "jersey": [110, 50, 160], "shorts": [60, 60, 60]},
+      "params": {"follow_hold_s": 0.06, "knee_bend_deg": 22, "jump_height_m": 0.1},
+      "flaws": [
+        {"id": "no_follow_through", "severity": 3},
+        {"id": "no_leg_drive", "severity": 2}
+      ]
+    },
+    {
+      "id": "rec_fader",
+      "tier": "intermediate",
+      "description": "Fades back and sideways on every shot and releases after the peak.",
+      "views": ["side", "front"],
+      "look": {"skin": "brown", "jersey": [20, 140, 160], "shorts": [250, 250, 250]},
+      "params": {"drift_x_m": -0.4, "drift_y_m": 0.25, "lean_deg": 14, "release_timing": 0.5, "jump_height_m": 0.2},
+      "flaws": [
+        {"id": "off_balance_drift", "severity": 3},
+        {"id": "releasing_on_the_way_down", "severity": 2}
+      ]
+    },
+    {
+      "id": "rec_guide_thumb",
+      "tier": "intermediate",
+      "description": "Thumbs the ball with the guide hand at release and pauses at the set point.",
+      "views": ["side", "front"],
+      "look": {"skin": "dark", "jersey": [240, 240, 240], "shorts": [180, 30, 30]},
+      "params": {"guide_push": 1, "hitch_s": 0.32, "knee_bend_deg": 42},
+      "flaws": [
+        {"id": "guide_hand_interference", "severity": 3},
+        {"id": "hitch_at_set_point", "severity": 2}
+      ]
+    },
+    {
+      "id": "advanced_solid",
+      "tier": "advanced",
+      "description": "High-school varsity shooter with sound mechanics and nothing to fix.",
+      "views": ["side", "front"],
+      "look": {"skin": "tan", "jersey": [30, 30, 120], "shorts": [30, 30, 120]},
+      "params": {"knee_bend_deg": 45, "release_angle_deg": 46, "set_height": 0.95, "elbow_flare_deg": 10, "follow_hold_s": 0.5, "jump_height_m": 0.17},
+      "flaws": []
+    },
+    {
+      "id": "advanced_slight_flare",
+      "tier": "advanced",
+      "description": "College-level shooter whose only issue is a mild elbow flare.",
+      "views": ["side", "front"],
+      "look": {"skin": "light", "jersey": [0, 110, 70], "shorts": [0, 110, 70]},
+      "params": {"elbow_flare_deg": 25, "knee_bend_deg": 46, "release_angle_deg": 47, "follow_hold_s": 0.55},
+      "flaws": [
+        {"id": "elbow_flare", "severity": 2}
+      ]
+    },
+    {
+      "id": "elite_curry_one_motion",
+      "tier": "elite",
+      "description": "Modeled on Stephen Curry: quick one-motion shot released on the way up from just above the eyes, high arc, held follow-through.",
+      "views": ["side", "front"],
+      "look": {"skin": "tan", "jersey": [29, 66, 138], "shorts": [29, 66, 138]},
+      "params": {"height_m": 1.88, "tempo": 1.35, "knee_bend_deg": 42, "jump_height_m": 0.16, "set_height": 0.93, "elbow_flare_deg": 8, "release_angle_deg": 47, "follow_hold_s": 0.7, "release_timing": -0.35},
+      "flaws": []
+    },
+    {
+      "id": "elite_klay_textbook",
+      "tier": "elite",
+      "description": "Modeled on Klay Thompson: textbook catch-and-shoot, elbow straight under the ball, release at the peak.",
+      "views": ["side", "front"],
+      "look": {"skin": "tan", "jersey": [253, 185, 39], "shorts": [253, 185, 39]},
+      "params": {"height_m": 1.98, "knee_bend_deg": 48, "jump_height_m": 0.2, "set_height": 1.0, "elbow_flare_deg": 4, "release_angle_deg": 46, "follow_hold_s": 0.7, "release_timing": 0.05},
+      "flaws": []
+    },
+    {
+      "id": "elite_durant_high_release",
+      "tier": "elite",
+      "description": "Modeled on Kevin Durant: very high set point and release, steep arc.",
+      "views": ["side", "front"],
+      "look": {"skin": "dark", "jersey": [0, 45, 98], "shorts": [0, 45, 98]},
+      "params": {"height_m": 2.08, "tempo": 1.1, "knee_bend_deg": 40, "jump_height_m": 0.25, "set_height": 1.05, "elbow_flare_deg": 7, "release_angle_deg": 49, "follow_hold_s": 0.6, "release_timing": 0.1},
+      "flaws": []
+    },
+    {
+      "id": "elite_lefty",
+      "tier": "elite",
+      "description": "Elite left-handed shooter with clean mechanics (tests handedness).",
+      "views": ["side", "front"],
+      "handedness": "left",
+      "look": {"skin": "brown", "jersey": [130, 0, 30], "shorts": [130, 0, 30]},
+      "params": {"height_m": 1.93, "knee_bend_deg": 46, "jump_height_m": 0.18, "set_height": 0.97, "elbow_flare_deg": 6, "release_angle_deg": 48, "follow_hold_s": 0.65},
+      "flaws": []
+    }
+  ]
+}
