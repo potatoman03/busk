@@ -22,6 +22,8 @@
 		39D6CC34C5C8704880FFEB43 /* CameraPoseSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632628D1BE8604194782A543 /* CameraPoseSource.swift */; };
 		40A84D80C988479FECC68305 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEF434FA39404A1A61C286B7 /* SettingsView.swift */; };
 		40ACA244A20FDC6CC47B72F1 /* SessionRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF8BAA5075D0438F943C610 /* SessionRecord.swift */; };
+		412B43E7CCB0886443E7D200 /* BallDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38D59AEE394A75BE757A1E9D /* BallDetector.swift */; };
+		4E92045D832A7AF009C10919 /* BallDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17805F22C605812DFF9DB658 /* BallDetectorTests.swift */; };
 		5C55C0F6B56C5440C313EA0B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D828BE0E7EE4B19457EDE0BC /* PrivacyInfo.xcprivacy */; };
 		67C875A227B99B5FB958B794 /* GhostReplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 724B42E247B1A97CCCC019EB /* GhostReplayView.swift */; };
 		682FB2EAA8A3546C6D4DFB78 /* ShotReplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4596C5E53E132A0036E46BF /* ShotReplay.swift */; };
@@ -70,11 +72,13 @@
 
 /* Begin PBXFileReference section */
 		10EE5C10464DA177167DEE90 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		17805F22C605812DFF9DB658 /* BallDetectorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BallDetectorTests.swift; sourceTree = "<group>"; };
 		1DE37067CF37291196E13A21 /* side.keypoints.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = side.keypoints.json; sourceTree = "<group>"; };
 		30DEACC32C992532E5250F4E /* ShotReplayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotReplayTests.swift; sourceTree = "<group>"; };
 		312208706C0C33B349AE0267 /* BuskTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BuskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		342209B10A8F674607296622 /* BuskUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = BuskUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3490E25B77A0630BFA13BCB4 /* ReplayPoseSourceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReplayPoseSourceTests.swift; sourceTree = "<group>"; };
+		38D59AEE394A75BE757A1E9D /* BallDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BallDetector.swift; sourceTree = "<group>"; };
 		3FBD0B931EDB59DFFE884677 /* BuskUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuskUITests.swift; sourceTree = "<group>"; };
 		4259846F864FD15E04404A69 /* SkeletonOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonOverlay.swift; sourceTree = "<group>"; };
 		4A89227129404F8B9E1BC54B /* ShotSimulator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShotSimulator.swift; sourceTree = "<group>"; };
@@ -151,6 +155,7 @@
 		1D63ABF265EFB1D6689008D7 /* BuskTests */ = {
 			isa = PBXGroup;
 			children = (
+				17805F22C605812DFF9DB658 /* BallDetectorTests.swift */,
 				EC06A4C9D17F8E3CC8D2A210 /* FormEvaluatorTests.swift */,
 				3490E25B77A0630BFA13BCB4 /* ReplayPoseSourceTests.swift */,
 				71CEC174D8C751EE7A477C41 /* ShooterTrackerTests.swift */,
@@ -216,6 +221,7 @@
 		46C5770793959E3367FAC28E /* Capture */ = {
 			isa = PBXGroup;
 			children = (
+				38D59AEE394A75BE757A1E9D /* BallDetector.swift */,
 				632628D1BE8604194782A543 /* CameraPoseSource.swift */,
 				A58C3402EAFF7EAC0ED0DC5D /* PoseSource.swift */,
 				B3D9794E4FE91828C14AD74B /* ReplayPoseSource.swift */,
@@ -403,6 +409,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				157DCF15CB5509D5D1244DD3 /* AppEnvironment.swift in Sources */,
+				412B43E7CCB0886443E7D200 /* BallDetector.swift in Sources */,
 				AEF46C4178110100EA49C750 /* BuskApp.swift in Sources */,
 				39D6CC34C5C8704880FFEB43 /* CameraPoseSource.swift in Sources */,
 				1E74038D4CE77040A8A7AFE7 /* CameraPreview.swift in Sources */,
@@ -441,6 +448,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E92045D832A7AF009C10919 /* BallDetectorTests.swift in Sources */,
 				8B74D103A24ECDBEDDA44600 /* FormEvaluatorTests.swift in Sources */,
 				0EF2878F5F0158A08B0B88B5 /* ReplayPoseSourceTests.swift in Sources */,
 				28E0ED450FC64C9244FCD4E7 /* ShooterTrackerTests.swift in Sources */,

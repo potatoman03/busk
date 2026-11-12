@@ -106,7 +106,8 @@ extension CameraPoseSource: AVCaptureVideoDataOutputSampleBufferDelegate {
         let ts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer).seconds
         guard let joints = detector.joints(in: pixelBuffer) else { return }
         let ratio = h > 0 ? w / h : aspectRatio
-        let frame = PoseFrame(timestamp: ts, joints: joints, aspect: ratio)
+        let ball = detector.ball(in: pixelBuffer, joints: joints, at: ts)
+        let frame = PoseFrame(timestamp: ts, joints: joints, aspect: ratio, ball: ball)
         DispatchQueue.main.async { [weak self] in
             self?.aspectRatio = ratio
             self?.onFrame?(frame)

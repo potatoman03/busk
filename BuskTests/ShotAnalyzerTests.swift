@@ -177,4 +177,66 @@ final class ShotAnalyzerTests: XCTestCase {
         }
         XCTAssertEqual(frames.compactMap { analyzer.process($0) }.count, styles.count)
     }
+
+    /// The ball in the shooting hand, a ball's radius above the wrist, on every frame.
+    private func withBall(_ frames: [PoseFrame], handedness: Handedness = .right) -> [PoseFrame] {
+        frames.map { f in
+            var f = f
+            if let w = f[handedness.wrist], let nose = f[.nose], let ankle = f[.rightAnkle] {
+                let r = 0.06 * (ankle.y - nose.y) / 0.87
+                f.ball = Ball(center: CGPoint(x: w.x, y: w.y - r), radius: r)
+            }
+            return f
+        }
+    }
+
+    private func measure(_ frames: [PoseFrame], view: CameraView) -> ShotMetrics? {
+        let analyzer = ShotAnalyzer(handedness: .right, view: view)
+        return frames.compactMap { analyzer.process($0) }.first
+    }
+
+    private func shot(_ style: ShotSimulator.Style, view: CameraView) -> [PoseFrame] {
+        var sim = ShotSimulator()
+        sim.view = view
+        let shot = sim.frames(for: style, start: 0.5)
+        return sim.idleFrames(seconds: 0.5, start: 0) + shot + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 1 / sim.fps)
+    }
+
+    func testSetPointIsReadFromTheBallWhenTheWristReadsLow() throws {
+        // From the front, Vision can read the wrist low while it is under the ball: drop it before the release and
+        // keep the ball where it really was.
+        let original = withBall(shot(.good, view: .front))
+        let analyzer = ShotAnalyzer(handedness: .right, view: .front)
+        _ = original.compactMap { analyzer.process($0) }
+        let release = try XCTUnwrap(analyzer.lastShotClip?.release)
+        let frames = original.map { f -> PoseFrame in
+            var f = f
+            if f.timestamp < release - 0.07, let w = f[.rightWrist], let s = f[.rightShoulder], let nose = f[.nose],
+               let ankle = f[.rightAnkle], w.y < s.y {
+                f.joints[.rightWrist] = CGPoint(x: w.x, y: min(s.y, w.y + 0.08 * (ankle.y - nose.y) / 0.87))
+            }
+            return f
+        }
+        var noBall = frames
+        for i in noBall.indices { noBall[i].ball = nil }
+        let wristOnly = try XCTUnwrap(measure(noBall, view: .front)?.setPointHeight)
+        let fromBall = try XCTUnwrap(measure(frames, view: .front)?.setPointHeight)
+        XCTAssertGreaterThan(fromBall, 0.06)
+        XCTAssertGreaterThan(fromBall, wristOnly + 0.05)
+    }
+
+    func testChestPushWithTheBallInViewStillHasLowSetPoint() throws {
+        for view in [CameraView.side, .front] {
+            XCTAssertLessThan(try XCTUnwrap(measure(withBall(shot(.lowSet, view: view)), view: view)?.setPointHeight), 0)
+        }
+    }
+
+    func testBallOutOfTheHandIsNotUsed() throws {
+        let frames = shot(.lowSet, view: .side).map { f -> PoseFrame in
+            var f = f
+            f.ball = Ball(center: CGPoint(x: 0.1, y: 0.05), radius: 0.03)
+            return f
+        }
+        XCTAssertLessThan(try XCTUnwrap(measure(frames, view: .side)?.setPointHeight), 0)
+    }
 }

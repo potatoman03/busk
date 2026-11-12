@@ -83,6 +83,8 @@ final class VideoPoseSource: PoseSource {
             let t = CMSampleBufferGetPresentationTimeStamp(sample).seconds
             last = t
             let joints = pose(at: t, pixels: pixels, orientation: orientation)
+            // The ball is found in the picture itself, also when the pose comes from a sidecar.
+            let ball = detector.ball(in: pixels, orientation: orientation, joints: joints, at: offset + t)
             if !joints.isEmpty { lastJoints = joints }
             let behind = Date().timeIntervalSince(wallStart) - t > Self.maxLag
             let draw = Self.shouldDraw(at: t, behind: behind, lastDrawn: lastDrawn)
@@ -90,7 +92,7 @@ final class VideoPoseSource: PoseSource {
             let image = draw ? displayImage(pixels, orientation: orientation) : nil
             let wait = t - Date().timeIntervalSince(wallStart)
             if wait > 0 { Thread.sleep(forTimeInterval: wait) }
-            let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect)
+            let frame = PoseFrame(timestamp: offset + t, joints: joints, aspect: poseAspect, ball: ball)
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.running else { return }
                 if let image {
