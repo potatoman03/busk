@@ -13,7 +13,7 @@ from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
 from busk_bench.heldout import load_heldout_clips  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
 from busk_bench.scoring import score_clip, summarize  # noqa: E402
-from busk_bench.visual import pick_device, replay_seconds  # noqa: E402
+from busk_bench.visual import coaching_timeout, coached, pick_device, replay_seconds, wait_for_coaching  # noqa: E402
 
 TAX = load_taxonomy()
 CLIPS, _, _ = load_clips(TAX)
@@ -243,6 +243,38 @@ class ReplayTiming(unittest.TestCase):
     def test_frames_plus_hold(self):
         self.assertAlmostEqual(replay_seconds({"fps": 30, "frames": [{}] * 60}), 3.5)
         self.assertAlmostEqual(replay_seconds({"frames": [{}] * 15}), 2.0)
+
+
+class WaitForCoaching(unittest.TestCase):
+    def run_wait(self, statuses, loops=False, timeout=10.0):
+        t = [0.0]
+        seq = iter(statuses)
+        read = lambda: next(seq, None)
+        def sleep(s):
+            t[0] += s
+        return wait_for_coaching(read, "c", loops, timeout, sleep=sleep, clock=lambda: t[0])
+
+    def test_keypoint_replay_waits_until_finished_with_a_shot(self):
+        playing = {"label": "c", "shots": 1, "finished": False}
+        done = {"label": "c", "shots": 1, "finished": True}
+        outcome, waited, st = self.run_wait([None, playing, playing, done])
+        self.assertEqual((outcome, waited, st), ("coached", 1.5, done))
+
+    def test_video_counts_at_first_shot(self):
+        outcome, _, _ = self.run_wait([{"label": "c", "shots": 0}, {"label": "c", "shots": 1}], loops=True)
+        self.assertEqual(outcome, "coached")
+
+    def test_finished_without_a_shot_is_a_miss(self):
+        self.assertEqual(self.run_wait([{"label": "c", "shots": 0, "finished": True}])[0], "no_shot")
+
+    def test_times_out_and_ignores_other_clips_status(self):
+        outcome, waited, _ = self.run_wait([{"label": "other", "shots": 3, "finished": True}], timeout=5)
+        self.assertEqual((outcome, waited), ("timeout", 5.0))
+        self.assertIsNone(coached({"label": "c", "shots": 0}, "c", loops=True))
+
+    def test_timeout_allows_for_the_slow_simulator(self):
+        self.assertEqual(coaching_timeout(1.0), 30.0)
+        self.assertEqual(coaching_timeout(5.0), 40.0)
 
 
 class SimulatorPick(unittest.TestCase):
