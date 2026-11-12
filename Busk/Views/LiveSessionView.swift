@@ -4,6 +4,8 @@ import SwiftUI
 struct LiveSessionView: View {
     @Bindable var session: CoachSession
     var onClose: () -> Void
+    /// Extra status pills (e.g. the replay clip label) shown under the phase pill, so they never cover the cue.
+    var badges: AnyView? = nil
     @Environment(\.modelContext) private var modelContext
     @State private var ended = false
 
@@ -84,6 +86,7 @@ struct LiveSessionView: View {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
                             .font(.caption.monospaced())
+                            .lineLimit(compact ? 2 : 1)
                             .padding(.horizontal, 10).padding(.vertical, 4)
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
@@ -135,6 +138,7 @@ struct LiveSessionView: View {
         }
             Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
                 .accessibilityIdentifier("phaseLabel")
+            if let badges { badges }
         }
     }
 
