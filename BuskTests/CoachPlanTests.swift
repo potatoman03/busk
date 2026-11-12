@@ -36,7 +36,9 @@ final class CoachPlanTests: XCTestCase {
     }
 
     func testCleanShooterGetsNoFocus() {
-        XCTAssertNil(CoachPlan(sessions: [session(Array(repeating: shot(), count: 40))]).focus)
+        let plan = CoachPlan(sessions: [session(Array(repeating: shot(), count: 40))])
+        XCTAssertNil(plan.focus)
+        XCTAssertEqual(plan.workout(hasBall: true).map(\.id), ["drill-formShooting", "maintain"])
     }
 
     func testFocusSticksUntilItGraduates() {

@@ -85,6 +85,11 @@ struct CoachView: View {
                     }
                     .tint(Theme.orange)
                 }
+            } else if plan.totalShots >= CoachPlan.baselineShots {
+                Label("Looking good", systemImage: "checkmark.seal").font(.caption).foregroundStyle(.secondary)
+                Text("Nothing to fix right now").font(.title2.bold()).accessibilityIdentifier("coachFocus")
+                Text("Every area Busk measures is solid. Keep shooting: if one slips, Busk makes it your focus.")
+                    .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 Label("Getting started", systemImage: "sparkles").font(.caption).foregroundStyle(.secondary)
                 Text("Let's find your first focus").font(.title2.bold()).accessibilityIdentifier("coachFocus")

@@ -137,7 +137,7 @@ final class CoachSession {
             }
         }
         if let focus, shots.count == targetShots, let r = summary.focusResult {
-            cue += ". That's \(shots.count). \(r.good) of \(r.measured) good on your \(focus.title.lowercased()). Set done: keep going or tap End"
+            cue += ". Set done: \(r.good) of \(r.measured) good on your \(focus.title.lowercased()). Keep going or tap End"
         }
         return cue
     }

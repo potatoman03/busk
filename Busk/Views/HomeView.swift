@@ -143,7 +143,7 @@ struct HomeView: View {
                     Spacer()
                     Image(systemName: "chevron.right").font(.footnote).foregroundStyle(.secondary)
                 }
-                Text(plan.focus.map { "Focus: \($0.title)" } ?? "Find your first focus")
+                Text(plan.focus.map { "Focus: \($0.title)" } ?? (plan.totalShots >= CoachPlan.baselineShots ? "Nothing to fix right now" : "Find your first focus"))
                     .font(.title3.bold())
                     .accessibilityIdentifier("homeCoachFocus")
                 if let next {

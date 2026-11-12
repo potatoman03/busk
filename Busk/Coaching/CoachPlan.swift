@@ -125,6 +125,15 @@ struct CoachPlan: Sendable {
     /// Today's workout, in order.
     func workout(hasBall: Bool) -> [WorkoutStep] {
         guard let focus else {
+            if totalShots >= Self.baselineShots {
+                let warmUp = Drill.byID(hasBall ? "formShooting" : "shadow")!
+                return [
+                    WorkoutStep(id: "drill-\(warmUp.id)", kind: .drill(warmUp), title: warmUp.title, detail: warmUp.summary),
+                    WorkoutStep(id: "maintain", kind: .trackedSet(focus: nil, shots: Self.focusSetShots),
+                                title: hasBall ? "Keep it sharp: \(Self.focusSetShots) shots" : "Keep it sharp: \(Self.focusSetShots) shadow shots",
+                                detail: "Nothing needs fixing right now. Busk watches every area and picks a new focus if one slips."),
+                ]
+            }
             return [
                 WorkoutStep(id: "lesson-overview", kind: .lesson(Lesson.byID("overview")!), title: "Learn the four beats",
                             detail: "Two minutes on how a jump shot works."),
