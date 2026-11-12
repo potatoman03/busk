@@ -223,15 +223,20 @@ final class ShotAnalyzer {
         // frame where the forearm is turned toward the camera doesn't count as a flare).
         var elbowFlare: Double?
         if view == .front {
-            let offsets = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }.map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
+            let push = samples[..<rel].filter { $0.t >= samples[rel].t - 0.34 }
+            // Only once the ball is up past the shoulder: on the way up out of the dip the forearm is still turning over.
+            let loaded = push.filter { $0.wrist.y < $0.shoulder.y }
+            let offsets = (loaded.count >= 4 ? loaded : push).map { Double(abs($0.elbow.x - $0.wrist.x)) / H }.sorted()
             // With only a few frames (Vision dropping the arm, a slow camera) one turned forearm is the median: not judged.
-            elbowFlare = offsets.count >= 6 ? offsets[offsets.count / 2] : nil
+            elbowFlare = push.count >= 6 ? offsets[offsets.count / 2] : nil
         }
 
         // Arc: the arm's elevation while it is fully extended at the release (earlier frames still show the set point).
         var armAngle: Double?
         if view == .side {
-            let window = Array(max(0, rel - 2)...min(n - 1, rel + 4))
+            // A releasing arm points up: a hand seen below the shoulder (the arm already dropped, the next loop's
+            // gather, a front-on clip filmed as side) would win on reach and read as a launch near -90°.
+            let window = Array(max(0, rel - 2)...min(n - 1, rel + 4)).filter { samples[$0].wrist.y < samples[$0].shoulder.y }
             let reach = { (i: Int) in Geometry.distance(samples[i].shoulder, samples[i].wrist) }
             let longest = window.map(reach).max() ?? 0
             let extended = window.filter { reach($0) >= longest * 0.97 }
@@ -315,7 +320,8 @@ final class ShotAnalyzer {
                             d = max(d, abs(1 - t0 / t1) * 3.1)
                         }
                     }
-                    drift = d
+                    // Most of a body height is the tracker landing on someone else's feet, not a drift.
+            drift = d <= 0.8 ? d : nil
                 }
             }
         }
