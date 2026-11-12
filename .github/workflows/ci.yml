@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || echo /Applications/Xcode.app)"
+          xcodebuild -version
+
+      - name: Check project is in sync with project.yml
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          git diff --exit-code -- Busk.xcodeproj
+
+      - name: Build and run unit + UI tests
+        run: |
+          mkdir -p build
+          DEST=$(scripts/sim-destination.sh)
+          echo "Testing on $DEST"
+          set -o pipefail
+          xcodebuild test \
+            -project Busk.xcodeproj -scheme Busk \
+            -destination "$DEST" \
+            -derivedDataPath build/dd \
+            -resultBundlePath build/Busk.xcresult \
+            CODE_SIGNING_ALLOWED=NO | tee build/test.log | grep -E "Test Case|error:|\*\* " || true
+          grep -q "\*\* TEST SUCCEEDED \*\*" build/test.log
+
+      - name: Export screenshots
+        if: always()
+        run: |
+          mkdir -p build/screenshots
+          if [ -d build/Busk.xcresult ]; then
+            xcrun xcresulttool export attachments --path build/Busk.xcresult --output-path build/screenshots || true
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            build/Busk.xcresult
+            build/screenshots
+            build/test.log
+          retention-days: 14
