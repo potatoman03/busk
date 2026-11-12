@@ -5,6 +5,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.voiceEnabled) private var voiceEnabled = true
     @AppStorage(SettingsKey.handedness) private var handedness: Handedness = .right
     @AppStorage(SettingsKey.cameraView) private var cameraView: CameraView = .side
+    @AppStorage(SettingsKey.ghostReplay) private var ghostReplay = false
 
     var body: some View {
         NavigationStack {
@@ -13,6 +14,13 @@ struct SettingsView: View {
                     Toggle("Spoken feedback", isOn: $voiceEnabled).accessibilityIdentifier("voiceSetting")
                     Button("Test voice") { CoachVoice.preview.say("Tuck your elbow under the ball") }
                         .disabled(!voiceEnabled)
+                }
+                Section {
+                    Toggle("Ghost replay", isOn: $ghostReplay).accessibilityIdentifier("ghostReplaySetting")
+                } header: {
+                    Text("Prototype")
+                } footer: {
+                    Text("After each shot, replays it in slow motion with your best shot of the session drawn over it, lined up at the release.")
                 }
                 Section("Defaults") {
                     Picker("Shooting hand", selection: $handedness) {
