@@ -58,8 +58,9 @@ enum VideoPoses {
         let asset = AVURLAsset(url: url)
         guard let track = asset.tracks(withMediaType: .video).first else { return [:] }
         let reader = try AVAssetReader(asset: asset)
+        // The same YCbCr frames the app's `VideoPoseSource` reads.
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
         ])
         reader.add(output)
         guard reader.startReading() else { return [:] }

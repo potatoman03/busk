@@ -61,8 +61,10 @@ final class VideoPoseSource: PoseSource {
         let asset = AVURLAsset(url: url)
         guard let track = asset.tracks(withMediaType: .video).first,
               let reader = try? AVAssetReader(asset: asset) else { return nil }
+        // The decoder's own YCbCr, not a BGRA copy converted by whichever device plays it, so the ball is found
+        // in the same pixels here as by the benchmark.
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
         ])
         output.alwaysCopiesSampleData = false
         guard reader.canAdd(output) else { return nil }
