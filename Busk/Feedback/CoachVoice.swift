@@ -19,7 +19,7 @@ final class CoachVoice: NSObject {
         let session = AVAudioSession.sharedInstance()
         if keepsMicrophoneOpen {
             try? session.setCategory(.playAndRecord, mode: .default,
-                                     options: [.defaultToSpeaker, .allowBluetoothA2DP, .duckOthers, .mixWithOthers])
+                                     options: [.defaultToSpeaker, .allowBluetoothHFP, .allowBluetoothA2DP, .duckOthers, .mixWithOthers])
         } else {
             try? session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers, .mixWithOthers])
         }
