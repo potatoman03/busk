@@ -31,6 +31,7 @@ jobs:
 
       - name: Build and run unit + UI tests
         run: |
+          mkdir -p build
           DEST=$(scripts/sim-destination.sh)
           echo "Testing on $DEST"
           set -o pipefail
