@@ -9,6 +9,10 @@ final class VoiceCommandTests: XCTestCase {
         XCTAssertEqual(VoiceCommandParser.command(in: "how’s my form"), .status)
         XCTAssertEqual(VoiceCommandParser.command(in: "End session."), .end)
         XCTAssertEqual(VoiceCommandParser.command(in: "alright I'm done"), .end)
+        XCTAssertEqual(VoiceCommandParser.command(in: "Made it!"), .make)
+        XCTAssertEqual(VoiceCommandParser.command(in: "swish"), .make)
+        XCTAssertEqual(VoiceCommandParser.command(in: "ugh, missed it"), .miss)
+        XCTAssertEqual(VoiceCommandParser.command(in: "brick"), .miss)
     }
 
     func testIgnoresOrdinaryTalkAndCoachCues() {

@@ -20,6 +20,9 @@ struct BuskApp: App {
             UserDefaults.standard.removePersistentDomain(forName: Bundle.main.bundleIdentifier ?? "")
             UIView.setAnimationsEnabled(false)
         }
+        if let days = AppEnvironment.seedPracticeDays {
+            PracticeSeed.insert(days: days, into: container.mainContext)
+        }
     }
 
     var body: some Scene {

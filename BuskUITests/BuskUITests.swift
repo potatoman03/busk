@@ -44,6 +44,65 @@ final class BuskUITests: XCTestCase {
         snapshot("01-home")
     }
 
+    func testPracticeProgress() {
+        relaunch(["-ui-testing", "-seed-practice", "21"])
+        let today = app.buttons["todayCard"]
+        XCTAssertTrue(today.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["streakCount"].exists)
+        snapshot("06-home-tracker")
+
+        today.tap()
+        XCTAssertTrue(app.staticTexts["progressTotalShots"].waitForExistence(timeout: 5))
+        XCTAssertGreaterThan(Int(app.staticTexts["progressTotalShots"].label.filter(\.isNumber)) ?? 0, 100)
+        XCTAssertTrue(app.descendants(matching: .any)["practiceCalendar"].exists)
+        snapshot("07-progress-top")
+        let scroll = app.scrollViews["progressScroll"]
+        scroll.swipeUp()
+        snapshot("08-progress-charts")
+        scroll.swipeUp()
+        scroll.swipeUp()
+        XCTAssertTrue(app.descendants(matching: .any)["improvementCard"].waitForExistence(timeout: 3))
+        snapshot("09-progress-improvement")
+        scroll.swipeUp()
+        XCTAssertTrue(app.descendants(matching: .any)["personalBests"].waitForExistence(timeout: 3))
+        snapshot("10-progress-bests")
+    }
+
+    func testEmptyProgress() {
+        app.buttons["progressButton"].tap()
+        XCTAssertTrue(app.staticTexts["No practice yet"].waitForExistence(timeout: 5))
+        snapshot("11-progress-empty")
+    }
+
+    func testMarkingMakesDuringSession() {
+        app.buttons["startButton"].tap()
+        XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+        app.buttons["goLiveButton"].tap()
+        let made = app.buttons["markMadeButton"]
+        XCTAssertTrue(made.waitForExistence(timeout: 30))
+        made.tap()
+        let makes = app.staticTexts["makeCount"]
+        XCTAssertTrue(makes.waitForExistence(timeout: 5))
+        XCTAssertEqual(makes.label, "1")
+        snapshot("12-live-made")
+        app.buttons["endSessionButton"].tap()
+
+        XCTAssertTrue(app.staticTexts["summaryMakes"].waitForExistence(timeout: 5))
+        let logged = Int(app.staticTexts["summaryMakes"].label) ?? -1
+        XCTAssertGreaterThanOrEqual(logged, 1)
+        app.steppers["makesStepper"].buttons.element(boundBy: 0).tap()
+        XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged - 1)
+        app.steppers["makesStepper"].buttons.element(boundBy: 1).tap()
+        XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged, "the live make is kept")
+        XCTAssertTrue(app.descendants(matching: .any)["summaryDemoNote"].exists, "demo sessions stay out of the tracker")
+        snapshot("13-summary-makes")
+        app.buttons["summaryDoneButton"].tap()
+        XCTAssertTrue(app.buttons["todayCard"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["demoTag"].exists)
+        XCTAssertEqual(app.descendants(matching: .any)["todayShots"].label.hasPrefix("0"), true, app.descendants(matching: .any)["todayShots"].label)
+        snapshot("14-home-after-session")
+    }
+
     func testFullShootingSession() {
         app.buttons["startButton"].tap()
         XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
@@ -86,9 +145,10 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.buttons["lastSessionCard"].waitForExistence(timeout: 5))
         app.buttons["historyButton"].tap()
         XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
+        XCTAssertEqual(app.collectionViews["historyList"].buttons.matching(identifier: "historyRow").count, 1)
+        XCTAssertTrue(app.descendants(matching: .any)["historyDayHeader"].exists)
         snapshot("05-history")
-        app.collectionViews["historyList"].cells.firstMatch.tap()
+        app.collectionViews["historyList"].buttons["historyRow"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         snapshot("05b-history-summary")
         app.buttons["shotRow-1"].firstMatch.tap()
@@ -129,6 +189,14 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(status.label.contains("how am i doing"), status.label)
         snapshot("09-voice-how-am-i-doing")
 
+        app.buttons["simulateVoice-make"].tap()
+        XCTAssertTrue(app.staticTexts["makeCount"].waitForExistence(timeout: 5), "\"made it\" marks the last shot")
+        snapshot("09b-voice-made-it")
+        sleep(2) // voice commands within 1.5 s of the last one are ignored as echoes
+        app.buttons["simulateVoice-miss"].tap()
+        XCTAssertTrue(status.label.contains("missed it"), status.label)
+
+        sleep(2)
         app.buttons["simulateVoice-end"].tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         XCTAssertGreaterThanOrEqual(Int(app.staticTexts["summaryShotCount"].label) ?? 0, 2)
@@ -171,7 +239,8 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.buttons["historyButton"].waitForExistence(timeout: 5))
         app.buttons["historyButton"].tap()
         XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
-        XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
+        XCTAssertEqual(app.collectionViews["historyList"].buttons.matching(identifier: "historyRow").count, 1)
+        XCTAssertTrue(app.descendants(matching: .any)["historyDayHeader"].exists)
         snapshot("06d-replay-history")
     }
 
