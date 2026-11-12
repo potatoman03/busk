@@ -64,7 +64,12 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationLink(value: HomeRoute.history) {
-                        Label("History", systemImage: "clock.arrow.circlepath").labelStyle(.titleAndIcon)
+                        // The toolbar draws a Label as its icon alone; spell it out so History is findable.
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock.arrow.circlepath")
+                            Text("History")
+                        }
+                        .fixedSize()
                     }
                     .accessibilityLabel("History")
                     .accessibilityIdentifier("historyButton")
