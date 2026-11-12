@@ -42,9 +42,9 @@
     ]
   },
   "run": {
-    "started_at": "2026-11-12T07:46:59+00:00",
-    "duration_s": 0.8,
-    "git_sha": "ca998eed5443942b8f54cd1f392ee32ed597df09",
+    "started_at": "2026-11-12T08:26:02+00:00",
+    "duration_s": 19.4,
+    "git_sha": "b682e7cd8918d7f8a855d7931cc25bf1d5003754",
     "git_ref": "HEAD",
     "analyzer_command": [
       "benchmark/adapters/busk-analyze/run.sh"
@@ -63,7 +63,7 @@
     }
   },
   "summary": {
-    "overall_score": 44.2124,
+    "overall_score": 41.0874,
     "clips": 32,
     "tiers": {
       "beginner": {
@@ -75,11 +75,11 @@
         "clips": 10
       },
       "advanced": {
-        "score": 45.8333,
+        "score": 41.6667,
         "clips": 6
       },
       "elite": {
-        "score": 67.5,
+        "score": 60.0,
         "clips": 10
       }
     },
@@ -89,17 +89,17 @@
         "clips": 17
       },
       "side": {
-        "score": 50.3294,
+        "score": 43.6627,
         "clips": 15
       }
     },
     "flawed_clip_score": 19.3198,
-    "clean_clip_score": 66.1765,
+    "clean_clip_score": 60.2941,
     "detection": 0.3025,
     "advice": 0.1792,
     "priority": 0.1333,
-    "false_alarms_per_clip": 0.4688,
-    "clean_clips_with_false_alarms": 7
+    "false_alarms_per_clip": 0.5938,
+    "clean_clips_with_false_alarms": 11
   },
   "flaws": {
     "no_leg_drive": {
@@ -118,7 +118,7 @@
       "clips_with_flaw": 4,
       "detection_rate": 0.25,
       "advice_rate": 0.25,
-      "false_alarm_rate": 0.1667
+      "false_alarm_rate": 0.3333
     },
     "flat_arc": {
       "clips_with_flaw": 3,
@@ -197,7 +197,7 @@
       },
       {
         "flaw": "elbow_flare",
-        "false_alarm_rate": 0.1667
+        "false_alarm_rate": 0.3333
       }
     ],
     "lowest_tier": "beginner",
@@ -225,7 +225,7 @@
     ]
   },
   "set_scores": {
-    "synthetic": 50.5,
+    "synthetic": 47.0,
     "real": 0.0
   },
   "clips": [
@@ -262,7 +262,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 5.846,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
@@ -311,7 +311,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.028,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
@@ -358,7 +358,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.029,
       "labeled_flaws": [
         "releasing_on_the_way_down",
         "off_balance_drift",
@@ -405,7 +405,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.029,
       "labeled_flaws": [
         "releasing_on_the_way_down",
         "elbow_flare",
@@ -450,7 +450,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.025,
+      "seconds": 0.03,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_leg_drive",
@@ -493,7 +493,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_leg_drive",
@@ -527,7 +527,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.03,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -562,7 +562,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.029,
       "labeled_flaws": [
         "elbow_flare"
       ],
@@ -594,7 +594,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.035,
       "labeled_flaws": [
         "flat_arc"
       ],
@@ -628,7 +628,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.031,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -666,7 +666,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.032,
       "labeled_flaws": [
         "no_follow_through",
         "no_leg_drive"
@@ -708,7 +708,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.028,
       "labeled_flaws": [
         "no_follow_through",
         "no_leg_drive"
@@ -747,7 +747,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [
         "off_balance_drift",
         "releasing_on_the_way_down"
@@ -786,7 +786,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [
         "off_balance_drift",
         "releasing_on_the_way_down"
@@ -824,7 +824,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [
         "hitch_at_set_point"
       ],
@@ -861,7 +861,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.03,
       "labeled_flaws": [
         "guide_hand_interference",
         "hitch_at_set_point"
@@ -873,14 +873,16 @@
       "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 75.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [],
+      "false_alarms": [
+        "elbow_flare"
+      ],
       "unknown_flaw_ids": [],
       "feedback": [
         "Nice. Tuck your elbow under the ball"
@@ -893,7 +895,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -923,7 +925,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -949,7 +951,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -981,7 +983,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.03,
       "labeled_flaws": [
         "elbow_flare"
       ],
@@ -991,14 +993,16 @@
       "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 75.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [],
+      "false_alarms": [
+        "elbow_flare"
+      ],
       "unknown_flaw_ids": [],
       "feedback": [
         "Nice. Tuck your elbow under the ball"
@@ -1011,7 +1015,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1041,20 +1045,22 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.025,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 75.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [],
+      "false_alarms": [
+        "elbow_flare"
+      ],
       "unknown_flaw_ids": [],
       "feedback": [
         "Nice. Tuck your elbow under the ball"
@@ -1067,7 +1073,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.047,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1097,20 +1103,22 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.032,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 75.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [],
+      "false_alarms": [
+        "elbow_flare"
+      ],
       "unknown_flaw_ids": [],
       "feedback": [
         "Nice. Tuck your elbow under the ball"
@@ -1123,7 +1131,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.023,
+      "seconds": 0.031,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1153,7 +1161,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.03,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1183,7 +1191,7 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.031,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1213,7 +1221,7 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.024,
+      "seconds": 0.033,
       "labeled_flaws": [],
       "expected_advice": [],
       "pose_source": "benchmark-keypoints"
@@ -1236,7 +1244,7 @@
       "view": "front",
       "handedness": "right",
       "status": "error",
-      "seconds": 0.013,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -1264,7 +1272,7 @@
       "view": "front",
       "handedness": "right",
       "status": "error",
-      "seconds": 0.013,
+      "seconds": 0.019,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -1292,7 +1300,7 @@
       "view": "front",
       "handedness": "right",
       "status": "error",
-      "seconds": 0.013,
+      "seconds": 0.029,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -1320,7 +1328,7 @@
       "view": "side",
       "handedness": "right",
       "status": "error",
-      "seconds": 0.013,
+      "seconds": 0.019,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
