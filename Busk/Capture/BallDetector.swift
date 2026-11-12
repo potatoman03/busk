@@ -54,7 +54,10 @@ final class BallDetector {
             .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
             .transformed(by: CGAffineTransform(scaleX: s, y: s))
         var rgba = [UInt8](repeating: 0, count: w * h * 4)
-        context.render(small, toBitmap: &rgba, rowBytes: w * 4, bounds: CGRect(x: 0, y: 0, width: w, height: h),
+        // Core Image counts up from the bottom and the bitmap's first row is its top: line that row up with the
+        // area's top edge, or every ball is found up to a render pixel too low.
+        context.render(small, toBitmap: &rgba, rowBytes: w * 4,
+                       bounds: CGRect(x: 0, y: area.height * s - CGFloat(h), width: CGFloat(w), height: CGFloat(h)),
                        format: .RGBA8, colorSpace: nil)
 
         // Skin or a tan wall touching the ball can pass the loosest orange test and merge with it into one bigger,
