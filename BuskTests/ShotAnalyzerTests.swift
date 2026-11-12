@@ -20,6 +20,34 @@ final class ShotAnalyzerTests: XCTestCase {
         }
     }
 
+    func testLowFrameRateSkipsTimingChecks() throws {
+        // 15 frames a second (Vision or the camera falling behind): too few frames to see a short hold, so the set point,
+        // hitch and release timing aren't judged; the rest still is.
+        var sim = ShotSimulator()
+        sim.fps = 15
+        let analyzer = ShotAnalyzer(handedness: .right, view: .side)
+        let shot = sim.frames(for: .good, start: 0.5)
+        let frames = sim.idleFrames(seconds: 0.5, start: 0) + shot + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 1 / sim.fps)
+        let m = try XCTUnwrap(frames.compactMap { analyzer.process($0) }.first)
+        XCTAssertNil(m.setPointHeight)
+        XCTAssertNil(m.hitch)
+        XCTAssertNil(m.releaseTiming)
+        XCTAssertNotNil(m.armAngle)
+        XCTAssertEqual(FormEvaluator().evaluate(m).cue, FormEvaluator().evaluate(try XCTUnwrap(run(.good).first)).cue)
+    }
+
+    func testReleaseRightAfterDroppedFramesDoesNotCrash() {
+        // Vision losing the shooter through the whole gather leaves no frames before the release to measure.
+        let sim = ShotSimulator()
+        let shot = sim.frames(for: .good, start: 0)
+        for cut in stride(from: 0.5, to: 1.3, by: 0.033) {
+            let analyzer = ShotAnalyzer(handedness: .right, view: .front)
+            let frames = shot.filter { $0.timestamp < 0.3 || $0.timestamp >= cut }
+                + sim.idleFrames(seconds: 1.5, start: shot.last!.timestamp + 1 / sim.fps)
+            _ = frames.compactMap { analyzer.process($0) }
+        }
+    }
+
     func testIdleFramesProduceNoShots() {
         let analyzer = ShotAnalyzer(handedness: .right, view: .side)
         let shots = ShotSimulator().idleFrames(seconds: 5, start: 0).compactMap { analyzer.process($0) }
@@ -28,18 +56,18 @@ final class ShotAnalyzerTests: XCTestCase {
 
     func testGoodFormMetrics() throws {
         let m = try XCTUnwrap(run(.good).first)
-        XCTAssertGreaterThan(m.setPointHeight, 0.1)
+        XCTAssertGreaterThan(try XCTUnwrap(m.setPointHeight), 0.1)
         XCTAssertGreaterThan(try XCTUnwrap(m.armAngle), 65)
         XCTAssertGreaterThan(m.followThrough, 0.6)
         XCTAssertGreaterThan(try XCTUnwrap(m.legDrive), 0.03)
         XCTAssertLessThan(abs(try XCTUnwrap(m.releaseTiming)), 0.5)
         XCTAssertLessThan(try XCTUnwrap(m.drift), 0.05)
-        XCTAssertLessThan(m.hitch, 0.1)
+        XCTAssertLessThan(try XCTUnwrap(m.hitch), 0.1)
         XCTAssertNil(m.elbowFlare)
     }
 
     func testChestPushHasLowSetPoint() throws {
-        XCTAssertLessThan(try XCTUnwrap(run(.lowSet).first).setPointHeight, 0)
+        XCTAssertLessThan(try XCTUnwrap(run(.lowSet).first?.setPointHeight), 0)
     }
 
     func testFlatShotHasLowArmAngle() throws {
@@ -47,8 +75,8 @@ final class ShotAnalyzerTests: XCTestCase {
     }
 
     func testHitchIsTimed() throws {
-        XCTAssertGreaterThan(try XCTUnwrap(run(.hitched).first).hitch, FormEvaluator.Thresholds().hitch.bad)
-        XCTAssertLessThan(try XCTUnwrap(run(.good).first).hitch, FormEvaluator.Thresholds().hitch.ok)
+        XCTAssertGreaterThan(try XCTUnwrap(run(.hitched).first?.hitch), FormEvaluator.Thresholds().hitch.bad)
+        XCTAssertLessThan(try XCTUnwrap(run(.good).first?.hitch), FormEvaluator.Thresholds().hitch.ok)
     }
 
     func testFaderDrifts() throws {
@@ -79,7 +107,7 @@ final class ShotAnalyzerTests: XCTestCase {
     func testLeftHandedShot() throws {
         let m = try XCTUnwrap(run(.good, handedness: .left).first)
         XCTAssertGreaterThan(try XCTUnwrap(m.armAngle), 65)
-        XCTAssertGreaterThan(m.setPointHeight, 0.1)
+        XCTAssertGreaterThan(try XCTUnwrap(m.setPointHeight), 0.1)
     }
 
     func testUnknownViewSkipsAngleSpecificChecks() throws {
