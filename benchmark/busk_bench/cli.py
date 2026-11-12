@@ -15,6 +15,7 @@ from pathlib import Path
 from . import SCHEMA_VERSION
 from .analyzer import prebuild, resolve_command, run_clip
 from .dataset import BENCH_DIR, load_clips, load_taxonomy
+from .real import fetch as fetch_real, load_real_clips
 from .scoring import score_clip, summarize
 from .visual import SimulatorCapture
 
@@ -82,10 +83,26 @@ def cmd_run(a):
     started = time.time()
     tax = load_taxonomy()
     clips, ds_version, ds_sha = load_clips(tax)
+    if a.set == "real":
+        clips = []
+    if a.set in ("real", "all"):
+        real, rv, rsha = load_real_clips(tax)
+        clips += real
+        ds_version = f"{ds_version}+real{rv}" if a.set == "all" else f"real{rv}"
+        ds_sha = hashlib.sha256(f"{ds_sha if a.set == 'all' else ''}:{rsha}".encode()).hexdigest()
     clips = _filter(clips, a.clips)
     cache = Path(a.cache)
-    log(f"rendering {len(clips)} clips (cached in {cache})")
-    paths = render_all(clips, cache, a.jobs)
+    synthetic = [c for c in clips if c.set == "synthetic"]
+    log(f"rendering {len(synthetic)} synthetic clips (cached in {cache})")
+    paths = render_all(synthetic, cache, a.jobs)
+    unavailable = {}
+    for c in [c for c in clips if c.set == "real"]:
+        try:
+            paths[c.id] = (fetch_real(c, cache, log), None)
+        except Exception as e:  # noqa: BLE001 - a missing real clip is reported, not fatal
+            unavailable[c.id] = str(e)[-300:]
+            log(f"real clip {c.id} unavailable, skipped: {e}")
+    clips = [c for c in clips if c.id not in unavailable]
 
     argv, source = resolve_command(a.analyzer, REPO_ROOT)
     analyzer_status = "ok"
@@ -121,10 +138,12 @@ def cmd_run(a):
         r = score_clip(c, out, tax)
         statuses[status] = statuses.get(status, 0) + 1
         results[c.id] = r
-        r.update({"clip": c.id, "archetype": c.archetype, "tier": c.tier, "view": c.view,
+        r.update({"clip": c.id, "set": c.set, "archetype": c.archetype, "tier": c.tier, "view": c.view,
                   "handedness": c.handedness, "status": status, "seconds": round(secs, 3),
                   "labeled_flaws": [f["id"] for f in c.observable],
                   "expected_advice": [tax.flaws[f["id"]].canonical_fix for f in c.observable]})
+        if c.source:
+            r["source"] = {k: c.source[k] for k in ("page", "license", "credit")}
         if out is not None:
             r["pose_source"] = out.get("pose_source")
         if err and status != "ok":
@@ -140,6 +159,10 @@ def cmd_run(a):
         analyzer_status = "partial" if statuses.get("ok") else "failed"
 
     agg = summarize(clips, results, tax)
+    sets = {}
+    for c in clips:
+        sets.setdefault(c.set, []).append(results[c.id]["score"])
+    agg["set_scores"] = {k: round(sum(v) / len(v), 1) for k, v in sets.items()}
     doc = {
         "schema_version": SCHEMA_VERSION,
         "benchmark": {
@@ -153,7 +176,7 @@ def cmd_run(a):
             "git_sha": os.environ.get("GITHUB_SHA") or _git("rev-parse", "HEAD"),
             "git_ref": os.environ.get("GITHUB_REF_NAME") or _git("rev-parse", "--abbrev-ref", "HEAD"),
             "analyzer_command": argv, "analyzer_source": source, "analyzer_status": analyzer_status,
-            "clip_statuses": statuses, "keypoints_provided": not a.no_keypoints,
+            "clip_statuses": statuses, "real_unavailable": unavailable, "keypoints_provided": not a.no_keypoints,
             "analyzer_build_error": build_error,
             "visual_evidence": visual,
         },
@@ -164,6 +187,8 @@ def cmd_run(a):
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(doc, indent=2) + "\n")
     print_summary(doc)
+    print("  sets    " + "  ".join(f"{k} {v:5.1f}" for k, v in doc["set_scores"].items())
+          + (f"   ({len(unavailable)} real clips unavailable)" if unavailable else ""))
     log(f"wrote {out_path}")
     rc = 0
     if a.baseline:
@@ -281,6 +306,8 @@ def main(argv=None):
     r = sub.add_parser("run", help="render clips, run busk's analyzer on each, score, write results JSON")
     r.add_argument("--analyzer", help="analyzer command (default: $BUSK_ANALYZER_CMD, then `swift run busk-analyze`)")
     r.add_argument("--out", default=str(DEFAULT_OUT))
+    r.add_argument("--set", choices=["all", "synthetic", "real"], default="all",
+                   help="synthetic rendered clips, fetched real footage, or both (default)")
     r.add_argument("--clips", help="comma-separated clip ids, archetypes or tiers")
     r.add_argument("--cache", default=str(DEFAULT_CACHE))
     r.add_argument("--jobs", type=int, default=min(4, os.cpu_count() or 1))

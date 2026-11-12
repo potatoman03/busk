@@ -143,5 +143,32 @@ class Render(unittest.TestCase):
             self.assertGreater((Path(d) / "a" / f"{c.id}.mp4").stat().st_size, 10_000)
 
 
+class RealTier(unittest.TestCase):
+    def test_manifest_has_provenance_and_valid_labels(self):
+        from busk_bench.real import load_real_clips
+        clips, _, _ = load_real_clips(load_taxonomy())
+        self.assertGreaterEqual(len(clips), 3)
+        for c in clips:
+            self.assertEqual(c.set, "real")
+            self.assertTrue(c.id.startswith("real__"))
+            self.assertRegex(c.source["sha1"], r"^[0-9a-f]{40}$")
+            self.assertRegex(c.source["license"], r"^(CC BY|CC0|Public domain)")
+            self.assertTrue(c.source["url"].startswith("https://upload.wikimedia.org/"))
+
+    def test_download_verifies_sha1(self):
+        import hashlib
+        from busk_bench.real import download
+        with tempfile.TemporaryDirectory() as d:
+            src = Path(d) / "clip.webm"
+            src.write_bytes(b"not really a video")
+            good = hashlib.sha1(src.read_bytes()).hexdigest()
+            dest = Path(d) / "out.webm"
+            download(src.as_uri(), dest, good, sleep=lambda s: None)
+            self.assertEqual(dest.read_bytes(), src.read_bytes())
+            with self.assertRaises(ValueError):
+                download(src.as_uri(), Path(d) / "bad.webm", "0" * 40, sleep=lambda s: None)
+            self.assertFalse((Path(d) / "bad.webm").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

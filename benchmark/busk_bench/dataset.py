@@ -46,6 +46,8 @@ class Clip:
     look: dict
     flaws: list  # every labeled flaw [{id, severity}]
     observable: list  # labeled flaws visible from this view, highest severity first
+    set: str = "synthetic"  # "synthetic" (rendered) or "real" (fetched footage)
+    source: dict | None = None  # provenance and license of real footage
 
     @property
     def primary(self):

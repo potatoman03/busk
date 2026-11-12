@@ -146,3 +146,29 @@ running in a booted simulator, add `--capture-simulator --require-visuals`. The 
 * The advice regexes accept common phrasings of each fix. If busk words a correct fix in a way they miss,
   extend `fix_patterns` in `taxonomy.json`. That changes the taxonomy hash, so the next comparison is
   marked not comparable instead of reporting a fake regression.
+
+## Real-footage tier
+
+`benchmark/real_clips.json` adds real video next to the synthetic core: openly licensed clips from Wikimedia Commons, fetched at run time from their original URL and checked against the pinned SHA-1 (no footage is stored in this repo; each clip records its page, license and credit for attribution). Clips are cached in `benchmark/.cache/real/` and transcoded to MP4. Real clips get no keypoint sidecar, so the analyzer has to find the pose itself, as the app does.
+
+| clip | tier | view | license | labels |
+|---|---|---|---|---|
+| Jackson McAndrew game free throw (upright phone video) | advanced | front | CC BY 4.0 | clean |
+| Kobe Bryant warmup free throw (handheld fan video) | elite | front | CC BY 2.0 | clean |
+| Marianna Tolo game free throw (from the stands) | elite | front | CC BY-SA 4.0 | clean |
+| Research demo jump shot (PLOS ONE shot-type study) | advanced | side | CC BY 4.0 | clean |
+
+`--set synthetic|real|all` picks the clips (default `all`); results carry `set` per clip and `set_scores`. A real clip that can't be fetched is skipped and listed in `run.real_unavailable` instead of failing the run.
+
+Gaps: no openly licensed Steph Curry footage and no usable beginner shooting footage turned up on Commons, so the real tier only checks that good form isn't "corrected". Beginner fixes are covered by the synthetic set. Labels are one reviewer's judgement (`label_confidence` per clip).
+
+## Running against busk's own analysis
+
+`benchmark/adapters/busk-analyze/run.sh` builds busk's real `ShotAnalyzer` + `FormEvaluator` (copied from `Busk/`) into a `busk-analyze` CLI that follows the contract, feeding it the benchmark keypoints instead of Vision (works on macOS and Linux; on Linux a small shim supplies the CoreGraphics types):
+
+```bash
+BUSK_ANALYZER_CMD=benchmark/adapters/busk-analyze/run.sh benchmark/run.sh
+```
+
+It reports what busk would say (`feedback` = the spoken cue) and maps each "needs work" area to a taxonomy flaw (elbow→`elbow_flare`, low arc→`flat_arc`, release point→`low_set_point`, follow-through→`no_follow_through`, legs→`no_leg_drive`). It needs keypoints, so real clips score 0 through it until the app exposes video-in analysis with Vision.
+
