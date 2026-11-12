@@ -196,7 +196,15 @@ final class ShotAnalyzer {
             hitch = max(hitch, Double(b - a + 1) * dt)
         }
         let set = samples[setIdx]
-        let setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
+        var setPointHeight = Double(set.shoulder.y - set.wrist.y) / H
+        if view == .front, lift(setIdx) <= (lo..<rel).map(lift).min()! + 0.03 {
+            // From the front, a ball carried up toward the camera without stopping hides the set point, so the slowest
+            // frame is the bottom of the dip. The ball is loaded where the elbow bends most with the wrist above it.
+            let bend = { (i: Int) in Geometry.angle(samples[i].shoulder, samples[i].elbow, samples[i].wrist) }
+            if let loaded = (setIdx..<rel).filter({ samples[$0].wrist.y < samples[$0].elbow.y }).min(by: { bend($0) < bend($1) }) {
+                setPointHeight = max(setPointHeight, lift(loaded))
+            }
+        }
 
         // Elbow: sideways elbow-to-wrist offset over the third of a second before the release (the median, so one
         // frame where the forearm is turned toward the camera doesn't count as a flare).
@@ -241,10 +249,16 @@ final class ShotAnalyzer {
         let known = feet.indices.filter { feet[$0] != nil }
         if let firstFoot = known.first, let lastFoot = known.last,
            let top = known.max(by: { feet[$0]! < feet[$1]! }), feet[top]! > feet[firstFoot]! + 0.012 {
-            let floor0 = feet[firstFoot]!, floor1 = feet[lastFoot]!
+            // Off the floor: a fifth of the way up the jump, so slow drift of the feet in the frame isn't counted as air time.
+            // The floor is measured near the jump: the shooter can step or the camera tilt elsewhere in the clip.
+            let reach = Int(0.8 / dt)
+            let floor0 = (max(firstFoot, top - reach)...top).compactMap { feet[$0] }.min() ?? feet[firstFoot]!
+            let floor1 = (top...min(lastFoot, top + reach)).compactMap { feet[$0] }.min() ?? feet[lastFoot]!
+            let level0 = floor0 + max(0.012, (feet[top]! - floor0) * 0.2)
+            let level1 = floor1 + max(0.012, (feet[top]! - floor1) * 0.2)
             var s0 = top, s1 = top
-            while s0 > 0, let f = feet[s0 - 1], f > floor0 + 0.012 { s0 -= 1 }
-            while s1 < n - 1, let f = feet[s1 + 1], f > floor1 + 0.012 { s1 += 1 }
+            while s0 > 0, let f = feet[s0 - 1], f > level0 { s0 -= 1 }
+            while s1 < n - 1, let f = feet[s1 + 1], f > level1 { s1 += 1 }
             let air = s1 - s0 + 1
             if air >= 3, rel >= s0 - 2, rel <= s1 + 2 {
                 // Sub-frame peak and takeoff/landing times: a short jump is only a few frames long.
@@ -260,11 +274,16 @@ final class ShotAnalyzer {
                     guard i >= 0, j < n, let fi = feet[i], let fj = feet[j], fi != fj else { return nil }
                     return samples[i].t + (level - fi) / (fj - fi) * (samples[j].t - samples[i].t)
                 }
-                let up = crossing(s0 - 1, s0, floor0 + 0.012) ?? samples[s0].t
-                let down = crossing(s1, s1 + 1, floor1 + 0.012) ?? samples[s1].t
+                let up = crossing(s0 - 1, s0, level0) ?? samples[s0].t
+                let down = crossing(s1, s1 + 1, level1) ?? samples[s1].t
                 releaseTiming = (samples[rel].t - apex) / max((down - up) / 2, dt)
-                let takeoff = samples[..<s0].last { $0.ankle != nil } ?? samples[firstFoot]
-                let settled = samples.last { $0.ankle != nil && $0.t <= samples[s1].t + 0.6 } ?? samples[lastFoot]
+                // Drift compares the stance before any foot lift and after the feet are back down, which can be well
+                // outside the air time on a clip whose feet creep in the frame.
+                var g0 = top, g1 = top
+                while g0 > 0, let f = feet[g0 - 1], f > feet[firstFoot]! + 0.012 { g0 -= 1 }
+                while g1 < n - 1, let f = feet[g1 + 1], f > feet[lastFoot]! + 0.012 { g1 += 1 }
+                let takeoff = samples[..<g0].last { $0.ankle != nil } ?? samples[firstFoot]
+                let settled = samples.last { $0.ankle != nil && $0.t <= samples[g1].t + 0.6 } ?? samples[lastFoot]
                 if let a0 = takeoff.ankle, let a1 = settled.ankle {
                     var d = Double(abs(a1.x - a0.x)) / H
                     if view == .front, let h0 = takeoff.span, let h1 = settled.span, h1 > 0 {
@@ -276,8 +295,8 @@ final class ShotAnalyzer {
                             let lengths = s.compactMap { x in x.root.map { Geometry.distance(x.shoulder, $0) } }.sorted()
                             return lengths.isEmpty ? nil : lengths[lengths.count / 2]
                         }
-                        let after = samples.indices.filter { samples[$0].t >= samples[s1].t + 0.35 && samples[$0].t <= samples[s1].t + 0.65 }
-                        if let t0 = torso(samples[max(0, s0 - 4)..<s0]), let first = after.first, let last = after.last,
+                        let after = samples.indices.filter { samples[$0].t >= samples[g1].t + 0.35 && samples[$0].t <= samples[g1].t + 0.65 }
+                        if let t0 = torso(samples[max(0, g0 - 4)..<g0]), let first = after.first, let last = after.last,
                            let t1 = torso(samples[first...last]), t1 > 0 {
                             d = max(d, abs(1 - t0 / t1) * 3.1)
                         }
