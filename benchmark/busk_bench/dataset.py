@@ -18,6 +18,7 @@ class Flaw:
     name: str
     views: list
     label_rule: dict
+    coaching_priority: int
     canonical_fix: str
     fix: list
     mention: list
@@ -62,12 +63,20 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def coaching_order(tax: Taxonomy, margins: dict | None = None):
+    """Sort key for labeled flaws: coaching priority, then margin past the threshold, then labeled severity."""
+    order = {fid: i for i, fid in enumerate(tax.flaws)}
+    margins = margins or {}
+    return lambda f: (tax.flaws[f["id"]].coaching_priority, -margins.get(f["id"], 0), -f["severity"], order[f["id"]])
+
+
 def load_taxonomy(path: Path = TAXONOMY_PATH) -> Taxonomy:
     raw = json.loads(path.read_text())
     flaws = {}
     for f in raw["flaws"]:
         flaws[f["id"]] = Flaw(
             id=f["id"], name=f["name"], views=f["views"], label_rule=f["label_rule"],
+            coaching_priority=f["coaching_priority"],
             canonical_fix=f["canonical_fix"],
             fix=[re.compile(p, re.I) for p in f["fix_patterns"]],
             mention=[re.compile(p, re.I) for p in f["mention_patterns"]],
@@ -76,16 +85,19 @@ def load_taxonomy(path: Path = TAXONOMY_PATH) -> Taxonomy:
 
 
 def load_clips(tax: Taxonomy, path: Path = CLIPS_PATH) -> tuple[list[Clip], str, str]:
+    from .heldout import HELDOUT_PATH, label
+
     raw = json.loads(path.read_text())
-    order = {fid: i for i, fid in enumerate(tax.flaws)}
+    heldout_cfg = json.loads(HELDOUT_PATH.read_text())
     clips = []
     for a in raw["archetypes"]:
         for f in a["flaws"]:
             if f["id"] not in tax.flaws:
                 raise ValueError(f"{a['id']}: unknown flaw {f['id']}")
+        margins = {f["id"]: f["margin"] for f in label(a["params"], heldout_cfg, tax)}
         for view in a["views"]:
             obs = [f for f in a["flaws"] if view in tax.flaws[f["id"]].views]
-            obs.sort(key=lambda f: (-f["severity"], order[f["id"]]))
+            obs.sort(key=coaching_order(tax, margins))
             clips.append(Clip(
                 id=f"{a['id']}__{view}", archetype=a["id"], tier=a["tier"], view=view,
                 handedness=a.get("handedness", "right"), description=a["description"],

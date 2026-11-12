@@ -2,9 +2,9 @@
   "schema_version": 1,
   "benchmark": {
     "taxonomy_version": "1.0.0",
-    "taxonomy_sha256": "5545c16a720b7e721fd8cf861fd1fb140a859dcda2b5cf5c4e861c0a72725660",
+    "taxonomy_sha256": "170559f8fa9cca641652a660c6df07647c415d21c7fcdc7c526090cc01e4f43d",
     "dataset_version": "1.0.0+heldout1-s20261112+real1",
-    "dataset_sha256": "ab237bbae8809f8bd8061ec4581bcd0a3f4fb0c2751e6f2856fc70b254286730",
+    "dataset_sha256": "6ebf73e13443133801920f8e530b9911de27281c2bedf445a9e883040a2e6b02",
     "renderer": "595ca9f87a5d",
     "clip_ids": [
       "beginner_chest_push__side",
@@ -138,19 +138,14 @@
     ]
   },
   "run": {
-    "started_at": "2026-11-12T09:06:29+00:00",
-    "duration_s": 854.5,
-    "git_sha": "3cd66a6200426d47ccf2d24f85788f3a57ae7883",
-    "git_ref": "devin/1794473927-heldout-tier",
+    "started_at": "2026-11-12T18:39:21+00:00",
+    "duration_s": 25.3,
+    "git_sha": "0f48e57f94b640389c2e063d3461fff557ddd59f",
+    "git_ref": "devin/1794508721-coaching-priority-labels",
     "analyzer_command": [
-      "swift",
-      "run",
-      "-c",
-      "release",
-      "--skip-build",
-      "busk-analyze"
+      "/tmp/ba-main"
     ],
-    "analyzer_source": "Package.swift",
+    "analyzer_source": "--analyzer",
     "analyzer_status": "ok",
     "clip_statuses": {
       "ok": 128
@@ -159,305 +154,47 @@
     "keypoints_provided": true,
     "analyzer_build_error": null,
     "visual_evidence": {
-      "status": "captured",
-      "error": null,
-      "device": "EDD9B083-63F1-44E6-9A7B-0A6964CC2561",
-      "device_name": "iPhone 17",
-      "app": "com.potatoman03.busk",
-      "mode": "in-app replay (-replay-keypoints)",
-      "replayed_clips": [
-        "beginner_chest_push__side",
-        "beginner_chest_push__front",
-        "beginner_flailing_jumper__side",
-        "beginner_flailing_jumper__front",
-        "beginner_two_motion__side",
-        "beginner_two_motion__front",
-        "rec_elbow_out__side",
-        "rec_elbow_out__front",
-        "rec_flat_shot__side",
-        "rec_flat_shot__front",
-        "rec_lazy_finish__side",
-        "rec_lazy_finish__front",
-        "rec_fader__side",
-        "rec_fader__front",
-        "rec_guide_thumb__side",
-        "rec_guide_thumb__front",
-        "advanced_solid__side",
-        "advanced_solid__front",
-        "advanced_slight_flare__side",
-        "advanced_slight_flare__front",
-        "elite_curry_one_motion__side",
-        "elite_curry_one_motion__front",
-        "elite_klay_textbook__side",
-        "elite_klay_textbook__front",
-        "elite_durant_high_release__side",
-        "elite_durant_high_release__front",
-        "elite_lefty__side",
-        "elite_lefty__front",
-        "heldout_00__side",
-        "heldout_00__front",
-        "heldout_01__side",
-        "heldout_01__front",
-        "heldout_02__side",
-        "heldout_02__front",
-        "heldout_03__side",
-        "heldout_03__front",
-        "heldout_04__side",
-        "heldout_04__front",
-        "heldout_05__side",
-        "heldout_05__front",
-        "heldout_06__side",
-        "heldout_06__front",
-        "heldout_07__side",
-        "heldout_07__front",
-        "heldout_08__side",
-        "heldout_08__front",
-        "heldout_09__side",
-        "heldout_09__front",
-        "heldout_10__side",
-        "heldout_10__front",
-        "heldout_11__side",
-        "heldout_11__front",
-        "heldout_12__side",
-        "heldout_12__front",
-        "heldout_13__side",
-        "heldout_13__front",
-        "heldout_14__side",
-        "heldout_14__front",
-        "heldout_15__side",
-        "heldout_15__front",
-        "heldout_16__side",
-        "heldout_16__front",
-        "heldout_17__side",
-        "heldout_17__front",
-        "heldout_18__side",
-        "heldout_18__front",
-        "heldout_19__side",
-        "heldout_19__front",
-        "heldout_20__side",
-        "heldout_20__front",
-        "heldout_21__side",
-        "heldout_21__front",
-        "heldout_22__side",
-        "heldout_22__front",
-        "heldout_23__side",
-        "heldout_23__front",
-        "heldout_24__side",
-        "heldout_24__front",
-        "heldout_25__side",
-        "heldout_25__front",
-        "heldout_26__side",
-        "heldout_26__front",
-        "heldout_27__side",
-        "heldout_27__front",
-        "heldout_28__side",
-        "heldout_28__front",
-        "heldout_29__side",
-        "heldout_29__front",
-        "heldout_30__side",
-        "heldout_30__front",
-        "heldout_31__side",
-        "heldout_31__front",
-        "heldout_32__side",
-        "heldout_32__front",
-        "heldout_33__side",
-        "heldout_33__front",
-        "heldout_34__side",
-        "heldout_34__front",
-        "heldout_35__side",
-        "heldout_35__front",
-        "heldout_36__side",
-        "heldout_36__front",
-        "heldout_37__side",
-        "heldout_37__front",
-        "heldout_38__side",
-        "heldout_38__front",
-        "heldout_39__side",
-        "heldout_39__front",
-        "heldout_40__side",
-        "heldout_40__front",
-        "heldout_41__side",
-        "heldout_41__front",
-        "heldout_42__side",
-        "heldout_42__front",
-        "heldout_43__side",
-        "heldout_43__front",
-        "heldout_44__side",
-        "heldout_44__front",
-        "heldout_45__side",
-        "heldout_45__front",
-        "heldout_46__side",
-        "heldout_46__front",
-        "heldout_47__side",
-        "heldout_47__front"
-      ],
-      "recording": "/Users/devin/repos/busk/benchmark/results/visual/simulator.mp4",
-      "screenshots": [
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_chest_push__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_chest_push__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_flailing_jumper__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_flailing_jumper__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_two_motion__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/beginner_two_motion__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_elbow_out__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_elbow_out__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_flat_shot__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_flat_shot__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_lazy_finish__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_lazy_finish__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_fader__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_fader__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_guide_thumb__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/rec_guide_thumb__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/advanced_solid__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/advanced_solid__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/advanced_slight_flare__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/advanced_slight_flare__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_curry_one_motion__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_curry_one_motion__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_klay_textbook__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_klay_textbook__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_durant_high_release__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_durant_high_release__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_lefty__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/elite_lefty__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_00__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_00__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_01__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_01__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_02__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_02__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_03__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_03__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_04__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_04__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_05__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_05__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_06__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_06__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_07__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_07__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_08__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_08__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_09__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_09__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_10__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_10__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_11__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_11__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_12__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_12__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_13__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_13__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_14__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_14__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_15__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_15__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_16__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_16__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_17__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_17__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_18__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_18__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_19__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_19__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_20__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_20__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_21__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_21__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_22__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_22__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_23__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_23__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_24__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_24__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_25__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_25__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_26__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_26__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_27__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_27__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_28__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_28__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_29__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_29__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_30__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_30__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_31__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_31__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_32__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_32__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_33__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_33__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_34__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_34__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_35__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_35__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_36__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_36__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_37__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_37__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_38__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_38__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_39__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_39__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_40__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_40__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_41__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_41__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_42__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_42__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_43__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_43__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_44__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_44__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_45__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_45__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_46__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_46__front.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_47__side.png",
-        "/Users/devin/repos/busk/benchmark/results/visual/heldout_47__front.png"
-      ]
+      "status": "not_requested"
     }
   },
   "summary": {
-    "overall_score": 85.9062,
+    "overall_score": 94.375,
     "clips": 128,
     "tiers": {
       "beginner": {
-        "score": 80.7143,
+        "score": 85.0,
         "clips": 28
       },
       "intermediate": {
-        "score": 80.6,
+        "score": 95.0,
         "clips": 60
       },
       "advanced": {
-        "score": 98.3333,
+        "score": 100.0,
         "clips": 30
       },
       "elite": {
-        "score": 95.0,
+        "score": 100.0,
         "clips": 10
       }
     },
     "views": {
       "front": {
-        "score": 87.4923,
+        "score": 94.1538,
         "clips": 65
       },
       "side": {
-        "score": 84.2698,
+        "score": 94.6032,
         "clips": 63
       }
     },
-    "flawed_clip_score": 79.7143,
-    "clean_clip_score": 97.7273,
-    "detection": 0.8804,
-    "advice": 0.8804,
-    "priority": 0.5595,
-    "false_alarms_per_clip": 0.1562,
-    "clean_clips_with_false_alarms": 4
+    "flawed_clip_score": 91.4286,
+    "clean_clip_score": 100.0,
+    "detection": 1.0,
+    "advice": 1.0,
+    "priority": 0.5714,
+    "false_alarms_per_clip": 0.0,
+    "clean_clips_with_false_alarms": 0
   },
   "flaws": {
     "no_leg_drive": {
@@ -468,166 +205,149 @@
     },
     "low_set_point": {
       "clips_with_flaw": 16,
-      "detection_rate": 0.9375,
-      "advice_rate": 0.9375,
-      "false_alarm_rate": 0.1339
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
+      "false_alarm_rate": 0.0
     },
     "elbow_flare": {
       "clips_with_flaw": 9,
       "detection_rate": 1.0,
       "advice_rate": 1.0,
-      "false_alarm_rate": 0.0273
+      "false_alarm_rate": 0.0
     },
     "flat_arc": {
       "clips_with_flaw": 6,
-      "detection_rate": 0.8333,
-      "advice_rate": 0.8333,
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
       "false_alarm_rate": 0.0
     },
     "no_follow_through": {
       "clips_with_flaw": 32,
-      "detection_rate": 0.9688,
-      "advice_rate": 0.9688,
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
       "false_alarm_rate": 0.0
     },
     "guide_hand_interference": {
       "clips_with_flaw": 12,
       "detection_rate": 1.0,
       "advice_rate": 1.0,
-      "false_alarm_rate": 0.0096
+      "false_alarm_rate": 0.0
     },
     "releasing_on_the_way_down": {
       "clips_with_flaw": 20,
-      "detection_rate": 0.85,
-      "advice_rate": 0.85,
-      "false_alarm_rate": 0.0093
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
+      "false_alarm_rate": 0.0
     },
     "hitch_at_set_point": {
       "clips_with_flaw": 18,
-      "detection_rate": 0.7222,
-      "advice_rate": 0.7222,
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
       "false_alarm_rate": 0.0
     },
     "off_balance_drift": {
       "clips_with_flaw": 24,
-      "detection_rate": 0.7917,
-      "advice_rate": 0.7917,
+      "detection_rate": 1.0,
+      "advice_rate": 1.0,
       "false_alarm_rate": 0.0
     }
   },
   "weakest": {
     "flaws_by_advice": [
       {
-        "flaw": "hitch_at_set_point",
-        "advice_rate": 0.7222,
-        "detection_rate": 0.7222,
-        "false_alarm_rate": 0.0
-      },
-      {
-        "flaw": "off_balance_drift",
-        "advice_rate": 0.7917,
-        "detection_rate": 0.7917,
+        "flaw": "elbow_flare",
+        "advice_rate": 1.0,
+        "detection_rate": 1.0,
         "false_alarm_rate": 0.0
       },
       {
         "flaw": "flat_arc",
-        "advice_rate": 0.8333,
-        "detection_rate": 0.8333,
+        "advice_rate": 1.0,
+        "detection_rate": 1.0,
         "false_alarm_rate": 0.0
       },
       {
-        "flaw": "releasing_on_the_way_down",
-        "advice_rate": 0.85,
-        "detection_rate": 0.85,
-        "false_alarm_rate": 0.0093
-      },
-      {
-        "flaw": "low_set_point",
-        "advice_rate": 0.9375,
-        "detection_rate": 0.9375,
-        "false_alarm_rate": 0.1339
-      }
-    ],
-    "over_called_flaws": [
-      {
-        "flaw": "low_set_point",
-        "false_alarm_rate": 0.1339
-      },
-      {
-        "flaw": "elbow_flare",
-        "false_alarm_rate": 0.0273
-      },
-      {
         "flaw": "guide_hand_interference",
-        "false_alarm_rate": 0.0096
+        "advice_rate": 1.0,
+        "detection_rate": 1.0,
+        "false_alarm_rate": 0.0
       },
       {
-        "flaw": "releasing_on_the_way_down",
-        "false_alarm_rate": 0.0093
+        "flaw": "hitch_at_set_point",
+        "advice_rate": 1.0,
+        "detection_rate": 1.0,
+        "false_alarm_rate": 0.0
+      },
+      {
+        "flaw": "low_set_point",
+        "advice_rate": 1.0,
+        "detection_rate": 1.0,
+        "false_alarm_rate": 0.0
       }
     ],
-    "lowest_tier": "intermediate",
+    "over_called_flaws": [],
+    "lowest_tier": "beginner",
     "lowest_clips": [
       {
-        "clip": "heldout_04__side",
-        "score": 0.0
+        "clip": "beginner_chest_push__front",
+        "score": 80.0
       },
       {
-        "clip": "heldout_08__front",
-        "score": 0.0
+        "clip": "beginner_chest_push__side",
+        "score": 80.0
       },
       {
-        "clip": "heldout_29__side",
-        "score": 0.0
+        "clip": "beginner_flailing_jumper__front",
+        "score": 80.0
       },
       {
-        "clip": "heldout_33__front",
-        "score": 0.0
+        "clip": "beginner_flailing_jumper__side",
+        "score": 80.0
       },
       {
-        "clip": "heldout_33__side",
-        "score": 0.0
+        "clip": "beginner_two_motion__front",
+        "score": 80.0
       }
     ]
   },
   "set_scores": {
-    "synthetic": 98.5714,
-    "heldout": 82.1458,
-    "real": 87.5
+    "synthetic": 93.5714,
+    "heldout": 94.375,
+    "real": 100.0
   },
-  "generalization_gap": 16.4,
+  "generalization_gap": -0.8,
   "clips": [
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
         "low_set_point",
         "no_leg_drive",
-        "flat_arc",
-        "no_follow_through"
+        "no_follow_through",
+        "flat_arc"
       ],
       "advised": [
         "low_set_point",
         "no_leg_drive",
-        "flat_arc",
-        "no_follow_through"
+        "no_follow_through",
+        "flat_arc"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
+        "Snap your wrist and hold your follow-through",
         "Bring the ball up above your forehead before you shoot, not from your chest",
         "More arc, shoot up and over the rim",
-        "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through"
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
+        "no_follow_through",
         "low_set_point",
         "flat_arc",
-        "no_leg_drive",
-        "no_follow_through"
+        "no_leg_drive"
       ],
       "clip": "beginner_chest_push__side",
       "set": "synthetic",
@@ -636,21 +356,20 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.439,
+      "seconds": 0.013,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
-        "flat_arc",
-        "no_follow_through"
+        "no_follow_through",
+        "flat_arc"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_chest_push__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -660,15 +379,15 @@
       "detected": [
         "low_set_point",
         "no_leg_drive",
-        "elbow_flare",
         "guide_hand_interference",
+        "elbow_flare",
         "no_follow_through"
       ],
       "advised": [
         "low_set_point",
         "no_leg_drive",
-        "elbow_flare",
         "guide_hand_interference",
+        "elbow_flare",
         "no_follow_through"
       ],
       "missed": [],
@@ -676,16 +395,16 @@
       "unknown_flaw_ids": [],
       "feedback": [
         "Guide hand on the side, let it come off clean",
+        "Snap your wrist and hold your follow-through",
         "Bring the ball up above your forehead before you shoot, not from your chest",
         "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through",
         "Tuck your shooting elbow under the ball"
       ],
       "flaws_reported": [
         "guide_hand_interference",
+        "no_follow_through",
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
         "elbow_flare"
       ],
       "clip": "beginner_chest_push__front",
@@ -695,37 +414,36 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.495,
+      "seconds": 0.013,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
-        "elbow_flare",
         "guide_hand_interference",
+        "elbow_flare",
         "no_follow_through"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
         "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
+        "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_chest_push__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "releasing_on_the_way_down",
         "off_balance_drift",
+        "releasing_on_the_way_down",
         "no_follow_through"
       ],
       "advised": [
-        "releasing_on_the_way_down",
         "off_balance_drift",
+        "releasing_on_the_way_down",
         "no_follow_through"
       ],
       "missed": [],
@@ -733,13 +451,13 @@
       "unknown_flaw_ids": [],
       "feedback": [
         "Release at the top of your jump, not on the way down",
-        "Jump straight up and land where you took off",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
         "releasing_on_the_way_down",
-        "off_balance_drift",
-        "no_follow_through"
+        "no_follow_through",
+        "off_balance_drift"
       ],
       "clip": "beginner_flailing_jumper__side",
       "set": "synthetic",
@@ -748,35 +466,34 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.447,
+      "seconds": 0.011,
       "labeled_flaws": [
-        "releasing_on_the_way_down",
         "off_balance_drift",
+        "releasing_on_the_way_down",
         "no_follow_through"
       ],
       "expected_advice": [
-        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_flailing_jumper__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
+        "off_balance_drift",
         "releasing_on_the_way_down",
         "elbow_flare",
-        "off_balance_drift",
         "no_follow_through"
       ],
       "advised": [
+        "off_balance_drift",
         "releasing_on_the_way_down",
         "elbow_flare",
-        "off_balance_drift",
         "no_follow_through"
       ],
       "missed": [],
@@ -785,14 +502,14 @@
       "feedback": [
         "Release at the top of your jump, not on the way down",
         "Jump straight up and land where you took off",
-        "Tuck your shooting elbow under the ball",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Tuck your shooting elbow under the ball"
       ],
       "flaws_reported": [
         "releasing_on_the_way_down",
         "off_balance_drift",
-        "elbow_flare",
-        "no_follow_through"
+        "no_follow_through",
+        "elbow_flare"
       ],
       "clip": "beginner_flailing_jumper__front",
       "set": "synthetic",
@@ -801,21 +518,20 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.637,
+      "seconds": 0.01,
       "labeled_flaws": [
+        "off_balance_drift",
         "releasing_on_the_way_down",
         "elbow_flare",
-        "off_balance_drift",
         "no_follow_through"
       ],
       "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_flailing_jumper__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -852,7 +568,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.513,
+      "seconds": 0.013,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_leg_drive",
@@ -863,14 +579,13 @@
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_two_motion__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
         "hitch_at_set_point",
         "no_leg_drive",
@@ -885,13 +600,13 @@
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
         "Guide hand on the side, let it come off clean",
+        "One smooth motion, don't stop the ball at your set point",
         "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
         "guide_hand_interference",
+        "hitch_at_set_point",
         "no_leg_drive"
       ],
       "clip": "beginner_two_motion__front",
@@ -901,7 +616,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.478,
+      "seconds": 0.013,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_leg_drive",
@@ -912,8 +627,7 @@
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/beginner_two_motion__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -936,11 +650,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.523,
+      "seconds": 0.015,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_elbow_out__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -969,15 +682,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.439,
+      "seconds": 0.013,
       "labeled_flaws": [
         "elbow_flare"
       ],
       "expected_advice": [
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_elbow_out__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1006,15 +718,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.469,
+      "seconds": 0.012,
       "labeled_flaws": [
         "flat_arc"
       ],
       "expected_advice": [
         "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_flat_shot__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1037,24 +748,23 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.531,
+      "seconds": 0.021,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_flat_shot__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "advised": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
@@ -1074,30 +784,29 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.503,
+      "seconds": 0.016,
       "labeled_flaws": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_lazy_finish__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "advised": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
@@ -1117,17 +826,16 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.428,
+      "seconds": 0.014,
       "labeled_flaws": [
-        "no_follow_through",
-        "no_leg_drive"
+        "no_leg_drive",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_lazy_finish__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -1160,7 +868,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.439,
+      "seconds": 0.016,
       "labeled_flaws": [
         "off_balance_drift",
         "releasing_on_the_way_down"
@@ -1169,8 +877,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_fader__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1203,7 +910,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.428,
+      "seconds": 0.029,
       "labeled_flaws": [
         "off_balance_drift",
         "releasing_on_the_way_down"
@@ -1212,8 +919,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_fader__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1242,28 +948,27 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.405,
+      "seconds": 0.016,
       "labeled_flaws": [
         "hitch_at_set_point"
       ],
       "expected_advice": [
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_guide_thumb__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "guide_hand_interference"
       ],
       "advised": [
-        "guide_hand_interference",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "guide_hand_interference"
       ],
       "missed": [],
       "false_alarms": [],
@@ -1283,17 +988,16 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.452,
+      "seconds": 0.022,
       "labeled_flaws": [
-        "guide_hand_interference",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "guide_hand_interference"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/rec_guide_thumb__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1316,11 +1020,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.449,
+      "seconds": 0.021,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/advanced_solid__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1343,11 +1046,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.45,
+      "seconds": 0.017,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/advanced_solid__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1370,11 +1072,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.503,
+      "seconds": 0.014,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/advanced_slight_flare__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1403,15 +1104,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.455,
+      "seconds": 0.015,
       "labeled_flaws": [
         "elbow_flare"
       ],
       "expected_advice": [
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/advanced_slight_flare__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1434,11 +1134,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.46,
+      "seconds": 0.015,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_curry_one_motion__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1461,11 +1160,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.465,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_curry_one_motion__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1488,11 +1186,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.444,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_klay_textbook__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1515,11 +1212,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.423,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_klay_textbook__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1542,11 +1238,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.466,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_durant_high_release__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1569,11 +1264,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.412,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_durant_high_release__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1596,11 +1290,10 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.416,
+      "seconds": 0.011,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_lefty__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1623,11 +1316,10 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.475,
+      "seconds": 0.011,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/elite_lefty__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1650,11 +1342,10 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.587,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_00__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1677,11 +1368,10 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.459,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_00__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1704,11 +1394,10 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.481,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_01__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1731,11 +1420,10 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.385,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_01__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1758,11 +1446,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.39,
+      "seconds": 0.01,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_02__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1785,11 +1472,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.427,
+      "seconds": 0.011,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_02__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -1797,26 +1483,26 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "advised": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
         "Bend your knees and drive up through your legs",
+        "One smooth motion, don't stop the ball at your set point",
         "Snap your wrist and hold your follow-through"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
         "no_leg_drive",
+        "hitch_at_set_point",
         "no_follow_through"
       ],
       "clip": "heldout_03__side",
@@ -1826,19 +1512,18 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.388,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "expected_advice": [
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_03__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -1846,26 +1531,26 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "advised": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
         "Bend your knees and drive up through your legs",
+        "One smooth motion, don't stop the ball at your set point",
         "Snap your wrist and hold your follow-through"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
         "no_leg_drive",
+        "hitch_at_set_point",
         "no_follow_through"
       ],
       "clip": "heldout_03__front",
@@ -1875,53 +1560,18 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.425,
+      "seconds": 0.011,
       "labeled_flaws": [
-        "no_leg_drive",
         "hitch_at_set_point",
+        "no_leg_drive",
         "no_follow_through"
       ],
       "expected_advice": [
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_03__front.png"
-    },
-    {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
-      "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [],
-      "false_alarms": [],
-      "unknown_flaw_ids": [],
-      "feedback": [],
-      "flaws_reported": [],
-      "status_reason": "no_shot_detected",
-      "clip": "heldout_04__side",
-      "set": "heldout",
-      "archetype": "heldout_04",
-      "tier": "beginner",
-      "view": "side",
-      "handedness": "right",
-      "status": "ok",
-      "seconds": 0.396,
-      "labeled_flaws": [
-        "no_follow_through",
-        "off_balance_drift",
-        "low_set_point"
-      ],
-      "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_04__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -1929,31 +1579,79 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
-        "no_follow_through",
+        "low_set_point",
         "off_balance_drift",
-        "low_set_point"
+        "no_follow_through"
       ],
       "advised": [
-        "guide_hand_interference",
-        "no_follow_through",
+        "low_set_point",
         "off_balance_drift",
-        "low_set_point"
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
+        "Snap your wrist and hold your follow-through",
         "Jump straight up and land where you took off",
-        "Guide hand on the side, let it come off clean",
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Snap your wrist and hold your follow-through"
+        "Bring the ball up above your forehead before you shoot, not from your chest"
       ],
       "flaws_reported": [
+        "no_follow_through",
+        "off_balance_drift",
+        "low_set_point"
+      ],
+      "clip": "heldout_04__side",
+      "set": "heldout",
+      "archetype": "heldout_04",
+      "tier": "beginner",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.013,
+      "labeled_flaws": [
+        "low_set_point",
+        "off_balance_drift",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 0.0,
+      "detected": [
+        "low_set_point",
         "off_balance_drift",
         "guide_hand_interference",
-        "low_set_point",
         "no_follow_through"
+      ],
+      "advised": [
+        "low_set_point",
+        "off_balance_drift",
+        "guide_hand_interference",
+        "no_follow_through"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Guide hand on the side, let it come off clean",
+        "Snap your wrist and hold your follow-through",
+        "Bring the ball up above your forehead before you shoot, not from your chest",
+        "Jump straight up and land where you took off"
+      ],
+      "flaws_reported": [
+        "guide_hand_interference",
+        "no_follow_through",
+        "low_set_point",
+        "off_balance_drift"
       ],
       "clip": "heldout_04__front",
       "set": "heldout",
@@ -1962,21 +1660,20 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.396,
+      "seconds": 0.012,
       "labeled_flaws": [
-        "guide_hand_interference",
-        "no_follow_through",
+        "low_set_point",
         "off_balance_drift",
-        "low_set_point"
+        "guide_hand_interference",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_04__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -1986,29 +1683,29 @@
       "detected": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "advised": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
         "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Jump straight up and land where you took off",
+        "Snap your wrist and hold your follow-through",
         "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through"
+        "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
         "low_set_point",
-        "off_balance_drift",
+        "no_follow_through",
         "no_leg_drive",
-        "no_follow_through"
+        "off_balance_drift"
       ],
       "clip": "heldout_05__side",
       "set": "heldout",
@@ -2017,21 +1714,20 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.476,
+      "seconds": 0.011,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_05__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2041,29 +1737,29 @@
       "detected": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "advised": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
         "Bring the ball up above your forehead before you shoot, not from your chest",
+        "Snap your wrist and hold your follow-through",
         "Jump straight up and land where you took off",
-        "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through"
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
         "low_set_point",
+        "no_follow_through",
         "off_balance_drift",
-        "no_leg_drive",
-        "no_follow_through"
+        "no_leg_drive"
       ],
       "clip": "heldout_05__front",
       "set": "heldout",
@@ -2072,21 +1768,20 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.392,
+      "seconds": 0.012,
       "labeled_flaws": [
         "low_set_point",
         "no_leg_drive",
-        "no_follow_through",
-        "off_balance_drift"
+        "off_balance_drift",
+        "no_follow_through"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_05__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2109,11 +1804,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.419,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_06__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2136,11 +1830,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.404,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_06__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2163,11 +1856,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.403,
+      "seconds": 0.014,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_07__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2190,11 +1882,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.399,
+      "seconds": 0.01,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_07__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2223,32 +1914,35 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.581,
+      "seconds": 0.011,
       "labeled_flaws": [
         "hitch_at_set_point"
       ],
       "expected_advice": [
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_08__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
-      "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [
+      "score": 100.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
         "hitch_at_set_point"
       ],
+      "advised": [
+        "hitch_at_set_point"
+      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Great shot, same again"
+        "One smooth motion, don't stop the ball at your set point"
       ],
-      "flaws_reported": [],
+      "flaws_reported": [
+        "hitch_at_set_point"
+      ],
       "clip": "heldout_08__front",
       "set": "heldout",
       "archetype": "heldout_08",
@@ -2256,15 +1950,14 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.401,
+      "seconds": 0.013,
       "labeled_flaws": [
         "hitch_at_set_point"
       ],
       "expected_advice": [
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_08__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2293,15 +1986,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.38,
+      "seconds": 0.012,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_09__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2330,15 +2022,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.382,
+      "seconds": 0.012,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_09__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2361,11 +2052,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.391,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_10__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2388,11 +2078,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.011,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_10__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2415,11 +2104,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_11__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2442,11 +2130,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.381,
+      "seconds": 0.011,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_11__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2475,15 +2162,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.01,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_12__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2512,15 +2198,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.39,
+      "seconds": 0.013,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_12__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2549,15 +2234,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.375,
+      "seconds": 0.011,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_13__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2586,37 +2270,38 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.365,
+      "seconds": 0.011,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_13__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 32.0,
-      "detection": 0.4,
-      "advice": 0.4,
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "hitch_at_set_point",
         "no_follow_through"
       ],
       "advised": [
+        "hitch_at_set_point",
         "no_follow_through"
       ],
-      "missed": [
-        "hitch_at_set_point"
-      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "One smooth motion, don't stop the ball at your set point"
       ],
       "flaws_reported": [
-        "no_follow_through"
+        "no_follow_through",
+        "hitch_at_set_point"
       ],
       "clip": "heldout_14__side",
       "set": "heldout",
@@ -2625,7 +2310,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.369,
+      "seconds": 0.012,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_follow_through"
@@ -2634,30 +2319,31 @@
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_14__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 32.0,
-      "detection": 0.4,
-      "advice": 0.4,
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "hitch_at_set_point",
         "no_follow_through"
       ],
       "advised": [
+        "hitch_at_set_point",
         "no_follow_through"
       ],
-      "missed": [
-        "hitch_at_set_point"
-      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "One smooth motion, don't stop the ball at your set point"
       ],
       "flaws_reported": [
-        "no_follow_through"
+        "no_follow_through",
+        "hitch_at_set_point"
       ],
       "clip": "heldout_14__front",
       "set": "heldout",
@@ -2666,7 +2352,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.366,
+      "seconds": 0.01,
       "labeled_flaws": [
         "hitch_at_set_point",
         "no_follow_through"
@@ -2675,8 +2361,7 @@
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_14__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2699,11 +2384,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.37,
+      "seconds": 0.01,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_15__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2726,11 +2410,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.391,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_15__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2753,11 +2436,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.391,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_16__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2780,11 +2462,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.379,
+      "seconds": 0.016,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_16__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2807,11 +2488,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.014,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_17__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2834,11 +2514,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.422,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_17__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2867,15 +2546,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.384,
+      "seconds": 0.023,
       "labeled_flaws": [
         "no_follow_through"
       ],
       "expected_advice": [
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_18__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2908,7 +2586,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.389,
+      "seconds": 0.013,
       "labeled_flaws": [
         "guide_hand_interference",
         "no_follow_through"
@@ -2917,8 +2595,7 @@
         "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_18__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2941,11 +2618,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.402,
+      "seconds": 0.014,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_19__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -2974,21 +2650,20 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.381,
+      "seconds": 0.023,
       "labeled_flaws": [
         "elbow_flare"
       ],
       "expected_advice": [
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_19__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 60.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "no_leg_drive"
       ],
@@ -2996,20 +2671,13 @@
         "no_leg_drive"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point",
-        "releasing_on_the_way_down"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Bend your knees and drive up through your legs",
-        "Release at the top of your jump, not on the way down"
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "no_leg_drive",
-        "releasing_on_the_way_down"
+        "no_leg_drive"
       ],
       "clip": "heldout_20__side",
       "set": "heldout",
@@ -3018,21 +2686,20 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.389,
+      "seconds": 0.019,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_20__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "no_leg_drive"
       ],
@@ -3040,16 +2707,12 @@
         "no_leg_drive"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
         "no_leg_drive"
       ],
       "clip": "heldout_20__front",
@@ -3059,18 +2722,17 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.375,
+      "seconds": 0.03,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_20__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
       "priority": 0.0,
@@ -3085,21 +2747,17 @@
         "no_follow_through"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Jump straight up and land where you took off",
-        "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
         "off_balance_drift",
-        "no_leg_drive",
-        "no_follow_through"
+        "no_follow_through",
+        "no_leg_drive"
       ],
       "clip": "heldout_21__side",
       "set": "heldout",
@@ -3108,7 +2766,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.367,
+      "seconds": 0.021,
       "labeled_flaws": [
         "no_leg_drive",
         "off_balance_drift",
@@ -3119,44 +2777,39 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_21__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
         "no_leg_drive",
         "off_balance_drift",
+        "guide_hand_interference",
         "no_follow_through"
       ],
       "advised": [
-        "guide_hand_interference",
         "no_leg_drive",
         "off_balance_drift",
+        "guide_hand_interference",
         "no_follow_through"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Jump straight up and land where you took off",
         "Guide hand on the side, let it come off clean",
-        "Bend your knees and drive up through your legs",
-        "Snap your wrist and hold your follow-through"
+        "Jump straight up and land where you took off",
+        "Snap your wrist and hold your follow-through",
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "off_balance_drift",
         "guide_hand_interference",
-        "no_leg_drive",
-        "no_follow_through"
+        "off_balance_drift",
+        "no_follow_through",
+        "no_leg_drive"
       ],
       "clip": "heldout_21__front",
       "set": "heldout",
@@ -3165,21 +2818,20 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.418,
+      "seconds": 0.016,
       "labeled_flaws": [
-        "guide_hand_interference",
         "no_leg_drive",
         "off_balance_drift",
+        "guide_hand_interference",
         "no_follow_through"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_21__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3202,11 +2854,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.026,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_22__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3229,11 +2880,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.383,
+      "seconds": 0.017,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_22__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3256,11 +2906,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.378,
+      "seconds": 0.014,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_23__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3289,15 +2938,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.383,
+      "seconds": 0.013,
       "labeled_flaws": [
         "elbow_flare"
       ],
       "expected_advice": [
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_23__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3326,21 +2974,20 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.381,
+      "seconds": 0.011,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_24__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 60.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "no_leg_drive"
       ],
@@ -3348,20 +2995,13 @@
         "no_leg_drive"
       ],
       "missed": [],
-      "false_alarms": [
-        "elbow_flare",
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Bend your knees and drive up through your legs",
-        "Tuck your shooting elbow under the ball"
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "no_leg_drive",
-        "elbow_flare"
+        "no_leg_drive"
       ],
       "clip": "heldout_24__front",
       "set": "heldout",
@@ -3370,15 +3010,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.382,
+      "seconds": 0.01,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_24__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -3386,27 +3025,27 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "advised": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
         "Release at the top of your jump, not on the way down",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "One smooth motion, don't stop the ball at your set point"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through"
+        "no_follow_through",
+        "hitch_at_set_point"
       ],
       "clip": "heldout_25__side",
       "set": "heldout",
@@ -3415,19 +3054,18 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.372,
+      "seconds": 0.012,
       "labeled_flaws": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_25__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -3435,27 +3073,27 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "advised": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
         "Release at the top of your jump, not on the way down",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "One smooth motion, don't stop the ball at your set point"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through"
+        "no_follow_through",
+        "hitch_at_set_point"
       ],
       "clip": "heldout_25__front",
       "set": "heldout",
@@ -3464,19 +3102,18 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.38,
+      "seconds": 0.013,
       "labeled_flaws": [
+        "hitch_at_set_point",
         "releasing_on_the_way_down",
-        "no_follow_through",
-        "hitch_at_set_point"
+        "no_follow_through"
       ],
       "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_25__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3505,15 +3142,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.369,
+      "seconds": 0.011,
       "labeled_flaws": [
         "releasing_on_the_way_down"
       ],
       "expected_advice": [
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_26__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3542,28 +3178,27 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.367,
+      "seconds": 0.013,
       "labeled_flaws": [
         "releasing_on_the_way_down"
       ],
       "expected_advice": [
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_26__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "advised": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
@@ -3583,30 +3218,29 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.371,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_27__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "advised": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
@@ -3626,17 +3260,16 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.369,
+      "seconds": 0.012,
       "labeled_flaws": [
-        "no_follow_through",
-        "hitch_at_set_point"
+        "hitch_at_set_point",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_27__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -3644,23 +3277,23 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "advised": [
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Release at the top of your jump, not on the way down",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Release at the top of your jump, not on the way down"
       ],
       "flaws_reported": [
-        "releasing_on_the_way_down",
-        "no_follow_through"
+        "no_follow_through",
+        "releasing_on_the_way_down"
       ],
       "clip": "heldout_28__side",
       "set": "heldout",
@@ -3669,45 +3302,44 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.373,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "expected_advice": [
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_28__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 80.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "guide_hand_interference",
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "advised": [
         "guide_hand_interference",
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Release at the top of your jump, not on the way down",
         "Guide hand on the side, let it come off clean",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Release at the top of your jump, not on the way down"
       ],
       "flaws_reported": [
-        "releasing_on_the_way_down",
         "guide_hand_interference",
-        "no_follow_through"
+        "no_follow_through",
+        "releasing_on_the_way_down"
       ],
       "clip": "heldout_28__front",
       "set": "heldout",
@@ -3716,37 +3348,43 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.369,
+      "seconds": 0.012,
       "labeled_flaws": [
         "guide_hand_interference",
-        "no_follow_through",
-        "releasing_on_the_way_down"
+        "releasing_on_the_way_down",
+        "no_follow_through"
       ],
       "expected_advice": [
         "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_28__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
-      "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [
+      "score": 100.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
         "off_balance_drift",
         "releasing_on_the_way_down"
       ],
+      "advised": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Great shot, same again"
+        "Jump straight up and land where you took off",
+        "Release at the top of your jump, not on the way down"
       ],
-      "flaws_reported": [],
+      "flaws_reported": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
       "clip": "heldout_29__side",
       "set": "heldout",
       "archetype": "heldout_29",
@@ -3754,7 +3392,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.375,
+      "seconds": 0.01,
       "labeled_flaws": [
         "off_balance_drift",
         "releasing_on_the_way_down"
@@ -3763,8 +3401,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_29__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -3772,27 +3409,27 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
         "off_balance_drift",
+        "guide_hand_interference",
         "releasing_on_the_way_down"
       ],
       "advised": [
-        "guide_hand_interference",
         "off_balance_drift",
+        "guide_hand_interference",
         "releasing_on_the_way_down"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Release at the top of your jump, not on the way down",
+        "Guide hand on the side, let it come off clean",
         "Jump straight up and land where you took off",
-        "Guide hand on the side, let it come off clean"
+        "Release at the top of your jump, not on the way down"
       ],
       "flaws_reported": [
-        "releasing_on_the_way_down",
+        "guide_hand_interference",
         "off_balance_drift",
-        "guide_hand_interference"
+        "releasing_on_the_way_down"
       ],
       "clip": "heldout_29__front",
       "set": "heldout",
@@ -3801,19 +3438,18 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.43,
+      "seconds": 0.011,
       "labeled_flaws": [
-        "guide_hand_interference",
         "off_balance_drift",
+        "guide_hand_interference",
         "releasing_on_the_way_down"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_29__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3842,15 +3478,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.368,
+      "seconds": 0.011,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_30__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3879,15 +3514,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.358,
+      "seconds": 0.01,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_30__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3916,15 +3550,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.389,
+      "seconds": 0.012,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_31__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -3953,56 +3586,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.364,
+      "seconds": 0.013,
       "labeled_flaws": [
         "low_set_point"
       ],
       "expected_advice": [
         "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_31__front.png"
-    },
-    {
-      "score": 20.0,
-      "detection": 0.25,
-      "advice": 0.25,
-      "priority": 0.0,
-      "detected": [
-        "no_follow_through"
-      ],
-      "advised": [
-        "no_follow_through"
-      ],
-      "missed": [
-        "off_balance_drift"
-      ],
-      "false_alarms": [],
-      "unknown_flaw_ids": [],
-      "feedback": [
-        "Snap your wrist and hold your follow-through"
-      ],
-      "flaws_reported": [
-        "no_follow_through"
-      ],
-      "clip": "heldout_32__side",
-      "set": "heldout",
-      "archetype": "heldout_32",
-      "tier": "intermediate",
-      "view": "side",
-      "handedness": "right",
-      "status": "ok",
-      "seconds": 0.377,
-      "labeled_flaws": [
-        "off_balance_drift",
-        "no_follow_through"
-      ],
-      "expected_advice": [
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_32__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4028,14 +3619,14 @@
         "off_balance_drift",
         "no_follow_through"
       ],
-      "clip": "heldout_32__front",
+      "clip": "heldout_32__side",
       "set": "heldout",
       "archetype": "heldout_32",
       "tier": "intermediate",
-      "view": "front",
+      "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.39,
+      "seconds": 0.01,
       "labeled_flaws": [
         "off_balance_drift",
         "no_follow_through"
@@ -4044,74 +3635,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_32__front.png"
-    },
-    {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
-      "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [
-        "hitch_at_set_point"
-      ],
-      "false_alarms": [],
-      "unknown_flaw_ids": [],
-      "feedback": [
-        "Great shot, same again"
-      ],
-      "flaws_reported": [],
-      "clip": "heldout_33__side",
-      "set": "heldout",
-      "archetype": "heldout_33",
-      "tier": "intermediate",
-      "view": "side",
-      "handedness": "right",
-      "status": "ok",
-      "seconds": 0.389,
-      "labeled_flaws": [
-        "hitch_at_set_point"
-      ],
-      "expected_advice": [
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_33__side.png"
-    },
-    {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
-      "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [
-        "hitch_at_set_point"
-      ],
-      "false_alarms": [],
-      "unknown_flaw_ids": [],
-      "feedback": [
-        "Great shot, same again"
-      ],
-      "flaws_reported": [],
-      "clip": "heldout_33__front",
-      "set": "heldout",
-      "archetype": "heldout_33",
-      "tier": "intermediate",
-      "view": "front",
-      "handedness": "right",
-      "status": "ok",
-      "seconds": 0.383,
-      "labeled_flaws": [
-        "hitch_at_set_point"
-      ],
-      "expected_advice": [
-        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_33__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -4120,25 +3644,139 @@
       "priority": 0.0,
       "detected": [
         "off_balance_drift",
-        "hitch_at_set_point",
-        "low_set_point"
+        "no_follow_through"
       ],
       "advised": [
         "off_balance_drift",
-        "hitch_at_set_point",
-        "low_set_point"
+        "no_follow_through"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
-        "Bring the ball up above your forehead before you shoot, not from your chest",
+        "Snap your wrist and hold your follow-through",
         "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
+        "no_follow_through",
+        "off_balance_drift"
+      ],
+      "clip": "heldout_32__front",
+      "set": "heldout",
+      "archetype": "heldout_32",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.011,
+      "labeled_flaws": [
+        "off_balance_drift",
+        "no_follow_through"
+      ],
+      "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
+        "hitch_at_set_point"
+      ],
+      "advised": [
+        "hitch_at_set_point"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "One smooth motion, don't stop the ball at your set point"
+      ],
+      "flaws_reported": [
+        "hitch_at_set_point"
+      ],
+      "clip": "heldout_33__side",
+      "set": "heldout",
+      "archetype": "heldout_33",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.011,
+      "labeled_flaws": [
+        "hitch_at_set_point"
+      ],
+      "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
+        "hitch_at_set_point"
+      ],
+      "advised": [
+        "hitch_at_set_point"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "One smooth motion, don't stop the ball at your set point"
+      ],
+      "flaws_reported": [
+        "hitch_at_set_point"
+      ],
+      "clip": "heldout_33__front",
+      "set": "heldout",
+      "archetype": "heldout_33",
+      "tier": "intermediate",
+      "view": "front",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.01,
+      "labeled_flaws": [
+        "hitch_at_set_point"
+      ],
+      "expected_advice": [
+        "Make it one smooth motion from the dip to the release; don't stop the ball at your set point."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 0.0,
+      "detected": [
         "hitch_at_set_point",
         "low_set_point",
+        "off_balance_drift"
+      ],
+      "advised": [
+        "hitch_at_set_point",
+        "low_set_point",
+        "off_balance_drift"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Bring the ball up above your forehead before you shoot, not from your chest",
+        "One smooth motion, don't stop the ball at your set point",
+        "Jump straight up and land where you took off"
+      ],
+      "flaws_reported": [
+        "low_set_point",
+        "hitch_at_set_point",
         "off_balance_drift"
       ],
       "clip": "heldout_34__side",
@@ -4148,19 +3786,18 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.387,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "off_balance_drift",
         "hitch_at_set_point",
-        "low_set_point"
+        "low_set_point",
+        "off_balance_drift"
       ],
       "expected_advice": [
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_34__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -4168,31 +3805,31 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
-        "off_balance_drift",
         "hitch_at_set_point",
-        "low_set_point"
+        "low_set_point",
+        "off_balance_drift",
+        "guide_hand_interference"
       ],
       "advised": [
-        "guide_hand_interference",
-        "off_balance_drift",
         "hitch_at_set_point",
-        "low_set_point"
+        "low_set_point",
+        "off_balance_drift",
+        "guide_hand_interference"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "One smooth motion, don't stop the ball at your set point",
+        "Guide hand on the side, let it come off clean",
         "Jump straight up and land where you took off",
         "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Guide hand on the side, let it come off clean"
+        "One smooth motion, don't stop the ball at your set point"
       ],
       "flaws_reported": [
-        "hitch_at_set_point",
+        "guide_hand_interference",
         "off_balance_drift",
         "low_set_point",
-        "guide_hand_interference"
+        "hitch_at_set_point"
       ],
       "clip": "heldout_34__front",
       "set": "heldout",
@@ -4201,46 +3838,43 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.392,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "guide_hand_interference",
-        "off_balance_drift",
         "hitch_at_set_point",
-        "low_set_point"
+        "low_set_point",
+        "off_balance_drift",
+        "guide_hand_interference"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Make it one smooth motion from the dip to the release; don't stop the ball at your set point.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_34__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 22.0,
-      "detection": 0.4,
-      "advice": 0.4,
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "off_balance_drift"
-      ],
-      "advised": [
-        "off_balance_drift"
-      ],
-      "missed": [
+        "off_balance_drift",
         "flat_arc"
       ],
-      "false_alarms": [
-        "low_set_point"
+      "advised": [
+        "off_balance_drift",
+        "flat_arc"
       ],
+      "missed": [],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
+        "More arc, shoot up and over the rim",
         "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
-        "low_set_point",
+        "flat_arc",
         "off_balance_drift"
       ],
       "clip": "heldout_35__side",
@@ -4250,23 +3884,22 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.388,
+      "seconds": 0.01,
       "labeled_flaws": [
-        "flat_arc",
-        "off_balance_drift"
+        "off_balance_drift",
+        "flat_arc"
       ],
       "expected_advice": [
-        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_35__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 60.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "off_balance_drift"
       ],
@@ -4274,20 +3907,13 @@
         "off_balance_drift"
       ],
       "missed": [],
-      "false_alarms": [
-        "elbow_flare",
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Jump straight up and land where you took off",
-        "Tuck your shooting elbow under the ball"
+        "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "off_balance_drift",
-        "elbow_flare"
+        "off_balance_drift"
       ],
       "clip": "heldout_35__front",
       "set": "heldout",
@@ -4296,15 +3922,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.413,
+      "seconds": 0.01,
       "labeled_flaws": [
         "off_balance_drift"
       ],
       "expected_advice": [
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_35__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4333,15 +3958,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.389,
+      "seconds": 0.01,
       "labeled_flaws": [
         "releasing_on_the_way_down"
       ],
       "expected_advice": [
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_36__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4378,7 +4002,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.386,
+      "seconds": 0.011,
       "labeled_flaws": [
         "guide_hand_interference",
         "elbow_flare",
@@ -4389,59 +4013,13 @@
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_36__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 10.0,
-      "detection": 0.25,
-      "advice": 0.25,
-      "priority": 0.0,
-      "detected": [
-        "no_leg_drive"
-      ],
-      "advised": [
-        "no_leg_drive"
-      ],
-      "missed": [
-        "off_balance_drift"
-      ],
-      "false_alarms": [
-        "low_set_point"
-      ],
-      "unknown_flaw_ids": [],
-      "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Bend your knees and drive up through your legs"
-      ],
-      "flaws_reported": [
-        "low_set_point",
-        "no_leg_drive"
-      ],
-      "clip": "heldout_37__side",
-      "set": "heldout",
-      "archetype": "heldout_37",
-      "tier": "intermediate",
-      "view": "side",
-      "handedness": "right",
-      "status": "ok",
-      "seconds": 0.379,
-      "labeled_flaws": [
-        "off_balance_drift",
-        "no_leg_drive"
-      ],
-      "expected_advice": [
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_37__side.png"
-    },
-    {
-      "score": 70.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "off_balance_drift",
         "no_leg_drive"
@@ -4451,17 +4029,55 @@
         "no_leg_drive"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Jump straight up and land where you took off",
         "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
+        "off_balance_drift",
+        "no_leg_drive"
+      ],
+      "clip": "heldout_37__side",
+      "set": "heldout",
+      "archetype": "heldout_37",
+      "tier": "intermediate",
+      "view": "side",
+      "handedness": "right",
+      "status": "ok",
+      "seconds": 0.012,
+      "labeled_flaws": [
+        "off_balance_drift",
+        "no_leg_drive"
+      ],
+      "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 100.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 1.0,
+      "detected": [
+        "off_balance_drift",
+        "no_leg_drive"
+      ],
+      "advised": [
+        "off_balance_drift",
+        "no_leg_drive"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Jump straight up and land where you took off",
+        "Bend your knees and drive up through your legs"
+      ],
+      "flaws_reported": [
         "off_balance_drift",
         "no_leg_drive"
       ],
@@ -4472,7 +4088,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.383,
+      "seconds": 0.013,
       "labeled_flaws": [
         "off_balance_drift",
         "no_leg_drive"
@@ -4481,8 +4097,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_37__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -4490,23 +4105,23 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "advised": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Bend your knees and drive up through your legs"
+        "Bend your knees and drive up through your legs",
+        "Bring the ball up above your forehead before you shoot, not from your chest"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "no_leg_drive"
+        "no_leg_drive",
+        "low_set_point"
       ],
       "clip": "heldout_38__side",
       "set": "heldout",
@@ -4515,17 +4130,16 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.388,
+      "seconds": 0.01,
       "labeled_flaws": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "expected_advice": [
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_38__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 80.0,
@@ -4533,23 +4147,23 @@
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "advised": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Bend your knees and drive up through your legs"
+        "Bend your knees and drive up through your legs",
+        "Bring the ball up above your forehead before you shoot, not from your chest"
       ],
       "flaws_reported": [
-        "low_set_point",
-        "no_leg_drive"
+        "no_leg_drive",
+        "low_set_point"
       ],
       "clip": "heldout_38__front",
       "set": "heldout",
@@ -4558,49 +4172,44 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.385,
+      "seconds": 0.01,
       "labeled_flaws": [
-        "no_leg_drive",
-        "low_set_point"
+        "low_set_point",
+        "no_leg_drive"
       ],
       "expected_advice": [
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
-        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest."
+        "Bring the ball up to a set point above your forehead before releasing; don't push it from your chest.",
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_38__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "no_leg_drive",
         "no_follow_through",
-        "flat_arc",
-        "no_leg_drive"
+        "flat_arc"
       ],
       "advised": [
+        "no_leg_drive",
+        "no_follow_through",
+        "flat_arc"
+      ],
+      "missed": [],
+      "false_alarms": [],
+      "unknown_flaw_ids": [],
+      "feedback": [
+        "Snap your wrist and hold your follow-through",
+        "More arc, shoot up and over the rim",
+        "Bend your knees and drive up through your legs"
+      ],
+      "flaws_reported": [
         "no_follow_through",
         "flat_arc",
         "no_leg_drive"
-      ],
-      "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
-      "unknown_flaw_ids": [],
-      "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
-        "Snap your wrist and hold your follow-through",
-        "Bend your knees and drive up through your legs",
-        "More arc, shoot up and over the rim"
-      ],
-      "flaws_reported": [
-        "low_set_point",
-        "no_follow_through",
-        "no_leg_drive",
-        "flat_arc"
       ],
       "clip": "heldout_39__side",
       "set": "heldout",
@@ -4609,51 +4218,46 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.388,
+      "seconds": 0.009,
       "labeled_flaws": [
+        "no_leg_drive",
         "no_follow_through",
-        "flat_arc",
-        "no_leg_drive"
+        "flat_arc"
       ],
       "expected_advice": [
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+        "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_39__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
+        "no_leg_drive",
         "elbow_flare",
-        "no_follow_through",
-        "no_leg_drive"
+        "no_follow_through"
       ],
       "advised": [
+        "no_leg_drive",
         "elbow_flare",
-        "no_follow_through",
-        "no_leg_drive"
+        "no_follow_through"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Snap your wrist and hold your follow-through",
-        "Bend your knees and drive up through your legs",
-        "Tuck your shooting elbow under the ball"
+        "Tuck your shooting elbow under the ball",
+        "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
         "no_follow_through",
-        "no_leg_drive",
-        "elbow_flare"
+        "elbow_flare",
+        "no_leg_drive"
       ],
       "clip": "heldout_39__front",
       "set": "heldout",
@@ -4662,38 +4266,33 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.389,
+      "seconds": 0.011,
       "labeled_flaws": [
+        "no_leg_drive",
         "elbow_flare",
-        "no_follow_through",
-        "no_leg_drive"
+        "no_follow_through"
       ],
       "expected_advice": [
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up.",
-        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+        "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_39__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 75.0,
+      "score": 100.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest"
+        "Great shot, same again"
       ],
-      "flaws_reported": [
-        "low_set_point"
-      ],
+      "flaws_reported": [],
       "clip": "heldout_40__side",
       "set": "heldout",
       "archetype": "heldout_40",
@@ -4701,30 +4300,25 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.381,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_40__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 75.0,
+      "score": 100.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest"
+        "Great shot, same again"
       ],
-      "flaws_reported": [
-        "low_set_point"
-      ],
+      "flaws_reported": [],
       "clip": "heldout_40__front",
       "set": "heldout",
       "archetype": "heldout_40",
@@ -4732,11 +4326,10 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.404,
+      "seconds": 0.013,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_40__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4765,15 +4358,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.382,
+      "seconds": 0.012,
       "labeled_flaws": [
         "releasing_on_the_way_down"
       ],
       "expected_advice": [
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_41__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4806,7 +4398,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.384,
+      "seconds": 0.01,
       "labeled_flaws": [
         "guide_hand_interference",
         "releasing_on_the_way_down"
@@ -4815,8 +4407,7 @@
         "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_41__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4849,7 +4440,7 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.382,
+      "seconds": 0.01,
       "labeled_flaws": [
         "off_balance_drift",
         "no_follow_through"
@@ -4858,8 +4449,7 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_42__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -4892,7 +4482,7 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.411,
+      "seconds": 0.013,
       "labeled_flaws": [
         "off_balance_drift",
         "no_follow_through"
@@ -4901,14 +4491,13 @@
         "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_42__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 100.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 0.0,
+      "priority": 1.0,
       "detected": [
         "no_leg_drive"
       ],
@@ -4916,16 +4505,12 @@
         "no_leg_drive"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
         "no_leg_drive"
       ],
       "clip": "heldout_43__side",
@@ -4935,41 +4520,36 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.371,
+      "seconds": 0.01,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_43__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 70.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
       "priority": 0.0,
       "detected": [
-        "guide_hand_interference",
-        "no_leg_drive"
+        "no_leg_drive",
+        "guide_hand_interference"
       ],
       "advised": [
-        "guide_hand_interference",
-        "no_leg_drive"
+        "no_leg_drive",
+        "guide_hand_interference"
       ],
       "missed": [],
-      "false_alarms": [
-        "low_set_point"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Bring the ball up above your forehead before you shoot, not from your chest",
         "Guide hand on the side, let it come off clean",
         "Bend your knees and drive up through your legs"
       ],
       "flaws_reported": [
-        "low_set_point",
         "guide_hand_interference",
         "no_leg_drive"
       ],
@@ -4980,17 +4560,16 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.384,
+      "seconds": 0.011,
       "labeled_flaws": [
-        "guide_hand_interference",
-        "no_leg_drive"
+        "no_leg_drive",
+        "guide_hand_interference"
       ],
       "expected_advice": [
-        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes.",
-        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
+        "Bend your knees and drive up through your legs; the power should come from the floor, not your arms.",
+        "Keep your guide hand on the side of the ball and let it come off cleanly; only the shooting hand pushes."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_43__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -5019,15 +4598,14 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.39,
+      "seconds": 0.012,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_44__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -5056,33 +4634,39 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.383,
+      "seconds": 0.012,
       "labeled_flaws": [
         "no_leg_drive"
       ],
       "expected_advice": [
         "Bend your knees and drive up through your legs; the power should come from the floor, not your arms."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_44__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 0.0,
-      "detection": 0.0,
-      "advice": 0.0,
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
       "priority": 0.0,
-      "detected": [],
-      "advised": [],
-      "missed": [
-        "releasing_on_the_way_down",
-        "off_balance_drift"
+      "detected": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
       ],
+      "advised": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Great shot, same again"
+        "Release at the top of your jump, not on the way down",
+        "Jump straight up and land where you took off"
       ],
-      "flaws_reported": [],
+      "flaws_reported": [
+        "releasing_on_the_way_down",
+        "off_balance_drift"
+      ],
       "clip": "heldout_45__side",
       "set": "heldout",
       "archetype": "heldout_45",
@@ -5090,38 +4674,39 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.371,
+      "seconds": 0.015,
       "labeled_flaws": [
-        "releasing_on_the_way_down",
-        "off_balance_drift"
-      ],
-      "expected_advice": [
-        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
-      ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_45__side.png"
-    },
-    {
-      "score": 20.0,
-      "detection": 0.25,
-      "advice": 0.25,
-      "priority": 0.0,
-      "detected": [
-        "off_balance_drift"
-      ],
-      "advised": [
-        "off_balance_drift"
-      ],
-      "missed": [
+        "off_balance_drift",
         "releasing_on_the_way_down"
       ],
+      "expected_advice": [
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
+      ],
+      "pose_source": "benchmark-keypoints"
+    },
+    {
+      "score": 80.0,
+      "detection": 1.0,
+      "advice": 1.0,
+      "priority": 0.0,
+      "detected": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "advised": [
+        "off_balance_drift",
+        "releasing_on_the_way_down"
+      ],
+      "missed": [],
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
+        "Release at the top of your jump, not on the way down",
         "Jump straight up and land where you took off"
       ],
       "flaws_reported": [
+        "releasing_on_the_way_down",
         "off_balance_drift"
       ],
       "clip": "heldout_45__front",
@@ -5131,23 +4716,22 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.371,
+      "seconds": 0.013,
       "labeled_flaws": [
-        "releasing_on_the_way_down",
-        "off_balance_drift"
+        "off_balance_drift",
+        "releasing_on_the_way_down"
       ],
       "expected_advice": [
-        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
-        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance."
+        "Jump straight up and land where you took off; drifting in the air throws off your aim and distance.",
+        "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_45__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
         "releasing_on_the_way_down",
         "flat_arc",
@@ -5162,14 +4746,14 @@
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
+        "Snap your wrist and hold your follow-through",
         "Release at the top of your jump, not on the way down",
-        "More arc, shoot up and over the rim",
-        "Snap your wrist and hold your follow-through"
+        "More arc, shoot up and over the rim"
       ],
       "flaws_reported": [
+        "no_follow_through",
         "releasing_on_the_way_down",
-        "flat_arc",
-        "no_follow_through"
+        "flat_arc"
       ],
       "clip": "heldout_46__side",
       "set": "heldout",
@@ -5178,7 +4762,7 @@
       "view": "side",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.383,
+      "seconds": 0.012,
       "labeled_flaws": [
         "releasing_on_the_way_down",
         "flat_arc",
@@ -5189,14 +4773,13 @@
         "Put more arc on it; shoot up and over the front of the rim (around 45-50 degrees), not straight at it.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_46__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
-      "score": 100.0,
+      "score": 80.0,
       "detection": 1.0,
       "advice": 1.0,
-      "priority": 1.0,
+      "priority": 0.0,
       "detected": [
         "releasing_on_the_way_down",
         "no_follow_through"
@@ -5209,12 +4792,12 @@
       "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Release at the top of your jump, not on the way down",
-        "Snap your wrist and hold your follow-through"
+        "Snap your wrist and hold your follow-through",
+        "Release at the top of your jump, not on the way down"
       ],
       "flaws_reported": [
-        "releasing_on_the_way_down",
-        "no_follow_through"
+        "no_follow_through",
+        "releasing_on_the_way_down"
       ],
       "clip": "heldout_46__front",
       "set": "heldout",
@@ -5223,7 +4806,7 @@
       "view": "front",
       "handedness": "left",
       "status": "ok",
-      "seconds": 0.382,
+      "seconds": 0.014,
       "labeled_flaws": [
         "releasing_on_the_way_down",
         "no_follow_through"
@@ -5232,8 +4815,7 @@
         "Release at the top of your jump or on the way up; you are letting go on the way down and losing your legs.",
         "Snap your wrist and hold your follow-through, fingers pointing at the rim, until the ball lands."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_46__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -5256,11 +4838,10 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.394,
+      "seconds": 0.012,
       "labeled_flaws": [],
       "expected_advice": [],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_47__side.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -5289,15 +4870,14 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 0.418,
+      "seconds": 0.014,
       "labeled_flaws": [
         "elbow_flare"
       ],
       "expected_advice": [
         "Tuck your shooting elbow under the ball so your elbow, wrist and the rim line up."
       ],
-      "pose_source": "benchmark-keypoints",
-      "screenshot": "/Users/devin/repos/busk/benchmark/results/visual/heldout_47__front.png"
+      "pose_source": "benchmark-keypoints"
     },
     {
       "score": 100.0,
@@ -5320,7 +4900,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 3.523,
+      "seconds": 4.185,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -5331,23 +4911,19 @@
       "pose_source": "vision"
     },
     {
-      "score": 75.0,
+      "score": 100.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [
-        "guide_hand_interference"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Guide hand on the side, let it come off clean"
+        "Great shot, same again"
       ],
-      "flaws_reported": [
-        "guide_hand_interference"
-      ],
+      "flaws_reported": [],
       "clip": "real__kobe_bryant_warmup_free_throw__front",
       "set": "real",
       "archetype": "real__kobe_bryant_warmup_free_throw",
@@ -5355,7 +4931,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 5.448,
+      "seconds": 6.678,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -5366,23 +4942,19 @@
       "pose_source": "vision"
     },
     {
-      "score": 75.0,
+      "score": 100.0,
       "detection": null,
       "advice": null,
       "priority": null,
       "detected": [],
       "advised": [],
       "missed": [],
-      "false_alarms": [
-        "elbow_flare"
-      ],
+      "false_alarms": [],
       "unknown_flaw_ids": [],
       "feedback": [
-        "Tuck your shooting elbow under the ball"
+        "Great shot, same again"
       ],
-      "flaws_reported": [
-        "elbow_flare"
-      ],
+      "flaws_reported": [],
       "clip": "real__tolo_free_throw__front",
       "set": "real",
       "archetype": "real__tolo_free_throw",
@@ -5390,7 +4962,7 @@
       "view": "front",
       "handedness": "right",
       "status": "ok",
-      "seconds": 5.495,
+      "seconds": 6.934,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {
@@ -5421,7 +4993,7 @@
       "view": "side",
       "handedness": "right",
       "status": "ok",
-      "seconds": 4.866,
+      "seconds": 5.768,
       "labeled_flaws": [],
       "expected_advice": [],
       "source": {

@@ -1,9 +1,10 @@
 {
   "version": "1.0.0",
-  "notes": "Flaw IDs are the contract between busk's form analysis and this benchmark. Patterns are case-insensitive Python regexes matched against each feedback line. fix_patterns credit actionable advice for a flaw; mention_patterns only identify the flaw and are used for detection when the analyzer reports no flaw IDs. label_rule documents the kinematic threshold the synthetic clips use to decide the ground-truth label.",
+  "notes": "Flaw IDs are the contract between busk's form analysis and this benchmark. Patterns are case-insensitive Python regexes matched against each feedback line. fix_patterns credit actionable advice for a flaw; mention_patterns only identify the flaw and are used for detection when the analyzer reports no flaw IDs. label_rule documents the kinematic threshold the synthetic clips use to decide the ground-truth label. coaching_priority is the order a coach fixes flaws in (1 first: where the ball starts and that it moves in one motion; 2 the base; 3 the release; 4 the finish). A clip's primary flaw is its visible flaw with the lowest coaching_priority; how far past the threshold a flaw is only breaks ties within a rank.",
   "flaws": [
     {
       "id": "no_leg_drive",
+      "coaching_priority": 2,
       "name": "No leg drive",
       "description": "Shooter barely bends the knees and powers the ball with the arms.",
       "views": ["side", "front"],
@@ -22,6 +23,7 @@
     },
     {
       "id": "low_set_point",
+      "coaching_priority": 1,
       "name": "Low set point",
       "description": "The ball is pushed from the chest or chin instead of from a set point at or above the forehead.",
       "views": ["side", "front"],
@@ -40,6 +42,7 @@
     },
     {
       "id": "elbow_flare",
+      "coaching_priority": 3,
       "name": "Elbow flare",
       "description": "The shooting elbow sticks out to the side instead of staying under the ball, pushing the shot off line.",
       "views": ["front"],
@@ -56,6 +59,7 @@
     },
     {
       "id": "flat_arc",
+      "coaching_priority": 4,
       "name": "Flat arc",
       "description": "The ball leaves on a flat trajectory (launch angle well under 45 degrees), shrinking the target at the rim.",
       "views": ["side"],
@@ -74,6 +78,7 @@
     },
     {
       "id": "no_follow_through",
+      "coaching_priority": 4,
       "name": "No follow-through",
       "description": "The shooting arm drops immediately after release with no wrist snap or held finish.",
       "views": ["side", "front"],
@@ -92,6 +97,7 @@
     },
     {
       "id": "guide_hand_interference",
+      "coaching_priority": 3,
       "name": "Guide hand interference",
       "description": "The non-shooting hand pushes or flicks the ball at release, adding side spin and pushing it off line.",
       "views": ["front"],
@@ -110,6 +116,7 @@
     },
     {
       "id": "releasing_on_the_way_down",
+      "coaching_priority": 3,
       "name": "Releasing on the way down",
       "description": "The ball is released well after the peak of the jump, so leg power is lost and the shot is short.",
       "views": ["side", "front"],
@@ -126,6 +133,7 @@
     },
     {
       "id": "hitch_at_set_point",
+      "coaching_priority": 1,
       "name": "Hitch at the set point",
       "description": "The ball stops at the set point (two-motion pause), killing rhythm and slowing the release.",
       "views": ["side", "front"],
@@ -143,6 +151,7 @@
     },
     {
       "id": "off_balance_drift",
+      "coaching_priority": 2,
       "name": "Off-balance drift",
       "description": "The shooter fades, leans or drifts in the air and lands well away from the takeoff spot.",
       "views": ["side", "front"],

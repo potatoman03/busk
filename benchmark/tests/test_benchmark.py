@@ -86,6 +86,12 @@ class Heldout(unittest.TestCase):
             self.assertTrue(any(not c.flaws for c in clips))
         self.assertTrue(any(c.handedness == "left" for c in self.CLIPS))
 
+    def test_primary_flaw_has_top_coaching_priority(self):
+        for c in self.CLIPS + CLIPS:
+            if c.observable:
+                rank = TAX.flaws[c.primary].coaching_priority
+                self.assertEqual(rank, min(TAX.flaws[f["id"]].coaching_priority for f in c.observable), c.id)
+
     def test_perfect_feedback_scores_100(self):
         for c in self.CLIPS:
             self.assertEqual(score_clip(c, perfect(c), TAX)["score"], 100.0, c.id)
