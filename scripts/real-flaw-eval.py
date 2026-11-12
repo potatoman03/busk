@@ -2,7 +2,7 @@
 
 Usage: python3 scripts/real-flaw-eval.py   (after benchmark/run.sh has downloaded the real clips and swift build -c release)
 Each clean real clip is checked as-is (no flaw may be reported), then once per injected flaw: a 0.45 s hold at the set
-point, the arm dropping right after the release, landing 0.3 body heights from the takeoff, and the jump happening
+point, the arm dropping right after the release, landing 0.3 body heights from the takeoff, and the body jumping
 0.25 s earlier than the arm (so the release comes on the way down). Flaws are only injected where the taxonomy says
 the view can show them, and drift / late release only on clips with a real jump.
 """
@@ -81,15 +81,18 @@ def inject(kp, flaw, side):
             a = min(1, max(0, (f["t"] - t0) / (t1 - t0)))
             for n, p in f["joints"].items(): f["joints"][n] = [p[0] + a * 0.3 * H, p[1]] + p[2:]
     elif flaw == "releasing_on_the_way_down":
-        # Jump earlier, keep the arm's timing: the release then lands after the peak.
+        # Jump earlier, keep the arm's timing: the body comes from 0.25 s later, the arms keep their own motion relative
+        # to the shoulder, so the release then lands after the peak.
         d = int(0.25 * fps); orig = copy.deepcopy(fr); n = len(fr)
-        low = ("hip", "knee", "ankle")
+        arm = ("elbow", "wrist")
         for i in range(max(0, st - int(0.6 * fps)), n):
-            src = orig[min(n - 1, i + d)]; r, r0 = j(orig[i], "root"), j(src, "root")
-            if not (r and r0): continue
-            dy = r0[1] - r[1]
+            src = orig[min(n - 1, i + d)]
             for nm, p in orig[i]["joints"].items():
-                q = j(src, nm) if any(k in nm for k in low) or nm == "root" else [p[0], p[1] + dy] + p[2:]
+                if any(k in nm for k in arm):
+                    sh = nm.split("_")[0] + "_shoulder"; s0, s1 = j(orig[i], sh), j(src, sh)
+                    q = [p[0] + s1[0] - s0[0], p[1] + s1[1] - s0[1]] + p[2:] if s0 and s1 else None
+                else:
+                    q = j(src, nm)
                 if q: fr[i]["joints"][nm] = q
     return kp
 
