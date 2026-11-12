@@ -209,6 +209,10 @@ class SimulatorPick(unittest.TestCase):
         self.assertEqual(pick_device([self.A, self.B], "A", {}), ("A", None))
         self.assertIsNotNone(pick_device([self.A], "C", {})[1])
 
+    def test_only_simulator_with_busk_installed(self):
+        self.assertEqual(pick_device([self.A, self.B], "booted", {}, {"B": True}), ("B", None))
+        self.assertIsNotNone(pick_device([self.A, self.B], "booted", {}, {"A": True, "B": True})[1])
+
     def test_nothing_booted(self):
         self.assertIsNotNone(pick_device([], "booted", {})[1])
 

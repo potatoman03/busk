@@ -20,11 +20,12 @@ from pathlib import Path
 BUSK_BUNDLE_ID = "com.potatoman03.busk"
 
 
-def pick_device(booted: list[dict], requested: str, running: dict[str, bool]) -> tuple[str | None, str | None]:
-    """Choose the simulator to capture: (udid, error). `running` maps udid -> busk is running there.
+def pick_device(booted: list[dict], requested: str, running: dict[str, bool],
+                installed: dict[str, bool] | None = None) -> tuple[str | None, str | None]:
+    """Choose the simulator to capture: (udid, error). `running`/`installed` map udid -> busk is running/installed.
 
     `simctl io booted` picks an arbitrary device when several are booted, so resolve it to the one
-    running busk.
+    running busk, else the only one with busk installed.
     """
     if requested != "booted":
         match = [d for d in booted if requested in (d["udid"], d["name"])]
@@ -36,6 +37,9 @@ def pick_device(booted: list[dict], requested: str, running: dict[str, bool]) ->
         return with_busk[0]["udid"], None
     if len(booted) == 1:
         return booted[0]["udid"], None
+    with_app = [d for d in booted if (installed or {}).get(d["udid"])]
+    if len(with_app) == 1:
+        return with_app[0]["udid"], None
     return None, "several simulators are booted and none is running busk; launch busk or pass --simulator UDID"
 
 
@@ -83,7 +87,8 @@ class SimulatorCapture:
             return "xcrun not found (install Xcode)"
         booted = _booted_devices()
         running = {d["udid"]: busk_running(d["udid"]) for d in booted}
-        udid, err = pick_device(booted, self.requested, running)
+        installed = {d["udid"]: app_data_dir(d["udid"]) is not None for d in booted}
+        udid, err = pick_device(booted, self.requested, running, installed)
         if err:
             return err
         self.device = udid
