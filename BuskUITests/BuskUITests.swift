@@ -123,13 +123,30 @@ final class BuskUITests: XCTestCase {
         app.buttons["endSessionButton"].tap()
 
         XCTAssertTrue(app.staticTexts["summaryMakes"].waitForExistence(timeout: 5))
-        let logged = Int(app.staticTexts["summaryMakes"].label) ?? -1
-        XCTAssertGreaterThanOrEqual(logged, 1)
-        XCTAssertTrue(app.descendants(matching: .any)["shotMade"].firstMatch.exists, "the shot list marks the made shot")
-        app.steppers["makesStepper"].buttons.element(boundBy: 0).tap()
-        XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged - 1)
-        app.steppers["makesStepper"].buttons.element(boundBy: 1).tap()
-        XCTAssertEqual(Int(app.staticTexts["summaryMakes"].label), logged, "the live make is kept")
+        let summaryMakes = app.staticTexts["summaryMakes"]
+        XCTAssertEqual(summaryMakes.label, "1", "the live make is kept")
+        XCTAssertFalse(app.steppers["makesStepper"].exists, "marked shots are changed one by one, not by a count")
+        let madeMark = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'shotMark-' AND label == 'Made'")).firstMatch
+        XCTAssertTrue(madeMark.exists, "the shot list marks the made shot")
+        let mark = app.buttons[madeMark.identifier]
+        mark.tap()
+        XCTAssertEqual(mark.label, "Missed")
+        XCTAssertEqual(summaryMakes.label, "0")
+        mark.tap()
+        XCTAssertEqual(mark.label, "Not marked")
+        mark.tap()
+        XCTAssertEqual(mark.label, "Made")
+        XCTAssertEqual(summaryMakes.label, "1")
+
+        app.buttons["countWholeButton"].tap()
+        let stepper = app.steppers["makesStepper"]
+        XCTAssertTrue(stepper.waitForExistence(timeout: 2))
+        XCTAssertFalse(mark.exists, "a whole-session count hides the shot marks it would disagree with")
+        stepper.buttons.element(boundBy: 0).tap()
+        XCTAssertEqual(summaryMakes.label, "0")
+        app.buttons["useShotMarksButton"].tap()
+        XCTAssertEqual(summaryMakes.label, "1")
+        XCTAssertEqual(mark.label, "Made")
         XCTAssertTrue(app.descendants(matching: .any)["summaryDemoNote"].exists, "demo sessions stay out of the tracker")
         snapshot("13-summary-makes")
         app.swipeUp()

@@ -54,17 +54,3 @@ struct ShotDetailView: View {
         .opaqueNavigationBar()
     }
 }
-
-/// A shot's Made or Missed mark, so the player can check the make count shot by shot. Nothing when it wasn't marked.
-struct MadeMark: View {
-    let made: Bool?
-
-    var body: some View {
-        if let made {
-            Image(systemName: made ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundStyle(made ? .green : .secondary)
-                .accessibilityLabel(made ? "Made" : "Missed")
-                .accessibilityIdentifier(made ? "shotMade" : "shotMissed")
-        }
-    }
-}

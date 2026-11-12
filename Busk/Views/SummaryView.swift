@@ -128,13 +128,16 @@ struct SummaryContent: View {
                 Card {
                     Text("Shots").font(.headline)
                     ForEach(Array(summary.shots.enumerated()), id: \.element.id) { i, shot in
-                        NavigationLink {
-                            ShotDetailView(shot: shot, number: i + 1)
-                        } label: {
-                            shotRow(shot, number: i + 1)
+                        HStack(spacing: 4) {
+                            NavigationLink {
+                                ShotDetailView(shot: shown(shot, summary), number: i + 1)
+                            } label: {
+                                shotRow(shot, number: i + 1)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("shotRow-\(i + 1)")
+                            if !summary.countedWhole { markButton(shot.made, index: i) }
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("shotRow-\(i + 1)")
                     }
                 }
                 Text(footer)
@@ -176,7 +179,7 @@ struct SummaryContent: View {
         Group {
             if large {
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack { label; Spacer(); MadeMark(made: shot.made); score; chevron }
+                    HStack { label; Spacer(); score; chevron }
                     Text(shot.cue).multilineTextAlignment(.leading)
                 }
             } else {
@@ -184,7 +187,6 @@ struct SummaryContent: View {
                     label.frame(minWidth: 34, alignment: .leading)
                     Text(shot.cue).lineLimit(2).multilineTextAlignment(.leading)
                     Spacer()
-                    MadeMark(made: shot.made)
                     score
                     chevron
                 }
@@ -212,20 +214,60 @@ struct SummaryContent: View {
                     Text(makeRateLine(summary))
                         .font(.subheadline).foregroundStyle(.secondary)
                         .accessibilityIdentifier("summaryMakeRate")
-                    if summary.makes != nil, summary.unmarked > 0 {
-                        Text("\(summary.unmarked) not marked, so left out. Use − or + to count the whole session.")
-                            .font(.caption).foregroundStyle(.secondary)
-                            .accessibilityIdentifier("summaryUnmarked")
-                    }
+                    Text(makesHint(summary))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("summaryMakesHint")
                 }
                 Spacer()
-                // Stepping counts makes for the whole session, starting from the live marks.
-                Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 }),
-                        in: 0...max(summary.count, summary.makes ?? 0))
-                    .labelsHidden()
-                    .accessibilityIdentifier("makesStepper")
+                // Makes come from one place at a time, so the count and the shot marks never disagree.
+                if summary.countedWhole || summary.marked == 0 {
+                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 }),
+                            in: 0...max(summary.count, summary.makes ?? 0))
+                        .labelsHidden()
+                        .accessibilityIdentifier("makesStepper")
+                }
+            }
+            if summary.countedWhole, summary.marked > 0 {
+                Button("Use shot marks instead") { record.makes = nil }
+                    .font(.subheadline.bold())
+                    .accessibilityIdentifier("useShotMarksButton")
+            } else if !summary.countedWhole, summary.marked > 0 {
+                Button("Count the whole session instead") { record.makes = summary.makes }
+                    .font(.subheadline.bold())
+                    .accessibilityIdentifier("countWholeButton")
             }
         }
+    }
+
+    private func makesHint(_ summary: SessionSummary) -> String {
+        if summary.countedWhole { return "Counted for the whole session." }
+        guard summary.marked > 0 else { return "Count with − and +, or mark each shot below." }
+        let left = summary.unmarked > 0 ? " \(summary.unmarked) not marked, so left out." : ""
+        return "Tap a shot's mark below to change it." + left
+    }
+
+    /// Made, then Missed, then not marked.
+    private func markButton(_ made: Bool?, index: Int) -> some View {
+        Button {
+            record.mark(shot: index, made: made == nil ? true : made == true ? false : nil)
+        } label: {
+            Image(systemName: made == true ? "checkmark.circle.fill" : made == false ? "xmark.circle.fill" : "circle.dashed")
+                .font(.title3)
+                .foregroundStyle(made == true ? AnyShapeStyle(.green) : made == false ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tertiary))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(made == true ? "Made" : made == false ? "Missed" : "Not marked")
+        .accessibilityHint("Changes whether this shot went in")
+        .accessibilityIdentifier("shotMark-\(index + 1)")
+    }
+
+    /// A whole-session count replaces the shot marks, so shot detail doesn't show one that disagrees with it.
+    private func shown(_ shot: ShotResult, _ summary: SessionSummary) -> ShotResult {
+        var shot = shot
+        if summary.countedWhole { shot.made = nil }
+        return shot
     }
 
     private func makeRateLine(_ summary: SessionSummary) -> String {
