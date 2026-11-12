@@ -4,6 +4,9 @@ import SwiftUI
 @main
 struct BuskApp: App {
     let container: ModelContainer
+    @State private var voiceControl = VoiceControl()
+    @AppStorage(SettingsKey.voiceCommands) private var voiceCommands = false
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         let config = ModelConfiguration(isStoredInMemoryOnly: AppEnvironment.isUITesting || AppEnvironment.replayKeypointsPath != nil
@@ -28,6 +31,16 @@ struct BuskApp: App {
                     ReplaySessionView(video: video, label: AppEnvironment.replayLabel)
                 } else {
                     HomeView()
+                }
+            }
+            .environment(voiceControl)
+            .task(id: voiceCommands) {
+                if voiceCommands { await voiceControl.start() } else { voiceControl.stop() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                // Access may have just been granted in iOS Settings.
+                if phase == .active && voiceCommands && voiceControl.state == .needsPermission {
+                    Task { await voiceControl.start() }
                 }
             }
             .tint(Theme.orange)

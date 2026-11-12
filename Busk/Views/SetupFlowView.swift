@@ -8,7 +8,11 @@ struct SetupFlowView: View {
     @AppStorage(SettingsKey.voiceEnabled) private var voiceEnabled = true
     @State private var session: CoachSession?
     @State private var cameraDenied = false
+    @State private var starting = false
     @State private var finished: SessionSummary?
+    @Environment(VoiceControl.self) private var voice: VoiceControl?
+    /// Go live straight away (the player said "start session" on the home screen).
+    var autoStart = false
 
     var body: some View {
         Group {
@@ -21,6 +25,12 @@ struct SetupFlowView: View {
             } else {
                 setup
             }
+        }
+        .task {
+            if autoStart && session == nil { await begin() }
+        }
+        .onChange(of: voice?.event) { _, event in
+            if event?.command == .start && session == nil { Task { await begin() } }
         }
     }
 
@@ -80,6 +90,7 @@ struct SetupFlowView: View {
                 .padding(20)
             }
             .background(Theme.court.ignoresSafeArea())
+            .safeAreaInset(edge: .bottom) { VoiceControlBar(commands: [.start]).padding(.bottom, 4) }
             .navigationTitle("Set up")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -91,6 +102,9 @@ struct SetupFlowView: View {
     }
 
     private func begin() async {
+        guard session == nil, !starting else { return }
+        starting = true
+        defer { starting = false }
         let source: PoseSource
         if AppEnvironment.forceDemo || !CameraPoseSource.isAvailable {
             source = DemoPoseSource(handedness: handedness, view: cameraView, leadIn: AppEnvironment.demoIdle ? 120 : 0.5)

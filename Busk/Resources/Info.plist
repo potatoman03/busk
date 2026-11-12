@@ -24,6 +24,10 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Busk listens for voice commands like "start session" and "how am I doing" so you can control it from the shooting spot. Audio never leaves your phone.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Busk recognizes voice commands on your phone so you can start, end and check a session without walking back to it.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Busk uses the camera to track your body while you shoot, so it can coach your form. Video never leaves your phone.</string>
 	<key>UIApplicationSceneManifest</key>

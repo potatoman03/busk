@@ -3,8 +3,9 @@ import SwiftUI
 
 struct HomeView: View {
     @Query(sort: \SessionRecord.date, order: .reverse) private var records: [SessionRecord]
-    @State private var showSetup = false
+    @State private var setup: SetupLaunch?
     @State private var showSettings = false
+    @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
         NavigationStack {
@@ -12,7 +13,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     header
                     Button {
-                        showSetup = true
+                        setup = SetupLaunch()
                     } label: {
                         Label("Start shooting", systemImage: "figure.basketball")
                             .font(.title3.bold())
@@ -76,7 +77,22 @@ struct HomeView: View {
             .navigationDestination(for: SessionRecord.self) { SummaryView(record: $0) }
             .navigationDestination(for: HomeRoute.self) { _ in HistoryView() }
             .sheet(isPresented: $showSettings) { SettingsView() }
-            .fullScreenCover(isPresented: $showSetup) { SetupFlowView() }
+            .fullScreenCover(item: $setup) { SetupFlowView(autoStart: $0.autoStart) }
+            .safeAreaInset(edge: .bottom) {
+                if let voice, voice.state != .off {
+                    // Opaque so the list never shows through the bar.
+                    VoiceControlBar(commands: [.start])
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10).padding(.bottom, 4)
+                        .background(Color(red: 0.03, green: 0.015, blue: 0.01).ignoresSafeArea(edges: .bottom))
+                        .overlay(alignment: .top) { Divider() }
+                }
+            }
+        }
+        .onChange(of: voice?.event) { _, event in
+            // "Start session" from home skips setup and goes live with the saved camera angle and hand.
+            guard event?.command == .start, setup == nil, !showSettings else { return }
+            setup = SetupLaunch(autoStart: true)
         }
     }
 
@@ -110,4 +126,9 @@ struct SessionRow: View {
                 .foregroundStyle(Theme.color(forScore: s.averageScore))
         }
     }
+}
+
+private struct SetupLaunch: Identifiable {
+    let id = UUID()
+    var autoStart = false
 }

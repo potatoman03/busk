@@ -10,6 +10,12 @@ final class BuskUITests: XCTestCase {
         app.launch()
     }
 
+    private func relaunch(_ arguments: [String]) {
+        app.terminate()
+        app.launchArguments = arguments
+        app.launch()
+    }
+
     /// Rotates and waits for the layout to settle, so screenshots aren't taken mid-rotation.
     private func rotate(_ orientation: UIDeviceOrientation) {
         XCUIDevice.shared.orientation = orientation
@@ -84,6 +90,53 @@ final class BuskUITests: XCTestCase {
         app.collectionViews["historyList"].cells.firstMatch.tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         snapshot("05b-history-summary")
+    }
+
+    /// Hands-free flow: the simulator has no microphone, so the on-screen voice buttons inject each phrase into the
+    /// same parser the speech recognizer feeds on a device.
+    func testHandsFreeVoiceCommands() {
+        relaunch(["-ui-testing", "-voiceCommands", "YES"])
+        let status = app.staticTexts["voiceStatus"].firstMatch
+        XCTAssertTrue(status.waitForExistence(timeout: 10))
+        XCTAssertTrue(status.label.contains("start session"), status.label)
+        snapshot("07-voice-home")
+
+        app.buttons["simulateVoice-start"].tap()
+        let count = app.staticTexts["shotCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 10), "\"start session\" goes live without touching setup")
+        XCTAssertTrue(app.buttons["simulateVoice-status"].waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label.integerValue >= 2"), evaluatedWith: count)
+        waitForExpectations(timeout: 60)
+        snapshot("08-voice-live")
+
+        app.buttons["simulateVoice-status"].tap()
+        // Wait on the answer first: it only holds the cue log for a few seconds before the next shot's cue.
+        let spoken = app.staticTexts["lastSpokenCue"]
+        expectation(for: NSPredicate(format: "label CONTAINS 'average form'"), evaluatedWith: spoken)
+        waitForExpectations(timeout: 15)
+        XCTAssertTrue(spoken.label.hasPrefix("Said"), spoken.label)
+        XCTAssertTrue(status.label.contains("how am i doing"), status.label)
+        snapshot("09-voice-how-am-i-doing")
+
+        app.buttons["simulateVoice-end"].tap()
+        XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(Int(app.staticTexts["summaryShotCount"].label) ?? 0, 2)
+        snapshot("10-voice-ended-summary")
+    }
+
+    /// Voice commands are an off-by-default prototype: no voice bar (and no mic prompt) until Settings turns them on.
+    func testVoiceCommandsSettingShowsVoiceBar() {
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["voiceStatus"].exists)
+        app.buttons["settingsButton"].tap()
+        let toggle = app.switches["voiceCommandsSetting"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: 5))
+        XCTAssertEqual(toggle.value as? String, "0")
+        snapshot("11-voice-prototype-setting")
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "1")
+        app.buttons["settingsDoneButton"].tap()
+        XCTAssertTrue(app.staticTexts["voiceStatus"].firstMatch.waitForExistence(timeout: 5))
     }
 
     /// A replayed clip ends like a live session: Summary then Done lands on Home, and the clip is in History.

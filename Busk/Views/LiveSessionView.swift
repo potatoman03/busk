@@ -8,6 +8,7 @@ struct LiveSessionView: View {
     var badges: AnyView? = nil
     @Environment(\.modelContext) private var modelContext
     @State private var ended = false
+    @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
         if ended {
@@ -85,6 +86,27 @@ struct LiveSessionView: View {
         }
         .statusBarHidden()
         .onDisappear { session.stop() }
+        .onChange(of: voice?.event) { _, event in
+            guard !ended else { return }
+            switch event?.command {
+            case .end: endSession()
+            case .status: session.speakStatus()
+            case .start, nil: break
+            }
+        }
+    }
+
+    private func endSession() {
+        session.stop()
+        if !session.shots.isEmpty {
+            modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
+                                              view: session.cameraView, handedness: session.handedness,
+                                              isDemo: session.isDemo, shots: session.shots))
+            try? modelContext.save()
+            ended = true
+        } else {
+            onClose()
+        }
     }
 
     @ViewBuilder private var replayPanel: some View {
@@ -98,8 +120,23 @@ struct LiveSessionView: View {
     }
 
     @ViewBuilder private func feedback(compact: Bool) -> some View {
+        if compact, let voice, voice.state != .off {
+            // The landscape column is short: when a long cue leaves no room for the voice bar, drop the spoken-cue
+            // log, then the form card, so the cue and the voice buttons stay whole.
+            ViewThatFits(in: .vertical) {
+                feedbackStack(compact: true, cueLog: true, card: true)
+                feedbackStack(compact: true, cueLog: false, card: true)
+                feedbackStack(compact: true, cueLog: false, card: false)
+            }
+        } else {
+            feedbackStack(compact: compact, cueLog: true, card: true)
+        }
+    }
+
+    private func feedbackStack(compact: Bool, cueLog: Bool, card: Bool) -> some View {
+        VStack(spacing: 12) {
                     banner(compact: compact)
-                    if AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
+                    if cueLog, AppEnvironment.showSpokenCues, let cue = session.spokenLog.last {
                         Label("\(cue.muted ? "Muted" : "Said") #\(session.spokenLog.count): \(cue.text)",
                               systemImage: cue.muted ? "speaker.slash" : "waveform")
                             .font(.caption.monospaced())
@@ -109,24 +146,15 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
+                    if card, let shot = session.lastShot { ShotCard(shot: shot, compact: compact) }
+                    VoiceControlBar(commands: [.status, .end], compact: compact)
+        }
     }
 
     private func topBar(showBadges: Bool) -> some View {
         VStack(alignment: .leading, spacing: 8) {
         HStack(spacing: 10) {
-            Button {
-                session.stop()
-                if !session.shots.isEmpty {
-                    modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
-                                                      view: session.cameraView, handedness: session.handedness,
-                                                      isDemo: session.isDemo, shots: session.shots))
-                    try? modelContext.save()
-                    ended = true
-                } else {
-                    onClose()
-                }
-            } label: {
+            Button(action: endSession) {
                 Label("End", systemImage: "stop.fill").font(.headline).lineLimit(1).fixedSize()
             }
             .buttonStyle(.borderedProminent)
