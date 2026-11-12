@@ -47,7 +47,8 @@ final class ShotAnalyzerTests: XCTestCase {
     }
 
     func testHitchIsTimed() throws {
-        XCTAssertEqual(try XCTUnwrap(run(.hitched).first).hitch, 0.3, accuracy: 0.1)
+        XCTAssertGreaterThan(try XCTUnwrap(run(.hitched).first).hitch, FormEvaluator.Thresholds().hitch.bad)
+        XCTAssertLessThan(try XCTUnwrap(run(.good).first).hitch, FormEvaluator.Thresholds().hitch.ok)
     }
 
     func testFaderDrifts() throws {

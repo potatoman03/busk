@@ -18,7 +18,7 @@ from .dataset import BENCH_DIR, load_clips, load_taxonomy
 from .heldout import load_heldout_clips
 from .real import fetch as fetch_real, load_real_clips
 from .scoring import score_clip, summarize
-from .visual import SimulatorCapture
+from .visual import SimulatorCapture, save_keypoints
 
 REPO_ROOT = BENCH_DIR.parent
 DEFAULT_OUT = BENCH_DIR / "results" / "latest.json"
@@ -135,10 +135,18 @@ def cmd_run(a):
         else:
             status, out, err, secs = run_clip(argv, c, video, None if a.no_keypoints else kp,
                                               out_dir / f"{c.id}.json", a.timeout, REPO_ROOT)
+        shot = None
         if capture is not None and kp is not None:
             shot = capture.replay(c.id, kp)
-            if shot:
-                results.setdefault("_shots", {})[c.id] = shot
+        elif capture is not None and c.set == "real" and argv is not None and analyzer_status == "ok":
+            sidecar = cache / "real" / f"{c.id}.keypoints.json"
+            why = save_keypoints(argv, c, video, sidecar, REPO_ROOT)
+            if why:
+                log(f"no keypoints sidecar for {c.id}, not replayed in-app: {why}")
+            else:
+                shot = capture.replay_video(c.id, video, sidecar, c.view, c.handedness)
+        if shot:
+            results.setdefault("_shots", {})[c.id] = shot
         r = score_clip(c, out, tax)
         statuses[status] = statuses.get(status, 0) + 1
         results[c.id] = r
@@ -159,6 +167,8 @@ def cmd_run(a):
     for cid, path in shots.items():
         results[cid]["screenshot"] = path
     visual = capture.stop() if capture is not None else {"status": "not_requested"}
+    for cid, v in visual.get("in_app", {}).items():
+        results[cid]["in_app"] = v
     if analyzer_status == "ok" and statuses.get("ok", 0) < len(clips):
         analyzer_status = "partial" if statuses.get("ok") else "failed"
 
@@ -203,6 +213,8 @@ def cmd_run(a):
         rc = compare_files(Path(a.baseline), out_path, a)
     if a.require_analyzer and analyzer_status != "ok":
         rc = rc or 2
+    if visual.get("in_app_misses"):
+        log(f"in-app misses (busk coached no shot, or none before the timeout): {', '.join(visual['in_app_misses'])}")
     if a.require_visuals and visual.get("status") != "captured":
         log(f"visual evidence missing: {visual.get('error') or visual.get('status')}")
         rc = rc or 3

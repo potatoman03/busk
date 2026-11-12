@@ -10,6 +10,17 @@ final class BuskUITests: XCTestCase {
         app.launch()
     }
 
+    /// Rotates and waits for the layout to settle, so screenshots aren't taken mid-rotation.
+    private func rotate(_ orientation: UIDeviceOrientation) {
+        XCUIDevice.shared.orientation = orientation
+        let window = app.windows.firstMatch
+        let wide = orientation.isLandscape
+        for _ in 0..<20 where (window.frame.width > window.frame.height) != wide {
+            Thread.sleep(forTimeInterval: 0.2)
+        }
+        Thread.sleep(forTimeInterval: 0.8)
+    }
+
     private func snapshot(_ name: String) {
         let a = XCTAttachment(screenshot: app.screenshot())
         a.name = name
@@ -52,7 +63,7 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(matched, spoken.label)
         snapshot("03-live")
 
-        XCUIDevice.shared.orientation = .landscapeLeft
+        rotate(.landscapeLeft)
         defer { XCUIDevice.shared.orientation = .portrait }
         let end = app.buttons["endSessionButton"]
         XCTAssertTrue(end.waitForExistence(timeout: 5))
@@ -73,6 +84,31 @@ final class BuskUITests: XCTestCase {
         app.collectionViews["historyList"].cells.firstMatch.tap()
         XCTAssertTrue(app.staticTexts["summaryShotCount"].waitForExistence(timeout: 5))
         snapshot("05b-history-summary")
+    }
+
+    /// A replayed clip ends like a live session: Summary then Done lands on Home, and the clip is in History.
+    func testReplayDoneReturnsHomeWithHistory() {
+        let clip = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/side.keypoints.json").path
+        app.terminate()
+        app.launchArguments = ["-ui-testing", "-replay-keypoints", clip, "-replay-label", "side-real"]
+        app.launch()
+        XCTAssertTrue(app.descendants(matching: .any)["replayComplete"].waitForExistence(timeout: 30))
+        rotate(.landscapeLeft)
+        defer { XCUIDevice.shared.orientation = .portrait }
+        XCTAssertTrue(app.staticTexts["cueBanner"].waitForExistence(timeout: 5))
+        snapshot("06-replay-landscape")
+        rotate(.portrait)
+        snapshot("06b-replay-complete")
+        app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.buttons["summaryDoneButton"].waitForExistence(timeout: 5))
+        snapshot("06c-replay-summary")
+        app.buttons["summaryDoneButton"].tap()
+        XCTAssertTrue(app.buttons["historyButton"].waitForExistence(timeout: 5))
+        app.buttons["historyButton"].tap()
+        XCTAssertTrue(app.collectionViews["historyList"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.collectionViews["historyList"].cells.count, 1)
+        snapshot("06d-replay-history")
     }
 
     func testEndingWithoutShotsReturnsHome() {

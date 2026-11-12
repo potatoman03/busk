@@ -1,8 +1,9 @@
 import Foundation
 
 /// Proof that a `-replay-keypoints` run really played its clip, so a benchmark run can't pass on a stale screen.
-/// Written to `Documents/replay-status.json` (or `-replay-status PATH`) when the clip loads (`finished: false`)
-/// and again once every frame has gone through the live session.
+/// Written to `Documents/replay-status.json` (or `-replay-status PATH`) when the clip loads (`finished: false`),
+/// after every coached shot, and once every frame has gone through the live session. `-videoPath` clips loop, so
+/// they never finish; `shots` says when busk has coached one.
 struct ReplayStatus: Codable, Equatable {
     var label: String?
     var path: String
