@@ -62,6 +62,13 @@ final class FormEvaluatorTests: XCTestCase {
         XCTAssertEqual(FormEvaluator().evaluate(front).fixes, [.setPoint, .legs, .guideHand, .elbow, .followThrough])
     }
 
+    func testClearlyBadGuideHandBeatsAMarginalHitch() {
+        var m = good
+        m.guideHandPush = 0.067
+        m.hitch = 0.40
+        XCTAssertEqual(FormEvaluator().evaluate(m).fixes, [.guideHand, .rhythm])
+    }
+
     func testFollowThroughWaitsForTheBase() {
         var m = good
         m.followThrough = 0.0
