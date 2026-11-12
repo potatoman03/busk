@@ -110,12 +110,12 @@ final class BuskUITests: XCTestCase {
         snapshot("08-voice-live")
 
         app.buttons["simulateVoice-status"].tap()
-        expectation(for: NSPredicate(format: "label CONTAINS 'how am i doing'"), evaluatedWith: status)
-        waitForExpectations(timeout: 10)
+        // Wait on the answer first: it only holds the cue log for a few seconds before the next shot's cue.
         let spoken = app.staticTexts["lastSpokenCue"]
         expectation(for: NSPredicate(format: "label CONTAINS 'average form'"), evaluatedWith: spoken)
-        waitForExpectations(timeout: 10)
+        waitForExpectations(timeout: 15)
         XCTAssertTrue(spoken.label.hasPrefix("Said"), spoken.label)
+        XCTAssertTrue(status.label.contains("how am i doing"), status.label)
         snapshot("09-voice-how-am-i-doing")
 
         app.buttons["simulateVoice-end"].tap()
