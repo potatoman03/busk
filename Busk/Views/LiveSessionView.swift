@@ -7,13 +7,13 @@ struct LiveSessionView: View {
     /// Extra status pills (e.g. the replay clip label) shown under the phase pill, so they never cover the cue.
     var badges: AnyView? = nil
     @Environment(\.modelContext) private var modelContext
-    @State private var ended = false
+    @State private var saved: SessionRecord?
     @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
-        if ended {
+        if let saved {
             NavigationStack {
-                SummaryContent(summary: session.summary, date: session.startDate, isDemo: session.isDemo)
+                SummaryContent(record: saved)
                     .navigationTitle("Session summary")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -93,10 +93,12 @@ struct LiveSessionView: View {
         .statusBarHidden()
         .onDisappear { session.stop() }
         .onChange(of: voice?.event) { _, event in
-            guard !ended else { return }
+            guard saved == nil else { return }
             switch event?.command {
             case .end: endSession()
             case .status: session.speakStatus()
+            case .make: session.markLastShot(made: true)
+            case .miss: session.markLastShot(made: false)
             case .start, nil: break
             }
         }
@@ -105,11 +107,12 @@ struct LiveSessionView: View {
     private func endSession() {
         session.stop()
         if !session.shots.isEmpty {
-            modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
-                                              view: session.cameraView, handedness: session.handedness,
-                                              isDemo: session.isDemo, shots: session.shots))
+            let record = SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
+                                       view: session.cameraView, handedness: session.handedness,
+                                       isDemo: session.isDemo, shots: session.shots)
+            modelContext.insert(record)
             try? modelContext.save()
-            ended = true
+            saved = record
         } else {
             onClose()
         }
@@ -152,7 +155,12 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact, style: card) }
+                    if let shot = session.lastShot {
+                        ShotCard(shot: shot, compact: compact, style: card) { made in
+                            // Tapping the answer already shown clears it.
+                            session.markLastShot(made: shot.made == made ? nil : made)
+                        }
+                    }
                     VoiceControlBar(commands: [.status, .end], compact: compact)
         }
     }
@@ -183,6 +191,15 @@ struct LiveSessionView: View {
             }
             .padding(.horizontal, 12).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            if let makes = session.summary.makes {
+                VStack(spacing: 0) {
+                    Text("\(makes)").font(.title2.bold().monospacedDigit()).foregroundStyle(.green)
+                        .accessibilityIdentifier("makeCount")
+                    Text("made").font(.caption2)
+                }
+                .padding(.horizontal, 12).padding(.vertical, 6)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            }
             Button {
                 session.voiceEnabled.toggle()
             } label: {
@@ -243,11 +260,39 @@ struct ShotCard: View {
     enum Style { case full, scoreOnly }
     /// `scoreOnly` keeps the score and the weakest area on one row for when the column has no room for more.
     var style = Style.full
+    /// Made / Missed buttons for this shot; nil hides them.
+    var onMark: ((Bool) -> Void)? = nil
     var body: some View {
         switch style {
         case .full: fullCard
         case .scoreOnly: scoreRow
         }
+    }
+
+    /// Busk can't see the ball, so the player says whether it went in.
+    @ViewBuilder private var markButtons: some View {
+        if let onMark {
+            let stack = style == .scoreOnly ? AnyLayout(HStackLayout(spacing: 6)) : AnyLayout(VStackLayout(spacing: 6))
+            stack {
+                markButton("Made", symbol: "checkmark", tint: .green, selected: shot.made == true) { onMark(true) }
+                    .accessibilityIdentifier("markMadeButton")
+                markButton("Missed", symbol: "xmark", tint: .red, selected: shot.made == false) { onMark(false) }
+                    .accessibilityIdentifier("markMissedButton")
+            }
+        }
+    }
+
+    private func markButton(_ label: String, symbol: String, tint: Color, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.headline.bold())
+                .frame(width: 40, height: 40)
+                .foregroundStyle(selected ? .white : tint)
+                .background(selected ? tint : tint.opacity(0.18), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(selected ? "Selected" : "")
     }
 
     private var scoreRow: some View {
@@ -262,6 +307,7 @@ struct ShotCard: View {
                 Text(worst.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
+            markButtons
         }
         .padding(.horizontal, 14).padding(.vertical, 8)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -287,6 +333,7 @@ struct ShotCard: View {
                 }
             }
             Spacer(minLength: 0)
+            markButtons
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))

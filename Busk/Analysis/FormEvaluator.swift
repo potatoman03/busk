@@ -94,6 +94,8 @@ struct ShotResult: Codable, Equatable, Identifiable, Sendable {
     var focus: FormArea?
     /// Every area that needs work, most important first.
     var fixes: [FormArea] = []
+    /// Whether it went in, once the player says (nil until then).
+    var made: Bool?
 }
 
 struct FormEvaluator {
