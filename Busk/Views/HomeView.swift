@@ -93,6 +93,7 @@ struct HomeView: View {
             .background(Theme.court.ignoresSafeArea())
             .navigationTitle("Busk")
             .navigationBarTitleDisplayMode(.inline)
+            .opaqueNavigationBar()
             .toolbar {
                 // "Busk" stays the back-button title; the header below is the only heading on screen.
                 ToolbarItem(placement: .principal) { Color.clear.frame(width: 1, height: 1) }
@@ -210,7 +211,9 @@ struct SessionRow: View {
                 }
                 Text("\(s.count) shot\(s.count == 1 ? "" : "s")" + (s.makes.map { " · \($0) made" } ?? "") + " · \(record.durationText)")
                     .font(.subheadline).foregroundStyle(.secondary)
-                if let focus = s.topFocus {
+                if let focus = record.focus {
+                    Text("Focus set: \(focus.title.lowercased())").font(.caption).foregroundStyle(.secondary)
+                } else if let focus = s.topFocus {
                     Text("Focus: \(focus.title.lowercased())").font(.caption).foregroundStyle(.secondary)
                 }
             }
