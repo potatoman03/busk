@@ -41,8 +41,29 @@ final class CameraPoseSource: NSObject, PoseSource {
         }
     }
 
-    /// Keeps the delivered buffers upright for the current interface orientation.
-    func setRotation(_ angle: CGFloat) {
+    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
+    private var rotationObservation: NSKeyValueObservation?
+
+    /// Rotates the preview and the delivered buffers to match how the preview sits on screen, so both stay upright
+    /// in portrait and in either landscape orientation.
+    func followRotation(of previewLayer: AVCaptureVideoPreviewLayer) {
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else { return }
+        let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: previewLayer)
+        rotationCoordinator = coordinator
+        rotationObservation = coordinator.observe(\.videoRotationAngleForHorizonLevelPreview, options: [.initial, .new]) { [weak self, weak previewLayer] c, _ in
+            let angle = c.videoRotationAngleForHorizonLevelPreview
+            DispatchQueue.main.async { previewLayer.map { Self.apply(angle, to: $0.connection) } }
+            self?.setRotation(angle)
+        }
+    }
+
+    var previewRotationAngle: CGFloat? { rotationCoordinator?.videoRotationAngleForHorizonLevelPreview }
+
+    static func apply(_ angle: CGFloat, to connection: AVCaptureConnection?) {
+        if let connection, connection.isVideoRotationAngleSupported(angle) { connection.videoRotationAngle = angle }
+    }
+
+    private func setRotation(_ angle: CGFloat) {
         videoQueue.async { [weak self] in
             guard let self else { return }
             self.rotationAngle = angle
