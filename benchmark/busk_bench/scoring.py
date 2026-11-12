@@ -12,6 +12,8 @@ Clip score (0..100):
 """
 from __future__ import annotations
 
+import re
+
 from .dataset import Clip, Taxonomy
 
 W_DETECT, W_ADVICE, W_PRIORITY = 0.35, 0.45, 0.20
@@ -51,7 +53,9 @@ def score_clip(clip: Clip, out: dict | None, tax: Taxonomy) -> dict:
         res["status_reason"] = "no_shot_detected"
         return res
 
-    corrective = [ln for ln in norm["feedback"] if not tax.praise.search(ln)]
+    # Praise is judged per sentence, so "Nice. Tuck your elbow" still counts as a correction.
+    corrective = [s for ln in norm["feedback"] for s in re.split(r"(?<=[.!?])\s+", ln)
+                  if s.strip() and not tax.praise.search(s)]
     fixed = {fid for fid, f in tax.flaws.items() if any(_matches(f.fix, ln) for ln in corrective)}
     mentioned = {fid for fid, f in tax.flaws.items() if any(_matches(f.mention, ln) for ln in corrective)}
     res["unknown_flaw_ids"] = [f for f in norm["flaws"] if f not in tax.flaws]
