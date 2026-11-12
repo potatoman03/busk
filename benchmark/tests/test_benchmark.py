@@ -7,7 +7,7 @@ from pathlib import Path
 BENCH = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BENCH))
 
-from busk_bench.analyzer import resolve_command  # noqa: E402
+from busk_bench.analyzer import resolve_command, run_clip  # noqa: E402
 from busk_bench.cli import compare_docs  # noqa: E402
 from busk_bench.dataset import load_clips, load_taxonomy  # noqa: E402
 from busk_bench.kinematics import ShotParams  # noqa: E402
@@ -68,6 +68,11 @@ class Scoring(unittest.TestCase):
         r = score_clip(c, {"shots": [{"feedback": ["Great follow-through, beautiful arc!"]}]}, TAX)
         self.assertEqual(r["score"], 100.0)
 
+    def test_praise_prefixed_tip_is_a_false_alarm(self):
+        c = next(c for c in CLIPS if c.id == "advanced_solid__side")
+        r = score_clip(c, {"shots": [{"feedback": ["Nice. Tuck your elbow under the ball"]}]}, TAX)
+        self.assertEqual(r["false_alarms"], ["elbow_flare"])
+
     def test_no_output_and_no_shot_score_zero(self):
         c = CLIPS[0]
         self.assertEqual(score_clip(c, None, TAX)["score"], 0.0)
@@ -119,6 +124,13 @@ class Compare(unittest.TestCase):
 
 
 class Contract(unittest.TestCase):
+    def test_non_object_shot_is_invalid_output(self):
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "out.json"
+            argv = [sys.executable, "-c", f"open({str(out)!r}, 'w').write('{{\"shots\": [42]}}')"]
+            status, parsed, _, _ = run_clip(argv, CLIPS[0], Path(d) / "v.mp4", None, out, 30, Path(d))
+            self.assertEqual((status, parsed), ("invalid_output", None))
+
     def test_missing_analyzer(self):
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(resolve_command(None, Path(d)), (None, "not_found"))
