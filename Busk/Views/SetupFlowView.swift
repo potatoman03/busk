@@ -13,6 +13,9 @@ struct SetupFlowView: View {
     @Environment(VoiceControl.self) private var voice: VoiceControl?
     /// Go live straight away (the player said "start session" on the home screen).
     var autoStart = false
+    /// Focus set from the coaching plan: the coach only cues this area.
+    var focus: FormArea? = nil
+    var targetShots: Int? = nil
 
     var body: some View {
         Group {
@@ -27,6 +30,7 @@ struct SetupFlowView: View {
             }
         }
         .task {
+            if let view = focus?.bestView { cameraView = view }
             if autoStart && session == nil { await begin() }
         }
         .onChange(of: voice?.event) { _, event in
@@ -38,6 +42,21 @@ struct SetupFlowView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    if let focus {
+                        Card {
+                            Label("Focus set", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
+                            Text(focus.title + (targetShots.map { " · \($0) shots" } ?? "")).font(.title3.bold())
+                            Text("Busk only coaches your \(focus.title.lowercased()) this set: \(focus.cue.lowercased()).")
+                                .font(.subheadline).foregroundStyle(.secondary)
+                            if let view = focus.bestView {
+                                Label("\(focus.title) is judged with the phone \(view == .front ? "facing you" : "side on")",
+                                      systemImage: "camera.viewfinder")
+                                    .font(.footnote).foregroundStyle(cameraView == view ? Color.secondary : Color.yellow)
+                            }
+                        }
+                        .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("setupFocusCard")
+                    }
                     Card {
                         Text("Where is your phone?").font(.headline)
                         Picker("Camera angle", selection: $cameraView) {
@@ -46,6 +65,15 @@ struct SetupFlowView: View {
                         .pickerStyle(.segmented)
                         .accessibilityIdentifier("cameraViewPicker")
                         Text(cameraView.hint).font(.subheadline).foregroundStyle(.secondary)
+                        Text("Checks " + FormArea.allCases.filter { $0.bestView == nil || $0.bestView == cameraView }
+                            .map { $0.title.lowercased() }.formatted(.list(type: .and)) + ".")
+                            .font(.footnote).foregroundStyle(.secondary)
+                            .accessibilityIdentifier("cameraViewChecks")
+                        if focus == nil {
+                            Label("New to this? Start with Facing me: it checks your elbow and guide hand, the most common beginner misses. Side on checks your arc.",
+                                  systemImage: "lightbulb")
+                                .font(.footnote).foregroundStyle(Theme.orange)
+                        }
                     }
                     Card {
                         Text("Shooting hand").font(.headline)
@@ -116,7 +144,7 @@ struct SetupFlowView: View {
             source = CameraPoseSource()
         }
         let s = CoachSession(cameraView: cameraView, handedness: handedness, source: source,
-                             voiceEnabled: voiceEnabled && !AppEnvironment.isUITesting)
+                             voiceEnabled: voiceEnabled && !AppEnvironment.isUITesting, focus: focus, targetShots: targetShots)
         session = s
         s.start()
     }

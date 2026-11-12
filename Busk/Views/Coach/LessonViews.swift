@@ -1,0 +1,211 @@
+import SwiftUI
+
+struct LessonView: View {
+    let lesson: Lesson
+    /// Whether the lesson can start a focus set (not from inside a running session).
+    var canPractise = true
+    @State private var launch: Launch?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(lesson.unit.title.uppercased()).font(.caption.bold()).foregroundStyle(Theme.orange)
+                    Text(lesson.title).font(.largeTitle.bold()).accessibilityIdentifier("lessonTitle")
+                    Text(lesson.summary).foregroundStyle(.secondary)
+                }
+
+                Card {
+                    Label("Why it matters", systemImage: "lightbulb").font(.headline)
+                    Text(lesson.why)
+                }
+
+                Card {
+                    Label("How to do it", systemImage: "list.number").font(.headline)
+                    ForEach(Array(lesson.steps.enumerated()), id: \.offset) { i, step in
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text("\(i + 1)").font(.subheadline.bold().monospacedDigit()).foregroundStyle(Theme.orange)
+                            Text(step)
+                        }
+                    }
+                }
+
+                Card {
+                    Label("Think this", systemImage: "quote.bubble").font(.headline)
+                    Text("“\(lesson.feel)”").font(.title3.italic())
+                }
+
+                if !lesson.mistakes.isEmpty {
+                    Card {
+                        Label("Common mistakes", systemImage: "exclamationmark.triangle").font(.headline)
+                        ForEach(lesson.mistakes, id: \.self) { m in
+                            Label { Text(m) } icon: { Image(systemName: "xmark.circle").foregroundStyle(.red) }
+                        }
+                    }
+                }
+
+                if let checks = lesson.howBuskChecks {
+                    Card {
+                        Label("How Busk checks it", systemImage: "camera.viewfinder").font(.headline)
+                        Text(checks).font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+
+                if !lesson.drills.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Drills").font(.headline)
+                        ForEach(lesson.drills) { drill in
+                            NavigationLink(value: CoachRoute.drill(drill.id)) { DrillRow(drill: drill) }
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("drill-\(drill.id)")
+                        }
+                    }
+                }
+
+                if canPractise, let area = lesson.area {
+                    Button { launch = Launch(focus: area) } label: {
+                        Label("Practise it: \(CoachPlan.focusSetShots)-shot focus set", systemImage: "scope")
+                            .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 14)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .accessibilityIdentifier("practiseLessonButton")
+                }
+            }
+            .padding(20)
+        }
+        .background(Theme.court.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { WorkoutChecklist.set("lesson-\(lesson.id)", done: true) }
+        .fullScreenCover(item: $launch) { SetupFlowView(focus: $0.focus, targetShots: CoachPlan.focusSetShots) }
+    }
+
+    private struct Launch: Identifiable {
+        let id = UUID()
+        let focus: FormArea
+    }
+}
+
+struct DrillView: View {
+    let drill: Drill
+    @State private var done = false
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(drill.title).font(.largeTitle.bold()).accessibilityIdentifier("drillTitle")
+                    Text(drill.summary).foregroundStyle(.secondary)
+                    HStack {
+                        Pill(text: drill.needsBall ? "Needs a ball" : "No ball needed",
+                             systemImage: drill.needsBall ? "basketball" : "figure.run")
+                        Pill(text: drill.dose, systemImage: "repeat")
+                    }
+                }
+
+                Card {
+                    Label("Steps", systemImage: "list.number").font(.headline)
+                    ForEach(Array(drill.steps.enumerated()), id: \.offset) { i, step in
+                        HStack(alignment: .firstTextBaseline, spacing: 10) {
+                            Text("\(i + 1)").font(.subheadline.bold().monospacedDigit()).foregroundStyle(Theme.orange)
+                            Text(step)
+                        }
+                    }
+                }
+
+                Card {
+                    Label("Builds", systemImage: "figure.basketball").font(.headline)
+                    ForEach(drill.areas, id: \.self) { area in
+                        Label(area.title, systemImage: area.symbol)
+                    }
+                    if drill.tracked {
+                        Text("Set the phone up and Busk can watch this one: start a session and do the reps in view.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
+
+                Button {
+                    done.toggle()
+                    WorkoutChecklist.set("drill-\(drill.id)", done: done)
+                    if Self.warmUps.contains(drill.id) { WorkoutChecklist.set("warmup", done: done) }
+                } label: {
+                    Label(done ? "Done today" : "Mark done", systemImage: done ? "checkmark.circle.fill" : "circle")
+                        .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 14)
+                }
+                .buttonStyle(.bordered)
+                .tint(done ? .green : Theme.orange)
+                .accessibilityIdentifier("drillDoneButton")
+            }
+            .padding(20)
+        }
+        .background(Theme.court.ignoresSafeArea())
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { done = WorkoutChecklist.done().contains("drill-\(drill.id)") }
+    }
+
+    private static let warmUps: Set<String> = ["shadow", "formShooting"]
+}
+
+struct DrillRow: View {
+    let drill: Drill
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: drill.needsBall ? "basketball" : "figure.run").foregroundStyle(Theme.orange).frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(drill.title).font(.subheadline.bold())
+                Text((drill.needsBall ? "" : "No ball · ") + drill.dose).font(.footnote).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right").font(.footnote).foregroundStyle(.secondary)
+        }
+        .padding(14)
+        .background(.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .contentShape(Rectangle())
+    }
+}
+
+/// Every lesson, by unit, and every drill.
+struct LibraryView: View {
+    @AppStorage(SettingsKey.hasBall) private var hasBall = false
+
+    var body: some View {
+        List {
+            ForEach(Lesson.Unit.allCases, id: \.self) { unit in
+                Section(unit.title) {
+                    ForEach(Lesson.all.filter { $0.unit == unit }) { lesson in
+                        NavigationLink(value: CoachRoute.lesson(lesson.id)) {
+                            Label {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(lesson.title).bold()
+                                    Text(lesson.summary).font(.footnote).foregroundStyle(.secondary)
+                                }
+                            } icon: {
+                                Image(systemName: lesson.area?.symbol ?? "figure.basketball").foregroundStyle(Theme.orange)
+                            }
+                        }
+                        .accessibilityIdentifier("lesson-\(lesson.id)")
+                    }
+                }
+            }
+            Section(hasBall ? "Drills" : "Drills (no-ball first)") {
+                ForEach(hasBall ? Drill.all : Drill.all.filter { !$0.needsBall } + Drill.all.filter(\.needsBall)) { drill in
+                    NavigationLink(value: CoachRoute.drill(drill.id)) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(drill.title).bold()
+                                Text((drill.needsBall ? "Ball · " : "No ball · ") + drill.dose)
+                                    .font(.footnote).foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: drill.needsBall ? "basketball" : "figure.run").foregroundStyle(Theme.orange)
+                        }
+                    }
+                    .accessibilityIdentifier("libraryDrill-\(drill.id)")
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background(Theme.court.ignoresSafeArea())
+        .navigationTitle("Lessons")
+    }
+}

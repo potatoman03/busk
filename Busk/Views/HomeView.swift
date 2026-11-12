@@ -3,8 +3,11 @@ import SwiftUI
 
 struct HomeView: View {
     @Query(sort: \SessionRecord.date, order: .reverse) private var records: [SessionRecord]
+    @AppStorage(SettingsKey.hasBall) private var hasBall = false
     @State private var setup: SetupLaunch?
     @State private var showSettings = false
+    @State private var showGuide = false
+    @AppStorage(SettingsKey.hasSeenSetupTips) private var hasSeenGuide = false
     @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
@@ -24,6 +27,8 @@ struct HomeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .accessibilityIdentifier("startButton")
 
+                    coachCard
+
                     if let last = records.first {
                         NavigationLink(value: last) {
                             Card {
@@ -36,16 +41,35 @@ struct HomeView: View {
                     }
 
                     Card {
-                        Text("What Busk coaches").font(.headline)
-                        ForEach([FormArea.setPoint, .elbow, .guideHand, .arc, .releaseTiming, .followThrough], id: \.self) { area in
-                            Label {
-                                VStack(alignment: .leading) {
-                                    Text(area.title).bold()
-                                    Text(area.cue).font(.subheadline).foregroundStyle(.secondary)
+                        HStack {
+                            Text("What Busk coaches").font(.headline)
+                            Spacer()
+                            NavigationLink("All lessons", value: CoachRoute.library)
+                                .font(.subheadline).tint(Theme.orange)
+                                .accessibilityIdentifier("lessonsLink")
+                        }
+                        ForEach(CoachPlan.order, id: \.self) { area in
+                            NavigationLink(value: CoachRoute.lesson(Lesson.forArea(area)?.id ?? "overview")) {
+                                HStack {
+                                    Label {
+                                        VStack(alignment: .leading) {
+                                            Text(area.title).bold()
+                                            Text(area.cue).font(.subheadline).foregroundStyle(.secondary)
+                                                .multilineTextAlignment(.leading)
+                                        }
+                                    } icon: {
+                                        Image(systemName: area.symbol).foregroundStyle(Theme.orange)
+                                    }
+                                    Spacer(minLength: 4)
+                                    if let view = area.bestView {
+                                        Text(view.label).font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.secondary)
                                 }
-                            } icon: {
-                                Image(systemName: area.symbol).foregroundStyle(Theme.orange)
+                                .contentShape(Rectangle())
                             }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("homeArea-\(area.rawValue)")
                         }
                     }
 
@@ -76,7 +100,15 @@ struct HomeView: View {
             }
             .navigationDestination(for: SessionRecord.self) { SummaryView(record: $0) }
             .navigationDestination(for: HomeRoute.self) { _ in HistoryView() }
+            .coachDestinations()
             .sheet(isPresented: $showSettings) { SettingsView() }
+            .sheet(isPresented: $showGuide) { GuideView() }
+            .task {
+                // UI tests start on Home unless they ask for the first-run guide.
+                if !hasSeenGuide && (!AppEnvironment.isUITesting || AppEnvironment.arguments.contains("-show-guide")) {
+                    showGuide = true
+                }
+            }
             .fullScreenCover(item: $setup) { SetupFlowView(autoStart: $0.autoStart) }
             .safeAreaInset(edge: .bottom) {
                 if let voice, voice.state != .off {
@@ -94,6 +126,35 @@ struct HomeView: View {
             guard event?.command == .start, setup == nil, !showSettings else { return }
             setup = SetupLaunch(autoStart: true)
         }
+    }
+
+    /// Today's plan at a glance; opens the full coaching plan.
+    private var coachCard: some View {
+        let plan = CoachPlan(sessions: records.map(\.practice))
+        let steps = plan.workout(hasBall: hasBall)
+        let done = WorkoutChecklist.done()
+        let next = steps.first { !done.contains($0.id) }
+        return NavigationLink(value: CoachRoute.plan) {
+            Card {
+                HStack {
+                    Label("Your coach", systemImage: "graduationcap").font(.caption).foregroundStyle(.secondary)
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.footnote).foregroundStyle(.secondary)
+                }
+                Text(plan.focus.map { "Focus: \($0.title)" } ?? "Find your first focus")
+                    .font(.title3.bold())
+                    .accessibilityIdentifier("homeCoachFocus")
+                if let next {
+                    Label("Next: \(next.title)", systemImage: next.symbol)
+                        .font(.subheadline).foregroundStyle(Theme.orange)
+                } else {
+                    Label("Today's workout done", systemImage: "checkmark.circle.fill")
+                        .font(.subheadline).foregroundStyle(.green)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("coachCard")
     }
 
     private var header: some View {

@@ -107,7 +107,7 @@ struct LiveSessionView: View {
         if !session.shots.isEmpty {
             modelContext.insert(SessionRecord(date: session.startDate, duration: Date().timeIntervalSince(session.startDate),
                                               view: session.cameraView, handedness: session.handedness,
-                                              isDemo: session.isDemo, shots: session.shots))
+                                              isDemo: session.isDemo, shots: session.shots, focus: session.focus))
             try? modelContext.save()
             ended = true
         } else {
@@ -158,8 +158,15 @@ struct LiveSessionView: View {
     }
 
     private var phasePill: some View {
-        Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
-            .accessibilityIdentifier("phaseLabel")
+        HStack(spacing: 8) {
+            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
+                .accessibilityIdentifier("phaseLabel")
+            if let focus = session.focus, let r = session.summary.focusResult {
+                Pill(text: "\(focus.title) \(r.good)/\(r.measured)" + (session.targetShots.map { " · set \(min(session.shots.count, $0))/\($0)" } ?? ""),
+                     systemImage: "scope")
+                    .accessibilityIdentifier("focusPill")
+            }
+        }
     }
 
     private func topBar(landscape: Bool) -> some View {
@@ -259,7 +266,7 @@ struct ShotCard: View {
             if let worst = shot.areas.max(by: { $0.grade < $1.grade }) {
                 Circle().fill(Theme.color(for: worst.grade)).frame(width: 8, height: 8)
                 Text(worst.area.title).font(.caption.bold())
-                Text(worst.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                Text(worst.plain).font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
         }
@@ -282,7 +289,7 @@ struct ShotCard: View {
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
+                        Text(a.plain).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
                     }
                 }
             }

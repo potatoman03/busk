@@ -41,4 +41,6 @@ enum SettingsKey {
     static let hasSeenSetupTips = "hasSeenSetupTips"
     /// Prototype, off by default; `-voiceCommands YES` turns it on for simulator runs.
     static let voiceCommands = "voiceCommands"
+    /// Whether the player has a ball; without one the coaching plan uses shadow shots and ball-free drills.
+    static let hasBall = "hasBall"
 }

@@ -40,7 +40,27 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.buttons["settingsButton"].exists)
         XCTAssertTrue(app.buttons["historyButton"].exists)
         XCTAssertTrue(app.staticTexts["Elbow"].exists)
+        XCTAssertTrue(app.staticTexts["Balance"].exists)
         snapshot("01-home")
+    }
+
+    func testFirstRunGuide() {
+        relaunch(["-ui-testing", "-show-guide"])
+        let next = app.buttons["guideNextButton"]
+        XCTAssertTrue(next.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Set your phone up"].exists)
+        snapshot("00a-guide-phone")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["Pick an angle"].waitForExistence(timeout: 5))
+        snapshot("00b-guide-angle")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["While you shoot"].waitForExistence(timeout: 5))
+        snapshot("00c-guide-live")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["Your coach"].waitForExistence(timeout: 5))
+        snapshot("00d-guide-coach")
+        next.tap()
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
     }
 
     func testFullShootingSession() {
@@ -243,5 +263,74 @@ final class BuskUITests: XCTestCase {
         expectation(for: NSPredicate(format: "label.integerValue >= 1"), evaluatedWith: count)
         waitForExpectations(timeout: 60)
         XCTAssertFalse(app.descendants(matching: .any)["ghostReplayLegend"].exists)
+    }
+
+    func testCoachPlanAndLessons() {
+        let coach = app.buttons["coachCard"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["homeCoachFocus"].label, "Find your first focus")
+        coach.tap()
+        XCTAssertTrue(app.staticTexts["coachFocus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["coachFocus"].label, "Let's find your first focus")
+        XCTAssertTrue(app.buttons["step-baseline"].exists)
+        XCTAssertTrue(app.staticTexts["Baseline: 15 shadow shots"].exists)
+        snapshot("09-coach-start")
+
+        app.segmentedControls["hasBallPicker"].buttons["I have a ball"].tap()
+        XCTAssertTrue(app.staticTexts["Baseline: 15 shots"].waitForExistence(timeout: 5))
+        app.segmentedControls["hasBallPicker"].buttons["No ball"].tap()
+
+        app.buttons["step-lesson-overview"].tap()
+        XCTAssertTrue(app.staticTexts["lessonTitle"].waitForExistence(timeout: 5))
+        snapshot("10-lesson-overview")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertEqual(app.staticTexts["workoutProgress"].label, "1/2")
+
+        app.swipeUp()
+        app.buttons["libraryLink"].tap()
+        let elbow = app.buttons["lesson-elbow"]
+        XCTAssertTrue(elbow.waitForExistence(timeout: 5))
+        snapshot("11-library")
+        elbow.tap()
+        XCTAssertTrue(app.staticTexts["lessonTitle"].label.hasPrefix("Elbow"))
+        snapshot("12-lesson-elbow")
+        app.swipeUp()
+        let drill = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'drill-'")).firstMatch
+        XCTAssertTrue(drill.waitForExistence(timeout: 5))
+        drill.tap()
+        XCTAssertTrue(app.staticTexts["drillTitle"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["drillDoneButton"].exists)
+        snapshot("13-drill")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        // A focus set from the lesson: Busk only coaches the elbow and the plan keeps it as the focus.
+        let practise = app.buttons["practiseLessonButton"]
+        XCTAssertTrue(practise.waitForExistence(timeout: 5))
+        practise.tap()
+        XCTAssertTrue(app.otherElements["setupFocusCard"].waitForExistence(timeout: 5) || app.staticTexts["Focus set"].exists)
+        snapshot("14-focus-setup")
+        app.buttons["goLiveButton"].tap()
+        let pill = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Elbow '")).firstMatch
+        let count = app.staticTexts["shotCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label.integerValue >= 2"), evaluatedWith: count)
+        waitForExpectations(timeout: 60)
+        XCTAssertTrue(pill.waitForExistence(timeout: 5))
+        snapshot("15-focus-live")
+        app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.staticTexts["summaryFocusResult"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["summaryFocusResult"].label.hasPrefix("Elbow"))
+        snapshot("16-focus-summary")
+        app.buttons["summaryDoneButton"].tap()
+
+        while app.navigationBars.buttons.count > 0 && !app.navigationBars["Busk"].exists {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+        XCTAssertTrue(app.staticTexts["homeCoachFocus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["homeCoachFocus"].label, "Focus: Elbow")
+        app.buttons["coachCard"].tap()
+        XCTAssertEqual(app.staticTexts["coachFocus"].label, "Elbow")
+        XCTAssertTrue(app.buttons["step-focus-elbow"].exists)
+        snapshot("17-coach-focus")
     }
 }
