@@ -444,9 +444,13 @@ final class BuskUITests: XCTestCase {
         let toggle = app.switches["ghostReplaySetting"]
         XCTAssertTrue(toggle.waitForExistence(timeout: 5))
         XCTAssertEqual(toggle.value as? String, "0")
+        // Tap only once the sheet has settled and the switch can take the tap.
+        expectation(for: NSPredicate(format: "isHittable == true"), evaluatedWith: toggle)
+        waitForExpectations(timeout: 10)
         toggle.switches.firstMatch.tap()
+        // A predicate wait doesn't wait for the app to go idle like a plain property read does, so give a busy CI runner time.
         expectation(for: NSPredicate(format: "value == '1'"), evaluatedWith: toggle)
-        waitForExpectations(timeout: 5)
+        waitForExpectations(timeout: 15)
         snapshot("07-settings-ghost-replay")
         app.buttons["settingsDoneButton"].tap()
 
