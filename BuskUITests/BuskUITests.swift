@@ -65,15 +65,17 @@ final class BuskUITests: XCTestCase {
     }
 
     func testFramingCheckBeforeFirstShot() {
-        relaunch(["-ui-testing", "-demo-walk-in"])
+        // Once framed, the demo shooter stands still instead of shooting half a second later: the first shot's cue
+        // replaced "Got you" within about 2 s, and a busy CI runner's accessibility polls missed that window.
+        relaunch(["-ui-testing", "-demo-walk-in", "-demo-idle"])
         app.buttons["startButton"].tap()
         XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
         app.buttons["goLiveButton"].tap()
         let check = app.descendants(matching: .any)["framingCheck"]
         XCTAssertTrue(check.waitForExistence(timeout: 8))
-        snapshot("framing-check")
         let banner = app.staticTexts["cueBanner"]
         XCTAssertFalse(banner.label.hasPrefix("Got you"), banner.label)
+        snapshot("framing-check")
         expectation(for: NSPredicate(format: "label BEGINSWITH 'Got you'"), evaluatedWith: banner)
         waitForExpectations(timeout: 30)
         XCTAssertFalse(check.exists)
