@@ -91,8 +91,8 @@ final class CoachVoice: NSObject, AVSpeechSynthesizerDelegate {
 
     func stop() {
         generation += 1
-        inFlight.removeAll()
-        synth.stopSpeaking(at: .immediate)
+        if !inFlight.isEmpty { inFlight.removeAll() }
+        if synth.isSpeaking { synth.stopSpeaking(at: .immediate) }
     }
 
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {

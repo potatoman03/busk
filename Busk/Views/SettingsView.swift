@@ -17,7 +17,14 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Spoken feedback", isOn: $voiceEnabled).accessibilityIdentifier("voiceSetting")
+                    // Stops the test voice from the tap itself, not from a view update.
+                    Toggle("Spoken feedback", isOn: Binding {
+                        voiceEnabled
+                    } set: { on in
+                        voiceEnabled = on
+                        if !on { CoachVoice.preview.stop() }
+                    })
+                    .accessibilityIdentifier("voiceSetting")
                     Button {
                         CoachVoice.configureAudioSession()
                         CoachVoice.preview.say("Tuck your elbow under the ball")
@@ -34,9 +41,6 @@ struct SettingsView: View {
                     }
                     .disabled(!voiceEnabled)
                     .accessibilityIdentifier("testVoiceButton")
-                    .onChange(of: voiceEnabled) { _, on in
-                        if !on { CoachVoice.preview.stop() }
-                    }
                 } header: {
                     Text("Coach")
                 } footer: {

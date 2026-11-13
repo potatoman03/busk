@@ -442,6 +442,13 @@ final class BuskUITests: XCTestCase {
         XCTAssertEqual(toggle.value as? String, "0")
         // Turning spoken feedback off stops the test voice.
         XCTAssertTrue(speaking.waitForNonExistence(timeout: 5))
+        // Turning it back on brings the test voice back.
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "1")
+        let testVoice = app.buttons["testVoiceButton"]
+        XCTAssertTrue(testVoice.isEnabled)
+        testVoice.tap()
+        XCTAssertTrue(speaking.waitForExistence(timeout: 5))
         app.buttons["settingsDoneButton"].tap()
         XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
     }
