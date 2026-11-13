@@ -12,26 +12,27 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var records: [SessionRecord]
     @State private var confirmDelete = false
-    @State private var speaking = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Spoken feedback", isOn: $voiceEnabled).accessibilityIdentifier("voiceSetting")
+                    // Stops the test voice from the tap itself, not from a view update.
+                    Toggle("Spoken feedback", isOn: Binding {
+                        voiceEnabled
+                    } set: { on in
+                        voiceEnabled = on
+                        if !on { CoachVoice.preview.stop() }
+                    })
+                    .accessibilityIdentifier("voiceSetting")
                     Button {
                         CoachVoice.configureAudioSession()
                         CoachVoice.preview.say("Tuck your elbow under the ball")
-                        speaking = true
-                        Task {
-                            try? await Task.sleep(for: .seconds(4))
-                            speaking = false
-                        }
                     } label: {
                         HStack {
                             Text("Test voice")
                             Spacer()
-                            if speaking {
+                            if CoachVoice.preview.isSpeaking {
                                 Label("Speaking", systemImage: "speaker.wave.2.fill")
                                     .font(.footnote).foregroundStyle(.secondary)
                                     .accessibilityIdentifier("testVoiceSpeaking")
@@ -109,7 +110,11 @@ struct SettingsView: View {
 }
 
 extension CoachVoice {
-    static let preview = CoachVoice()
+    static let preview: CoachVoice = {
+        let voice = CoachVoice()
+        voice.holdsSpeech = AppEnvironment.holdVoicePreview
+        return voice
+    }()
 }
 
 extension Bundle {

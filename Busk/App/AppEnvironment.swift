@@ -14,6 +14,8 @@ enum AppEnvironment {
     static var forceDemo: Bool { isUITesting || isSimulator || arguments.contains("-demo") }
     /// `-demo-idle`: the demo shooter stands still for two minutes before shooting (UI tests that need no shots).
     static var demoIdle: Bool { arguments.contains("-demo-idle") }
+    /// `-hold-voice-preview`: Settings' Test voice stays "Speaking" until stopped instead of playing (UI tests on slow simulators).
+    static var holdVoicePreview: Bool { isUITesting && arguments.contains("-hold-voice-preview") }
     /// `-demo-walk-in`: the demo shooter starts badly framed (off to the side, too close, feet cut off) so the framing check shows.
     static var demoWalkIn: Bool { arguments.contains("-demo-walk-in") }
     /// Demo shots stay out of the coaching plan, except in UI tests or with `-demo-counts` (simulator checks of the plan).
