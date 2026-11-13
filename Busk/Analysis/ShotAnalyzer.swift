@@ -194,7 +194,10 @@ final class ShotAnalyzer {
         guard rel >= 2 else { return nil } // no gather in view to measure
         // A short hold at the set point or the top of the jump lasts a few frames; when the camera or Vision falls below
         // ~20 frames a second it isn't seen, and the slowest frame left is the bottom of the dip. Don't time those shots.
-        let timed = samples[..<rel].filter { $0.t >= samples[rel].t - 0.8 }.count >= 16
+        // Set point and timing need the lead-up to release sampled at about 20 fps: 16 frames in the last 0.8 s, or
+        // 10 in the last 0.5 s when tracking only picked the shooter up shortly before (a clip or session just started).
+        let before = samples[..<rel]
+        let timed = before.filter { $0.t >= samples[rel].t - 0.8 }.count >= 16 || before.filter { $0.t >= samples[rel].t - 0.5 }.count >= 10
 
         // Wrist speed relative to the shoulder, in body heights per second.
         var speed = [Double](repeating: 9, count: n)

@@ -58,8 +58,9 @@ enum VideoPoses {
         let asset = AVURLAsset(url: url)
         guard let track = asset.tracks(withMediaType: .video).first else { return [:] }
         let reader = try AVAssetReader(asset: asset)
+        // The same YCbCr frames the app's `VideoPoseSource` reads.
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: [
-            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
         ])
         reader.add(output)
         guard reader.startReading() else { return [:] }
@@ -141,7 +142,7 @@ enum VideoPoses {
         return frames.enumerated().map { i, f in (f.t, pick?.frames[i] ?? [:]) }
     }
 
-    private static func orientationOf(_ t: CGAffineTransform) -> (CGImagePropertyOrientation, Bool) {
+    static func orientationOf(_ t: CGAffineTransform) -> (CGImagePropertyOrientation, Bool) {
         switch (t.a, t.b, t.c, t.d) {
         case (0, 1, -1, 0): return (.right, true)
         case (0, -1, 1, 0): return (.left, true)

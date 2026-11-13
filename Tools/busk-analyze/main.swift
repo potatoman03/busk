@@ -1,3 +1,4 @@
+import AVFoundation
 import CoreGraphics
 import Foundation
 
@@ -43,6 +44,15 @@ if let kpPath = opts["keypoints"] {
         return PoseFrame(timestamp: (f["t"] as? Double) ?? Double(i) / fps, joints: joints, aspect: aspect, ball: ball)
     }
     poseSource = "benchmark-keypoints"
+    // As the app does under -videoPath, the ball is found in the picture, also when the pose comes from a sidecar.
+    if let video = opts["video"], FileManager.default.fileExists(atPath: video) {
+        let url = URL(fileURLWithPath: video)
+        if let track = AVURLAsset(url: url).tracks(withMediaType: .video).first,
+           let balls = try? VideoPoses.findBalls(url, orientation: VideoPoses.orientationOf(track.preferredTransform).0,
+                                                 joints: Dictionary(uniqueKeysWithValues: frames.enumerated().map { ($0.offset, $0.element.joints) })) {
+            for i in frames.indices { frames[i].ball = balls[i] }
+        }
+    }
 } else {
     guard let video = opts["video"] else { fail("--video is required") }
     do { frames = try VideoPoses.read(URL(fileURLWithPath: video), handedness: handedness,live: opts["live-tracking"] == "1") } catch { fail("\(error)") }
@@ -94,6 +104,7 @@ if let last = frames.last {
     for k in 1...Int(1.6 / max(dt, 1.0 / 240)) {
         var f = last
         f.timestamp += Double(k) * dt
+        f.ball = nil
         frames.append(f)
     }
 }
