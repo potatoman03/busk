@@ -19,6 +19,19 @@ struct SummaryContent: View {
     @Environment(\.dynamicTypeSize) private var typeSize
     private var large: Bool { typeSize.isAccessibilitySize }
     private var summary: SessionSummary { record.summary }
+    @State private var lesson: Lesson?
+
+    /// Demo shooter sessions stay out of the coaching plan, so they never set the player's next focus.
+    private var countsForPlan: Bool { !record.isDemo || AppEnvironment.demoCountsForPlan }
+
+    /// Once the plan has a baseline, the next focus is the plan's, so Summary and Coach never disagree.
+    private var nextFocus: (plan: Bool, focus: FormArea?) {
+        if countsForPlan {
+            let plan = CoachPlan(sessions: records.coachingSessions)
+            if plan.totalShots >= CoachPlan.baselineShots { return (true, plan.focus) }
+        }
+        return (false, summary.topFocus)
+    }
 
     var body: some View {
         let summary = record.summary
@@ -33,26 +46,61 @@ struct SummaryContent: View {
                 }
                 makesCard(summary)
                 progressCard(summary)
-                if let focus = summary.topFocus {
+                if let focus = summary.focus, let r = summary.focusResult {
                     Card {
-                        Label("Next session focus", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
-                        Text(focus.title).font(.title2.bold())
-                        Text(focus.cue).foregroundStyle(.secondary)
+                        Label("Focus set", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
+                        Text(r.measured == 0 ? "\(focus.title): not measured" : "\(focus.title): \(r.good) of \(r.measured) good")
+                            .font(.title2.bold())
+                            .accessibilityIdentifier("summaryFocusResult")
+                        if r.measured > 0 {
+                            ProgressView(value: Double(r.good), total: Double(r.measured))
+                                .tint(Double(r.good) / Double(r.measured) >= CoachPlan.graduateRate ? .green : .yellow)
+                        }
+                        Text(r.measured == 0
+                             ? "Busk couldn't judge your \(focus.title.lowercased()) from this camera angle."
+                             : Double(r.good) / Double(r.measured) >= CoachPlan.graduateRate
+                             ? "That's \(Int(CoachPlan.graduateRate * 100))% or better. Keep it there for a few sets and you move on."
+                             : "Keep at it: \(Int(CoachPlan.graduateRate * 100))% good over a few sets moves you on. \(focus.cue).")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                        lessonButton(focus)
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("summaryFocus")
+                } else if let focus = nextFocus.focus {
+                    Card {
+                        Label(countsForPlan ? "Next session focus" : "The demo shooter's main fix", systemImage: "scope")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Text(focus.title).font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
+                        Text(focus.cue).foregroundStyle(.secondary)
+                        lessonButton(focus)
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("summaryFocus")
+                } else if nextFocus.plan {
+                    Card {
+                        Label("Next session focus", systemImage: "checkmark.seal").font(.caption).foregroundStyle(.secondary)
+                        Text("Nothing to fix right now").font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
+                        Text("Every area Busk measures is solid. Keep shooting: if one slips, Busk makes it your focus.")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("summaryFocus")
                 }
                 Card {
                     HStack {
                         Text("By area").font(.headline)
                         Spacer()
-                        if previous != nil { Text("last session → now").font(.caption).foregroundStyle(.secondary) }
+                        Text(previous != nil ? "last session → now · tap for lesson" : "Tap for the lesson")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                     if !unmeasured.isEmpty {
-                        Text("Not measured: " + unmeasured.map(\.title).joined(separator: ", "))
+                        Text("Not measured: " + unmeasured.map(\.title).joined(separator: ", ")
+                             + (unmeasured.contains { $0.bestView == .front } && !summary.shots.isEmpty ? ". Set the phone facing you to check them." : ""))
                             .font(.footnote).foregroundStyle(.secondary)
                             .accessibilityIdentifier("summaryUnmeasured")
                     }
                     ForEach(summary.areaBreakdown, id: \.area) { row in
+                        Button { lesson = Lesson.forArea(row.area) } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             let layout = large ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2)) : AnyLayout(HStackLayout())
                             layout {
@@ -68,9 +116,14 @@ struct SummaryContent: View {
                                 }
                                 Text("\(TodayCard.percent(row.goodRate)) good").monospacedDigit()
                                     .foregroundStyle(lastRates[row.area].map { row.goodRate > $0 + 0.001 ? Color.green : row.goodRate < $0 - 0.001 ? .red : .secondary } ?? .secondary)
+                                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.secondary)
                             }
                             ProgressView(value: row.goodRate).tint(row.goodRate >= 0.7 ? .green : row.goodRate >= 0.4 ? .yellow : .red)
                         }
+                        .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("summaryArea-\(row.area.rawValue)")
                     }
                 }
                 Card {
@@ -95,6 +148,23 @@ struct SummaryContent: View {
         }
         .background(Theme.court.ignoresSafeArea())
         .opaqueNavigationBar()
+        .sheet(item: $lesson) { lesson in
+            NavigationStack {
+                LessonView(lesson: lesson, canPractise: false)
+                    .coachDestinations()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { self.lesson = nil } }
+                    }
+            }
+        }
+    }
+
+    @ViewBuilder private func lessonButton(_ area: FormArea) -> some View {
+        if let l = Lesson.forArea(area) {
+            Button { lesson = l } label: { Label("Lesson: \(l.title)", systemImage: "book") }
+                .font(.subheadline.bold())
+                .accessibilityIdentifier("summaryLessonButton")
+        }
     }
 
     /// Areas no shot was graded on: the front-view checks when filmed side on, or anything tracking lost.

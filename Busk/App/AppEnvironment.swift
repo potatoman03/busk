@@ -14,6 +14,10 @@ enum AppEnvironment {
     static var forceDemo: Bool { isUITesting || isSimulator || arguments.contains("-demo") }
     /// `-demo-idle`: the demo shooter stands still for two minutes before shooting (UI tests that need no shots).
     static var demoIdle: Bool { arguments.contains("-demo-idle") }
+    /// `-demo-walk-in`: the demo shooter starts badly framed (off to the side, too close, feet cut off) so the framing check shows.
+    static var demoWalkIn: Bool { arguments.contains("-demo-walk-in") }
+    /// Demo shots stay out of the coaching plan, except in UI tests or with `-demo-counts` (simulator checks of the plan).
+    static var demoCountsForPlan: Bool { isUITesting || arguments.contains("-demo-counts") }
     /// `-videoPath /path/clip.mp4` runs Vision on a video file instead of the camera or demo shooter.
     static var videoURL: URL? {
         UserDefaults.standard.string(forKey: "videoPath").map { URL(fileURLWithPath: $0) }
@@ -43,6 +47,8 @@ enum SettingsKey {
     static let hasSeenSetupTips = "hasSeenSetupTips"
     /// Prototype, off by default; `-voiceCommands YES` turns it on for simulator runs.
     static let voiceCommands = "voiceCommands"
+    /// Whether the player has a ball; without one the coaching plan uses shadow shots and ball-free drills.
+    static let hasBall = "hasBall"
     /// Shots a day the practice tracker counts toward.
     static let dailyShotGoal = "dailyShotGoal"
 }
