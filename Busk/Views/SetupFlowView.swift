@@ -33,6 +33,8 @@ struct SetupFlowView: View {
             if let view = focus?.bestView { cameraView = view }
             if autoStart && session == nil { await begin() }
         }
+        .onAppear { voice?.setupScreens += 1 }
+        .onDisappear { voice?.setupScreens -= 1 }
         .onChange(of: voice?.event) { _, event in
             if event?.command == .start && session == nil { Task { await begin() } }
         }

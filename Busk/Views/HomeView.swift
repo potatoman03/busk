@@ -144,7 +144,7 @@ struct HomeView: View {
         }
         .onChange(of: voice?.event) { _, event in
             // "Start session" from home skips setup and goes live with the saved camera angle and hand.
-            guard event?.command == .start, setup == nil, !showSettings else { return }
+            guard event?.command == .start, setup == nil, !showSettings, voice?.setupScreens == 0 else { return }
             setup = SetupLaunch(autoStart: true)
         }
     }

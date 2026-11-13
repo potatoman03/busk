@@ -50,7 +50,7 @@ final class DemoPoseSource: PoseSource {
     func start() {
         stop()
         queue = simulator.idleFrames(seconds: leadIn, start: clock)
-        if walkIn && clock == 0 { queue = badlyFramed() + simulator.idleFrames(seconds: leadIn, start: 6) }
+        if walkIn && clock == 0 { queue = badlyFramed() + simulator.idleFrames(seconds: leadIn, start: Self.walkInSeconds) }
         wallStart = Date().addingTimeInterval(-clock)
         timer = Timer.scheduledTimer(withTimeInterval: 1 / simulator.fps, repeats: true) { [weak self] _ in
             self?.tick()
@@ -62,7 +62,10 @@ final class DemoPoseSource: PoseSource {
         timer = nil
     }
 
-    /// Six seconds of a shooter finding their spot: off to the side, then too close, then feet out of the picture.
+    /// How long the walk-in lasts: long enough to read each framing problem, and for a slow UI test runner to see it.
+    static let walkInSeconds = 12.0
+
+    /// A shooter finding their spot: off to the side, then too close, then feet out of the picture.
     /// Joints that leave the picture are dropped, as Vision would.
     private func badlyFramed() -> [PoseFrame] {
         let moves: [(CGPoint) -> CGPoint] = [
@@ -70,8 +73,9 @@ final class DemoPoseSource: PoseSource {
             { CGPoint(x: 0.5 + ($0.x - 0.5) * 1.8, y: 0.5 + ($0.y - 0.5) * 1.8) },
             { CGPoint(x: $0.x, y: $0.y + 0.2) },
         ]
-        return moves.enumerated().flatMap { step, move in
-            simulator.idleFrames(seconds: 2, start: Double(step) * 2).map { frame in
+        let step = Self.walkInSeconds / Double(moves.count)
+        return moves.enumerated().flatMap { i, move in
+            simulator.idleFrames(seconds: step, start: Double(i) * step).map { frame in
                 var f = frame
                 f.joints = frame.joints.compactMapValues { p in
                     let q = move(p)

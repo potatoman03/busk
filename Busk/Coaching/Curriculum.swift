@@ -239,9 +239,9 @@ struct Drill: Identifiable, Hashable, Sendable {
               needsBall: false, areas: [.legs, .rhythm], dose: "3 sets of 8",
               steps: [
                   "Feet shoulder-width, hands in your shooting pocket.",
-                  "Dip until your thighs are a third of the way to a squat.",
-                  "Explode up onto your toes, bringing your hands to the set point on the way.",
-                  "Land softly and reset. Speed up, never pause at the bottom.",
+                  "Dip as if you were about to sit on a tall bar stool: knees bent, hips back a little, heels down.",
+                  "Jump straight up, just a few centimetres off the floor, bringing your hands to the set point on the way.",
+                  "Land softly on both feet where you took off, then reset. Speed up, never pause at the bottom.",
               ], tracked: true),
         Drill(id: "landOnX", title: "Land on the X", summary: "Jump straight up and down on a mark.",
               needsBall: false, areas: [.balance], dose: "2 sets of 10",
@@ -268,6 +268,7 @@ struct Drill: Identifiable, Hashable, Sendable {
         Drill(id: "guideOff", title: "Guide hand off", summary: "Teach the guide hand to stay quiet.",
               needsBall: false, areas: [.guideHand], dose: "3 sets of 10",
               steps: [
+                  "Set Busk to Facing me so it can check your guide hand, then start a session.",
                   "Shadow shoot with your guide hand flat on the side of an imaginary ball, fingers up.",
                   "At the release, freeze. Your guide hand should still point up, at the same height, not toward the rim.",
                   "With a ball: shoot from 1-2 m and take the guide hand off just before the release.",
@@ -289,7 +290,7 @@ struct Drill: Identifiable, Hashable, Sendable {
         Drill(id: "wallFlick", title: "Wall flick", summary: "Grooves a high finish and a wrist snap, no ball needed.",
               needsBall: false, areas: [.followThrough, .arc], dose: "3 sets of 15",
               steps: [
-                  "Stand an arm's length from a wall, shooting side toward it is fine.",
+                  "Stand with your shooting side to a wall. Hold your arm straight out sideways: your fingertips should just touch it.",
                   "From the set point, push up so your fingertips brush the wall high above your head.",
                   "Snap your wrist so your fingers point down. Hold for two seconds.",
                   "With a ball: lie on your back and flick the ball straight up a metre, catch, repeat.",

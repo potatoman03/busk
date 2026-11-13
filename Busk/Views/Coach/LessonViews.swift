@@ -112,6 +112,15 @@ struct DrillView: View {
                     }
                 }
 
+                if drill.id == "wallFlick" {
+                    Card {
+                        Label("Where to stand", systemImage: "figure.stand").font(.headline)
+                        WallFlickPicture().frame(height: 170)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("wallFlickPicture")
+                }
+
                 Card {
                     Label("Steps", systemImage: "list.number").font(.headline)
                     ForEach(Array(drill.steps.enumerated()), id: \.offset) { i, step in
@@ -127,10 +136,11 @@ struct DrillView: View {
                     ForEach(drill.areas, id: \.self) { area in
                         Label(area.title, systemImage: area.symbol)
                     }
-                    if drill.tracked {
-                        Text("Set the phone up and Busk can watch this one: start a session and do the reps in view.")
-                            .font(.footnote).foregroundStyle(.secondary)
-                    }
+                    Text(drill.tracked
+                         ? "Set the phone up and Busk can watch this one: start a session and do the reps in view."
+                         : "Busk can't watch this one. Do the reps on your own, then tap Mark done.")
+                        .font(.footnote).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("drillTrackingNote")
                 }
 
                 Button {
@@ -317,5 +327,52 @@ struct PoseFigure: View {
             ctx.fill(Path(ellipseIn: CGRect(x: c.x - r, y: c.y - r, width: r * 2, height: r * 2)), with: .color(Theme.orange))
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// Front view of the wall flick: shooting side to the wall, one arm's length away, fingertips brushing it at the top.
+struct WallFlickPicture: View {
+    var body: some View {
+        Canvas { ctx, size in
+            let w = size.width, h = size.height
+            let wallX = w * 0.68
+            ctx.fill(Path(CGRect(x: wallX, y: 4, width: 10, height: h - 8)), with: .color(.gray.opacity(0.6)))
+            let floor = h - 6
+            ctx.stroke(Path { $0.move(to: CGPoint(x: w * 0.1, y: floor)); $0.addLine(to: CGPoint(x: wallX, y: floor)) },
+                       with: .color(.secondary), lineWidth: 1)
+
+            let reach = h * 0.3
+            let cx = wallX - reach
+            let head = CGPoint(x: cx, y: h * 0.24)
+            let neck = CGPoint(x: cx, y: h * 0.33)
+            let hip = CGPoint(x: cx, y: h * 0.62)
+            let shoulder = CGPoint(x: cx + h * 0.06, y: h * 0.36)
+            let guide = CGPoint(x: cx - h * 0.06, y: h * 0.36)
+            var body = Path()
+            body.move(to: neck); body.addLine(to: hip)
+            body.move(to: hip); body.addLine(to: CGPoint(x: cx - h * 0.07, y: floor))
+            body.move(to: hip); body.addLine(to: CGPoint(x: cx + h * 0.07, y: floor))
+            body.move(to: guide); body.addLine(to: shoulder)
+            body.move(to: guide); body.addLine(to: CGPoint(x: cx - h * 0.12, y: h * 0.5))
+            ctx.stroke(body, with: .color(.white), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            ctx.fill(Path(ellipseIn: CGRect(x: head.x - 9, y: head.y - 9, width: 18, height: 18)), with: .color(.white))
+
+            // The shooting arm reaches up and brushes the wall; a dotted arm shows the arm's-length check.
+            let fingertips = CGPoint(x: wallX - 2, y: h * 0.06)
+            var arm = Path()
+            arm.move(to: shoulder); arm.addLine(to: fingertips)
+            ctx.stroke(arm, with: .color(Theme.orange), style: StrokeStyle(lineWidth: 4, lineCap: .round))
+            var check = Path()
+            check.move(to: shoulder); check.addLine(to: CGPoint(x: wallX - 2, y: shoulder.y))
+            ctx.stroke(check, with: .color(.secondary), style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
+
+            ctx.draw(Text("Wall").font(.caption2).foregroundStyle(.secondary),
+                     at: CGPoint(x: wallX + 16, y: h * 0.5), anchor: .leading)
+            ctx.draw(Text("arm's length").font(.caption2).foregroundStyle(.secondary),
+                     at: CGPoint(x: shoulder.x + 6, y: shoulder.y + 8), anchor: .topLeading)
+            ctx.draw(Text("Fingertips brush the wall").font(.caption2.bold()).foregroundStyle(Theme.orange),
+                     at: CGPoint(x: fingertips.x - 8, y: fingertips.y), anchor: .trailing)
+        }
+        .accessibilityLabel("Stand with your shooting side to the wall, an arm's length away. At the top, your fingertips brush the wall.")
     }
 }
