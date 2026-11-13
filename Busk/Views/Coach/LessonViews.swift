@@ -330,23 +330,23 @@ struct PoseFigure: View {
     }
 }
 
-/// Front view of the wall flick: shooting side to the wall, one arm's length away, fingertips brushing it at the top.
+/// Front view of the wall flick: shooting side to the wall, a hand's width away, fingertips brushing it straight overhead.
 struct WallFlickPicture: View {
     var body: some View {
         Canvas { ctx, size in
             let w = size.width, h = size.height
-            let wallX = w * 0.68
+            let wallX = w * 0.48
             ctx.fill(Path(CGRect(x: wallX, y: 4, width: 10, height: h - 8)), with: .color(.gray.opacity(0.6)))
             let floor = h - 6
-            ctx.stroke(Path { $0.move(to: CGPoint(x: w * 0.1, y: floor)); $0.addLine(to: CGPoint(x: wallX, y: floor)) },
+            ctx.stroke(Path { $0.move(to: CGPoint(x: w * 0.15, y: floor)); $0.addLine(to: CGPoint(x: wallX, y: floor)) },
                        with: .color(.secondary), lineWidth: 1)
 
-            let reach = h * 0.3
-            let cx = wallX - reach
+            let gap = h * 0.09
+            let shoulder = CGPoint(x: wallX - gap, y: h * 0.36)
+            let cx = shoulder.x - h * 0.06
             let head = CGPoint(x: cx, y: h * 0.24)
             let neck = CGPoint(x: cx, y: h * 0.33)
             let hip = CGPoint(x: cx, y: h * 0.62)
-            let shoulder = CGPoint(x: cx + h * 0.06, y: h * 0.36)
             let guide = CGPoint(x: cx - h * 0.06, y: h * 0.36)
             var body = Path()
             body.move(to: neck); body.addLine(to: hip)
@@ -357,22 +357,22 @@ struct WallFlickPicture: View {
             ctx.stroke(body, with: .color(.white), style: StrokeStyle(lineWidth: 3, lineCap: .round))
             ctx.fill(Path(ellipseIn: CGRect(x: head.x - 9, y: head.y - 9, width: 18, height: 18)), with: .color(.white))
 
-            // The shooting arm reaches up and brushes the wall; a dotted arm shows the arm's-length check.
             let fingertips = CGPoint(x: wallX - 2, y: h * 0.06)
             var arm = Path()
             arm.move(to: shoulder); arm.addLine(to: fingertips)
             ctx.stroke(arm, with: .color(Theme.orange), style: StrokeStyle(lineWidth: 4, lineCap: .round))
-            var check = Path()
-            check.move(to: shoulder); check.addLine(to: CGPoint(x: wallX - 2, y: shoulder.y))
-            ctx.stroke(check, with: .color(.secondary), style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
+            var gapLine = Path()
+            gapLine.move(to: CGPoint(x: shoulder.x, y: shoulder.y + 10)); gapLine.addLine(to: CGPoint(x: wallX, y: shoulder.y + 10))
+            ctx.stroke(gapLine, with: .color(.secondary), style: StrokeStyle(lineWidth: 2, dash: [3, 3]))
 
+            let right = wallX + 18
+            ctx.draw(Text("Fingertips brush it").font(.caption2.bold()).foregroundStyle(Theme.orange),
+                     at: CGPoint(x: right, y: fingertips.y + 4), anchor: .leading)
+            ctx.draw(Text("A hand's width gap").font(.caption2).foregroundStyle(.secondary),
+                     at: CGPoint(x: right, y: shoulder.y + 10), anchor: .leading)
             ctx.draw(Text("Wall").font(.caption2).foregroundStyle(.secondary),
-                     at: CGPoint(x: wallX + 16, y: h * 0.5), anchor: .leading)
-            ctx.draw(Text("arm's length").font(.caption2).foregroundStyle(.secondary),
-                     at: CGPoint(x: shoulder.x + 6, y: shoulder.y + 8), anchor: .topLeading)
-            ctx.draw(Text("Fingertips brush the wall").font(.caption2.bold()).foregroundStyle(Theme.orange),
-                     at: CGPoint(x: fingertips.x - 8, y: fingertips.y), anchor: .trailing)
+                     at: CGPoint(x: right, y: h * 0.85), anchor: .leading)
         }
-        .accessibilityLabel("Stand with your shooting side to the wall, an arm's length away. At the top, your fingertips brush the wall.")
+        .accessibilityLabel("Stand with your shooting side to the wall, your shoulder a hand's width from it. Push straight up so your fingertips brush the wall.")
     }
 }

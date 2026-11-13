@@ -272,6 +272,8 @@ final class BuskUITests: XCTestCase {
             for _ in 0..<4 where !next.isHittable { app.swipeDown() }
             for _ in 0..<4 where !next.isHittable { app.swipeUp() }
             next.tap()
+            XCTAssertTrue(app.staticTexts["\(lessonID == "legs" ? "Shoot with your legs" : "Quiet guide hand")"].firstMatch.waitForExistence(timeout: 5))
+            snapshot("19-lesson-\(lessonID)")
             let d = app.buttons["drill-\(drillID)"]
             for _ in 0..<3 where !d.isHittable { app.swipeUp() }
             d.tap()
