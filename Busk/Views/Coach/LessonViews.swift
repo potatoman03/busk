@@ -106,8 +106,8 @@ struct DrillView: View {
                     Text(drill.title).font(.largeTitle.bold()).accessibilityIdentifier("drillTitle")
                     Text(drill.summary).foregroundStyle(.secondary)
                     ViewThatFits(in: .horizontal) {
-                        HStack { pills }
-                        VStack(alignment: .leading, spacing: 8) { pills }
+                        HStack { pills() }
+                        VStack(alignment: .leading, spacing: 8) { pills(wrap: true) }
                     }
                 }
 
@@ -164,10 +164,10 @@ struct DrillView: View {
         .onAppear { done = WorkoutChecklist.done().contains("drill-\(drill.id)") }
     }
 
-    @ViewBuilder private var pills: some View {
+    @ViewBuilder private func pills(wrap: Bool = false) -> some View {
         Pill(text: drill.needsBall ? "Needs a ball" : "No ball needed",
-             systemImage: drill.needsBall ? "basketball" : "figure.run", truncates: true)
-        Pill(text: drill.dose, systemImage: "repeat", truncates: true)
+             systemImage: drill.needsBall ? "basketball" : "figure.run", wraps: wrap)
+        Pill(text: drill.dose, systemImage: "repeat", wraps: wrap)
     }
 
     private static let warmUps: Set<String> = ["shadow", "formShooting"]

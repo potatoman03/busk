@@ -245,7 +245,16 @@ final class BuskUITests: XCTestCase {
     /// same parser the speech recognizer feeds on a device.
     /// At the largest accessibility text size, no lesson or drill page is wider than the screen.
     func testLessonsAndDrillsFitAtAccessibilityXL() {
-        relaunch(["-ui-testing", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"])
+        lessonsAndDrillsFit(size: "AccessibilityXL")
+    }
+
+    /// Accessibility L is the first size where the drill pills stack one per row.
+    func testLessonsAndDrillsFitAtAccessibilityL() {
+        lessonsAndDrillsFit(size: "AccessibilityL")
+    }
+
+    private func lessonsAndDrillsFit(size: String) {
+        relaunch(["-ui-testing", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategory\(size)"])
         let coach = app.buttons["coachCard"]
         XCTAssertTrue(coach.waitForExistence(timeout: 10))
         coach.tap()
@@ -266,7 +275,7 @@ final class BuskUITests: XCTestCase {
                 let f = text.frame
                 XCTAssertTrue(f.minX >= -1 && f.maxX <= width + 1, "\(id): \"\(text.label)\" spans \(f.minX)...\(f.maxX) of \(width)")
             }
-            if id == "libraryDrill-wallFlick" || id == "lesson-setPoint" || id == "libraryDrill-dipRise" { snapshot("xl-\(id)") }
+            if id == "libraryDrill-wallFlick" || id == "lesson-setPoint" || id == "libraryDrill-dipRise" || id == "libraryDrill-oneStepBack" { snapshot("\(size)-\(id)") }
             app.navigationBars.buttons.element(boundBy: 0).tap()
             XCTAssertTrue(row.waitForExistence(timeout: 5), id)
         }
