@@ -31,6 +31,8 @@ final class VoiceControl {
     private(set) var lastHeard: String?
     /// The latest command. Screens react with `onChange(of:)`.
     private(set) var event: VoiceEvent?
+    /// Set up screens on display. While one is up it owns "start session", so Home doesn't open another on top.
+    @ObservationIgnored var setupScreens = 0
 
     @ObservationIgnored private let simulateInput: Bool
     @ObservationIgnored private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
@@ -41,6 +43,7 @@ final class VoiceControl {
     @ObservationIgnored private var restartTimer: Timer?
     @ObservationIgnored private var configObserver: NSObjectProtocol?
     @ObservationIgnored private var interruptionObserver: NSObjectProtocol?
+    @ObservationIgnored private var resetObserver: NSObjectProtocol?
     @ObservationIgnored private var starting = false
     /// Bumped by `stop()`, so a `start()` still waiting on a permission prompt doesn't open the mic afterwards.
     @ObservationIgnored private var runID = 0
@@ -93,6 +96,10 @@ final class VoiceControl {
                                                                 queue: .main) { [weak self] _ in
             MainActor.assumeIsolated { self?.restartEngine() }
         }
+        resetObserver = NotificationCenter.default.addObserver(forName: CoachVoice.audioSessionReset, object: nil,
+                                                               queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.restartEngine() }
+        }
         // A phone call or Siri stops the engine without a configuration change; resume once it's over.
         interruptionObserver = NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification,
                                                                       object: nil, queue: .main) { [weak self] note in
@@ -113,6 +120,8 @@ final class VoiceControl {
         configObserver = nil
         if let interruptionObserver { NotificationCenter.default.removeObserver(interruptionObserver) }
         interruptionObserver = nil
+        if let resetObserver { NotificationCenter.default.removeObserver(resetObserver) }
+        resetObserver = nil
         task?.cancel()
         task = nil
         tapTarget.request?.endAudio()

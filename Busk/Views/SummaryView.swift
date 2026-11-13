@@ -1,9 +1,10 @@
+import SwiftData
 import SwiftUI
 
 struct SummaryView: View {
     let record: SessionRecord
     var body: some View {
-        SummaryContent(summary: record.summary, date: record.date, isDemo: record.isDemo, duration: record.duration)
+        SummaryContent(record: record)
             .navigationTitle("Session")
             .navigationBarTitleDisplayMode(.inline)
             .opaqueNavigationBar()
@@ -11,37 +12,95 @@ struct SummaryView: View {
 }
 
 struct SummaryContent: View {
-    let summary: SessionSummary
-    let date: Date
-    let isDemo: Bool
-    var duration: TimeInterval?
+    @Bindable var record: SessionRecord
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \SessionRecord.date) private var records: [SessionRecord]
+    @AppStorage(SettingsKey.dailyShotGoal) private var goal = PracticeGoal.defaultShots
     @Environment(\.dynamicTypeSize) private var typeSize
     private var large: Bool { typeSize.isAccessibilitySize }
+    private var summary: SessionSummary { record.summary }
+    @State private var lesson: Lesson?
+
+    /// Demo shooter sessions stay out of the coaching plan, so they never set the player's next focus.
+    private var countsForPlan: Bool { !record.isDemo || AppEnvironment.demoCountsForPlan }
+
+    /// Once the plan has a baseline, the next focus is the plan's, so Summary and Coach never disagree.
+    private var nextFocus: (plan: Bool, focus: FormArea?) {
+        if countsForPlan {
+            let plan = CoachPlan(sessions: records.coachingSessions)
+            if plan.totalShots >= CoachPlan.baselineShots { return (true, plan.focus) }
+        }
+        return (false, summary.topFocus)
+    }
 
     var body: some View {
+        let summary = record.summary
+        let previous = records.last { $0.date < record.date && $0.isDemo == record.isDemo }?.summary
+        let lastRates = Dictionary(uniqueKeysWithValues: (previous?.areaBreakdown ?? []).map { ($0.area, $0.goodRate) })
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 12) {
                     stat("\(summary.count)", summary.count == 1 ? "shot" : "shots", id: "summaryShotCount")
+                    stat(summary.makes.map(String.init) ?? "–", "made", color: .green, id: "summaryMakes")
                     stat("\(summary.averageScore)", "avg form", color: Theme.color(forScore: summary.averageScore), id: "summaryAverage")
-                    stat("\(summary.bestScore)", "best", id: "summaryBest")
                 }
-                if let focus = summary.topFocus {
+                makesCard(summary)
+                progressCard(summary)
+                if let focus = summary.focus, let r = summary.focusResult {
                     Card {
-                        Label("Next session focus", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
-                        Text(focus.title).font(.title2.bold())
-                        Text(focus.cue).foregroundStyle(.secondary)
+                        Label("Focus set", systemImage: "scope").font(.caption).foregroundStyle(.secondary)
+                        Text(r.measured == 0 ? "\(focus.title): not measured" : "\(focus.title): \(r.good) of \(r.measured) good")
+                            .font(.title2.bold())
+                            .accessibilityIdentifier("summaryFocusResult")
+                        if r.measured > 0 {
+                            ProgressView(value: Double(r.good), total: Double(r.measured))
+                                .tint(Double(r.good) / Double(r.measured) >= CoachPlan.graduateRate ? .green : .yellow)
+                        }
+                        Text(r.measured == 0
+                             ? "Busk couldn't judge your \(focus.title.lowercased()) from this camera angle."
+                             : Double(r.good) / Double(r.measured) >= CoachPlan.graduateRate
+                             ? "That's \(Int(CoachPlan.graduateRate * 100))% or better. Keep it there for a few sets and you move on."
+                             : "Keep at it: \(Int(CoachPlan.graduateRate * 100))% good over a few sets moves you on. \(focus.cue).")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                        lessonButton(focus)
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("summaryFocus")
+                } else if let focus = nextFocus.focus {
+                    Card {
+                        Label(countsForPlan ? "Next session focus" : "The demo shooter's main fix", systemImage: "scope")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Text(focus.title).font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
+                        Text(focus.cue).foregroundStyle(.secondary)
+                        lessonButton(focus)
+                    }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityIdentifier("summaryFocus")
+                } else if nextFocus.plan {
+                    Card {
+                        Label("Next session focus", systemImage: "checkmark.seal").font(.caption).foregroundStyle(.secondary)
+                        Text("Nothing to fix right now").font(.title2.bold()).accessibilityIdentifier("summaryNextFocus")
+                        Text("Every area Busk measures is solid. Keep shooting: if one slips, Busk makes it your focus.")
+                            .foregroundStyle(.secondary)
+                    }
+                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("summaryFocus")
                 }
                 Card {
-                    Text("By area").font(.headline)
+                    HStack {
+                        Text("By area").font(.headline)
+                        Spacer()
+                        Text(previous != nil ? "last session → now · tap for lesson" : "Tap for the lesson")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
                     if !unmeasured.isEmpty {
-                        Text("Not measured: " + unmeasured.map(\.title).joined(separator: ", "))
+                        Text("Not measured: " + unmeasured.map(\.title).joined(separator: ", ")
+                             + (unmeasured.contains { $0.bestView == .front } && !summary.shots.isEmpty ? ". Set the phone facing you to check them." : ""))
                             .font(.footnote).foregroundStyle(.secondary)
                             .accessibilityIdentifier("summaryUnmeasured")
                     }
                     ForEach(summary.areaBreakdown, id: \.area) { row in
+                        Button { lesson = Lesson.forArea(row.area) } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             let layout = large ? AnyLayout(VStackLayout(alignment: .leading, spacing: 2)) : AnyLayout(HStackLayout())
                             layout {
@@ -51,22 +110,35 @@ struct SummaryContent: View {
                                     Image(systemName: row.area.symbol).foregroundStyle(Theme.orange)
                                 }
                                 if !large { Spacer() }
-                                Text("\(Int((row.goodRate * 100).rounded()))% good").monospacedDigit().foregroundStyle(.secondary)
+                                if let before = lastRates[row.area] {
+                                    Text("\(TodayCard.percent(before)) →").monospacedDigit().foregroundStyle(.secondary)
+                                        .accessibilityIdentifier("areaLastSession")
+                                }
+                                Text("\(TodayCard.percent(row.goodRate)) good").monospacedDigit()
+                                    .foregroundStyle(lastRates[row.area].map { row.goodRate > $0 + 0.001 ? Color.green : row.goodRate < $0 - 0.001 ? .red : .secondary } ?? .secondary)
+                                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.secondary)
                             }
                             ProgressView(value: row.goodRate).tint(row.goodRate >= 0.7 ? .green : row.goodRate >= 0.4 ? .yellow : .red)
                         }
+                        .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("summaryArea-\(row.area.rawValue)")
                     }
                 }
                 Card {
                     Text("Shots").font(.headline)
                     ForEach(Array(summary.shots.enumerated()), id: \.element.id) { i, shot in
-                        NavigationLink {
-                            ShotDetailView(shot: shot, number: i + 1)
-                        } label: {
-                            shotRow(shot, number: i + 1)
+                        HStack(spacing: 4) {
+                            NavigationLink {
+                                ShotDetailView(shot: shown(shot, summary), number: i + 1)
+                            } label: {
+                                shotRow(shot, number: i + 1)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("shotRow-\(i + 1)")
+                            if !summary.countedWhole { markButton(shot.made, index: i) }
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("shotRow-\(i + 1)")
                     }
                 }
                 Text(footer)
@@ -76,6 +148,23 @@ struct SummaryContent: View {
         }
         .background(Theme.court.ignoresSafeArea())
         .opaqueNavigationBar()
+        .sheet(item: $lesson) { lesson in
+            NavigationStack {
+                LessonView(lesson: lesson, canPractise: false)
+                    .coachDestinations()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { self.lesson = nil } }
+                    }
+            }
+        }
+    }
+
+    @ViewBuilder private func lessonButton(_ area: FormArea) -> some View {
+        if let l = Lesson.forArea(area) {
+            Button { lesson = l } label: { Label("Lesson: \(l.title)", systemImage: "book") }
+                .font(.subheadline.bold())
+                .accessibilityIdentifier("summaryLessonButton")
+        }
     }
 
     /// Areas no shot was graded on: the front-view checks when filmed side on, or anything tracking lost.
@@ -109,12 +198,134 @@ struct SummaryContent: View {
     }
 
     private var footer: String {
-        var parts = [date.formatted(date: .abbreviated, time: .shortened)]
-        if let duration, duration >= 1 {
-            parts.append(Duration.seconds(duration).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .abbreviated, maximumUnitCount: 2)))
+        var parts = ["best shot \(summary.bestScore)", record.date.formatted(date: .abbreviated, time: .shortened)]
+        if record.duration >= 1 {
+            parts.append(Duration.seconds(record.duration).formatted(.units(allowed: [.hours, .minutes, .seconds], width: .abbreviated, maximumUnitCount: 2)))
         }
-        if isDemo { parts.insert("Demo session", at: 0) }
+        if record.isDemo { parts.insert("Demo session", at: 0) }
         return parts.joined(separator: " · ")
+    }
+
+    /// Busk can't see the ball, so makes are logged by the player: live Made/Missed taps, voice, or here afterwards.
+    private func makesCard(_ summary: SessionSummary) -> some View {
+        Card {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Makes").font(.headline)
+                    Text(makeRateLine(summary))
+                        .font(.subheadline).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("summaryMakeRate")
+                    Text(makesHint(summary))
+                        .font(.caption).foregroundStyle(.secondary)
+                        .accessibilityIdentifier("summaryMakesHint")
+                }
+                Spacer()
+                // Makes come from one place at a time, so the count and the shot marks never disagree.
+                if summary.countedWhole || summary.marked == 0 {
+                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { setMakes($0 == 0 && summary.marked == 0 ? nil : $0) }),
+                            in: 0...max(summary.count, summary.makes ?? 0))
+                        .labelsHidden()
+                        .accessibilityIdentifier("makesStepper")
+                }
+            }
+            if summary.countedWhole {
+                Button(summary.marked > 0 ? "Use shot marks instead" : "Mark each shot instead") { setMakes(nil) }
+                    .font(.subheadline.bold())
+                    .accessibilityIdentifier("useShotMarksButton")
+            } else if !summary.countedWhole, summary.marked > 0 {
+                Button("Count the whole session instead") { setMakes(summary.makes) }
+                    .font(.subheadline.bold())
+                    .accessibilityIdentifier("countWholeButton")
+            }
+        }
+    }
+
+    private func makesHint(_ summary: SessionSummary) -> String {
+        if summary.countedWhole { return "Counted for the whole session." }
+        guard summary.marked > 0 else { return "Count with − and +, or mark each shot below." }
+        let left = summary.unmarked > 0 ? " \(summary.unmarked) not marked, so left out." : ""
+        return "Tap a shot's mark below to change it." + left
+    }
+
+    // Saved right away so an edit survives the app being closed straight after.
+    private func setMakes(_ makes: Int?) {
+        record.makes = makes
+        try? modelContext.save()
+    }
+
+    /// Made, then Missed, then not marked.
+    private func markButton(_ made: Bool?, index: Int) -> some View {
+        Button {
+            record.mark(shot: index, made: made == nil ? true : made == true ? false : nil)
+            try? modelContext.save()
+        } label: {
+            Image(systemName: made == true ? "checkmark.circle.fill" : made == false ? "xmark.circle.fill" : "circle.dashed")
+                .font(.title3)
+                .foregroundStyle(made == true ? AnyShapeStyle(.green) : made == false ? AnyShapeStyle(.secondary) : AnyShapeStyle(.tertiary))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(made == true ? "Made" : made == false ? "Missed" : "Not marked")
+        .accessibilityHint("Changes whether this shot went in")
+        .accessibilityIdentifier("shotMark-\(index + 1)")
+    }
+
+    /// A whole-session count replaces the shot marks, so shot detail doesn't show one that disagrees with it.
+    private func shown(_ shot: ShotResult, _ summary: SessionSummary) -> ShotResult {
+        var shot = shot
+        if summary.countedWhole { shot.made = nil }
+        return shot
+    }
+
+    private func makeRateLine(_ summary: SessionSummary) -> String {
+        guard let rate = summary.makeRate else { return "How many went in? Count them here." }
+        let n = summary.attempts
+        return "\(TodayCard.percent(rate)) of \(n) \(summary.countedWhole ? "" : "marked ")shot\(n == 1 ? "" : "s") went in"
+    }
+
+    /// Where this session leaves today's goal and how it compares with earlier sessions.
+    @ViewBuilder private func progressCard(_ summary: SessionSummary) -> some View {
+        if record.isDemo {
+            Card {
+                Label("Demo session", systemImage: "play.rectangle").font(.headline)
+                Text("The built-in shooter took these shots, so they don't count toward your streak, daily goal or progress.")
+                    .font(.subheadline).foregroundStyle(.secondary)
+            }
+            .accessibilityIdentifier("summaryDemoNote")
+        } else {
+            dayCard(summary)
+        }
+    }
+
+    private func dayCard(_ summary: SessionSummary) -> some View {
+        let log = PracticeLog(records: records)
+        let day = log.day(record.date)
+        let earlierRecords = records.filter { $0.date < record.date && !$0.isDemo }.suffix(5)
+        let earlier = earlierRecords.flatMap(\.shots)
+        return Card {
+            HStack(spacing: 14) {
+                GoalRing(value: day.shots, goal: goal).frame(width: 56, height: 56)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(Calendar.current.isDateInToday(record.date) ? "Today" : record.date.formatted(.dateTime.weekday(.wide)))
+                        .font(.caption).foregroundStyle(.secondary)
+                    Text("\(day.shots) of \(goal) shots").font(.headline.monospacedDigit())
+                        .accessibilityIdentifier("summaryDayShots")
+                    if log.currentStreak > 0 && Calendar.current.isDateInToday(record.date) {
+                        Label("\(log.currentStreak) day streak", systemImage: "flame.fill").font(.caption).foregroundStyle(Theme.orange)
+                    }
+                }
+                Spacer()
+                if !earlier.isEmpty {
+                    let before = SessionSummary(shots: Array(earlier)).averageScore
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Change(delta: summary.averageScore - before, unit: "").font(.title3)
+                        Text("form vs last \(earlierRecords.count)").font(.caption2).foregroundStyle(.secondary)
+                    }
+                    .accessibilityIdentifier("summaryFormChange")
+                }
+            }
+        }
     }
 
     private func stat(_ value: String, _ label: String, color: Color = .primary, id: String) -> some View {

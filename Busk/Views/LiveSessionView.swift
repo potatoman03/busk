@@ -17,10 +17,9 @@ struct LiveSessionView: View {
     @Environment(VoiceControl.self) private var voice: VoiceControl?
 
     var body: some View {
-        if ended {
+        if ended, let record {
             NavigationStack {
-                SummaryContent(summary: session.summary, date: session.startDate, isDemo: session.isDemo,
-                               duration: record?.duration)
+                SummaryContent(record: record)
                     .navigationTitle("Session summary")
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
@@ -88,6 +87,7 @@ struct LiveSessionView: View {
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
+                                framingCard
                                 feedback(compact: true)
                             }
                             .frame(width: hudWidth)
@@ -96,6 +96,7 @@ struct LiveSessionView: View {
                         .frame(maxHeight: .infinity)
                     } else {
                         replayPanel
+                        framingCard
                         feedback(compact: false)
                             .onGeometryChange(for: CGFloat.self) { $0.size.height + 12 } action: { feedbackHeight = $0 }
                     }
@@ -132,6 +133,8 @@ struct LiveSessionView: View {
             switch event?.command {
             case .end: endSession()
             case .status: session.speakStatus()
+            case .make: session.markLastShot(made: true)
+            case .miss: session.markLastShot(made: false)
             case .start, nil: break
             }
         }
@@ -154,7 +157,8 @@ struct LiveSessionView: View {
             record.update(duration: duration, shots: session.shots)
         } else {
             let new = SessionRecord(date: session.startDate, duration: duration, view: session.cameraView,
-                                    handedness: session.handedness, isDemo: session.isDemo, shots: session.shots)
+                                    handedness: session.handedness, isDemo: session.isDemo, shots: session.shots,
+                                    focus: session.focus)
             modelContext.insert(new)
             record = new
         }
@@ -198,14 +202,26 @@ struct LiveSessionView: View {
                             .background(.ultraThinMaterial, in: Capsule())
                             .accessibilityIdentifier("lastSpokenCue")
                     }
-                    if let shot = session.lastShot { ShotCard(shot: shot, compact: compact, style: card) }
-                    VoiceControlBar(commands: [.status, .end], compact: compact)
+                    if let shot = session.lastShot {
+                        ShotCard(shot: shot, compact: compact, style: card) { made in
+                            // Tapping the answer already shown clears it.
+                            session.markLastShot(made: shot.made == made ? nil : made)
+                        }
+                    }
+                    VoiceControlBar(commands: [.status, .make, .miss, .end], compact: compact)
         }
     }
 
     private var phasePill: some View {
-        Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
-            .accessibilityIdentifier("phaseLabel")
+        HStack(spacing: 8) {
+            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
+                .accessibilityIdentifier("phaseLabel")
+            if let focus = session.focus, let r = session.summary.focusResult {
+                Pill(text: "\(focus.title) \(r.good)/\(r.measured)" + (session.targetShots.map { session.shots.count >= $0 ? " · set done" : " · set \(session.shots.count)/\($0)" } ?? ""),
+                     systemImage: "scope")
+                    .accessibilityIdentifier("focusPill")
+            }
+        }
     }
 
     private func topBar(landscape: Bool) -> some View {
@@ -229,6 +245,15 @@ struct LiveSessionView: View {
             }
             .padding(.horizontal, 12).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            if let makes = session.summary.makes {
+                VStack(spacing: 0) {
+                    Text("\(makes)").font(.title2.bold().monospacedDigit()).foregroundStyle(.green)
+                        .accessibilityIdentifier("makeCount")
+                    Text("made").font(.caption2)
+                }
+                .padding(.horizontal, 12).padding(.vertical, 6)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            }
             Button {
                 session.voiceEnabled.toggle()
             } label: {
@@ -252,19 +277,36 @@ struct LiveSessionView: View {
         }
     }
 
+    /// Before the first shot: what the camera can and can't see, so the player can fix the setup.
+    @ViewBuilder private var framingCard: some View {
+        if let f = session.framing {
+            HStack(spacing: 14) {
+                ForEach([("Head", f.head), ("Shooting arm", f.arm), ("Feet", f.feet), ("Centred", f.centred)], id: \.0) { item in
+                    Label(item.0, systemImage: item.1 ? "checkmark.circle.fill" : "xmark.circle")
+                        .foregroundStyle(item.1 ? Color.green : Color.yellow)
+                }
+            }
+            .font(.caption.weight(.semibold))
+            .labelStyle(.titleAndIcon)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("framingCheck")
+        }
+    }
+
     private func banner(compact: Bool) -> some View {
         Text(session.bannerText)
             .font(compact ? .title3.bold() : .title2.bold())
             .multilineTextAlignment(.center)
             .minimumScaleFactor(0.7)
             .fixedSize(horizontal: false, vertical: true)
-            // Swap the words outright: a crossfade draws the old and new cue on top of each other.
-            .contentTransition(.identity)
+            // Swap the words and resize the backdrop in the same frame: animating either lets the text show
+            // over the old cue or past the edge of the backdrop.
             .padding(.horizontal, 20).padding(.vertical, 14)
             .frame(maxWidth: .infinity)
             .background(Theme.orange.opacity(0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .accessibilityIdentifier("cueBanner")
-            .animation(.snappy, value: session.bannerText)
     }
 }
 
@@ -273,12 +315,14 @@ struct Pill: View {
     let systemImage: String
     /// Long labels shorten in the middle instead of widening the layout.
     var truncates = false
+    /// Wraps onto more lines instead, for pills stacked one per row.
+    var wraps = false
     var body: some View {
         Label(text, systemImage: systemImage)
             .font(.caption.bold())
-            .lineLimit(1)
+            .lineLimit(wraps ? nil : 1)
             .truncationMode(.middle)
-            .fixedSize(horizontal: !truncates, vertical: true)
+            .fixedSize(horizontal: !truncates && !wraps, vertical: true)
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: Capsule())
     }
@@ -291,11 +335,39 @@ struct ShotCard: View {
     enum Style { case full, scoreOnly }
     /// `scoreOnly` keeps the score and the weakest area on one row for when the column has no room for more.
     var style = Style.full
+    /// Made / Missed buttons for this shot; nil hides them.
+    var onMark: ((Bool) -> Void)? = nil
     var body: some View {
         switch style {
         case .full: fullCard
         case .scoreOnly: scoreRow
         }
+    }
+
+    /// Busk can't see the ball, so the player says whether it went in.
+    @ViewBuilder private var markButtons: some View {
+        if let onMark {
+            let stack = style == .scoreOnly ? AnyLayout(HStackLayout(spacing: 6)) : AnyLayout(VStackLayout(spacing: 6))
+            stack {
+                markButton("Made", symbol: "checkmark", tint: .green, selected: shot.made == true) { onMark(true) }
+                    .accessibilityIdentifier("markMadeButton")
+                markButton("Missed", symbol: "xmark", tint: .red, selected: shot.made == false) { onMark(false) }
+                    .accessibilityIdentifier("markMissedButton")
+            }
+        }
+    }
+
+    private func markButton(_ label: String, symbol: String, tint: Color, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.headline.bold())
+                .frame(width: 40, height: 40)
+                .foregroundStyle(selected ? .white : tint)
+                .background(selected ? tint : tint.opacity(0.18), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(selected ? "Selected" : "")
     }
 
     private var scoreRow: some View {
@@ -307,9 +379,10 @@ struct ShotCard: View {
             if let worst = shot.areas.max(by: { $0.grade < $1.grade }) {
                 Circle().fill(Theme.color(for: worst.grade)).frame(width: 8, height: 8)
                 Text(worst.area.title).font(.caption.bold())
-                Text(worst.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                Text(worst.plain).font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
+            markButtons
         }
         .padding(.horizontal, 14).padding(.vertical, 8)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -330,11 +403,12 @@ struct ShotCard: View {
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
+                        Text(a.plain).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
                     }
                 }
             }
             Spacer(minLength: 0)
+            markButtons
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))

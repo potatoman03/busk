@@ -10,12 +10,18 @@ final class CoachSession {
     let handedness: Handedness
     let source: PoseSource
     let startDate = Date()
+    /// Focus set: the coach only cues this area, praising it when it's right.
+    let focus: FormArea?
+    /// Shots in the focus set; the coach calls the set done when it's reached (the player can keep going).
+    let targetShots: Int?
 
     private(set) var latestPose: PoseFrame?
     private(set) var shots: [ShotResult] = []
     private(set) var phase: ShotPhase = .waiting
-    private(set) var bannerText = "Step into frame"
+    private(set) var bannerText = "Step in front of the camera, 3 to 4 metres away"
     private(set) var bodyVisible = false
+    /// Framing before the first shot; nil once the player has been framed or has shot.
+    private(set) var framing: FramingCheck?
     /// Every cue the coach said (or would have said while muted), newest last.
     private(set) var spokenLog: [SpokenCue] = []
 
@@ -32,6 +38,10 @@ final class CoachSession {
     @ObservationIgnored private var lastSeen: TimeInterval = 0
     @ObservationIgnored private var lastFrameTime: TimeInterval = 0
     @ObservationIgnored private var announcedVisible = false
+    /// In a focus set: the shot number when each other area was last called out as more urgent than the focus.
+    @ObservationIgnored private var flaggedOutsideFocus: [FormArea: Int] = [:]
+    @ObservationIgnored private var adviceSince: (text: String, time: TimeInterval)?
+    @ObservationIgnored private var lastAdviceSpoken: (text: String, time: TimeInterval)?
     @ObservationIgnored private var statusUntil = Date.distantPast
     @ObservationIgnored private var best: (clip: ShotClip, number: Int, score: Int)?
     @ObservationIgnored private var pausedAt: Date?
@@ -40,13 +50,16 @@ final class CoachSession {
     /// Every camera angle grades more areas than this; fewer means tracking lost part of the body mid-shot.
     static let fullCheckAreas = 5
     var lastShot: ShotResult? { shots.last }
-    var summary: SessionSummary { SessionSummary(shots: shots) }
+    var summary: SessionSummary { SessionSummary(shots: shots, focus: focus) }
     var isDemo: Bool { source.isDemo }
     /// Time spent shooting, not counting time the app was in the background.
     var activeDuration: TimeInterval { (pausedAt ?? Date()).timeIntervalSince(startDate) - pausedTotal }
 
     init(cameraView: CameraView, handedness: Handedness, source: PoseSource, voiceEnabled: Bool,
-         ghostReplayEnabled: Bool = UserDefaults.standard.bool(forKey: SettingsKey.ghostReplay)) {
+         ghostReplayEnabled: Bool = UserDefaults.standard.bool(forKey: SettingsKey.ghostReplay),
+         focus: FormArea? = nil, targetShots: Int? = nil) {
+        self.focus = focus
+        self.targetShots = targetShots
         self.ghostReplayEnabled = ghostReplayEnabled
         self.cameraView = cameraView
         self.handedness = handedness
@@ -97,16 +110,12 @@ final class CoachSession {
         }
         if visible != bodyVisible {
             bodyVisible = visible
-            if visible && !announcedVisible {
-                announcedVisible = true
-                bannerText = "Got you. Shoot when ready"
-                speak("Got you. Shoot when ready")
-            } else if !visible && shots.isEmpty {
-                bannerText = "Step into frame"
-            } else if visible && shots.isEmpty {
-                bannerText = "Got you. Shoot when ready"
+            if announcedVisible && shots.isEmpty {
+                bannerText = visible ? (focus.map { "Got you. Focus on your \($0.title.lowercased()). Shoot when ready" }
+                    ?? "Got you. Shoot when ready") : "Step into frame"
             }
         }
+        if !announcedVisible && shots.isEmpty { checkFraming(frame) }
 
         if let metrics = analyzer.process(frame) {
             var result = evaluator.evaluate(metrics)
@@ -125,8 +134,9 @@ final class CoachSession {
                 }
                 if result.score > best?.score ?? -1 { best = (clip, shots.count, result.score) }
             }
-            bannerText = result.cue
-            speak(result.cue)
+            let cue = coachingCue(for: result)
+            bannerText = cue
+            speak(cue)
         }
         if analyzer.phase != phase {
             let next = analyzer.phase.rawValue, wrist = String(describing: frame[handedness.wrist])
@@ -135,11 +145,99 @@ final class CoachSession {
         phase = analyzer.phase
     }
 
+    /// The cue for a shot. In a focus set it's about the focus area only. Either way, when the fix from the last shot
+    /// got better the coach says so, and a cue repeated shot after shot changes its wording so it isn't one sentence on loop.
+    private func coachingCue(for result: ShotResult) -> String {
+        let previous = shots.dropLast().last
+        var cue: String
+        if let focus {
+            let now = result.areas.first { $0.area == focus }
+            switch now?.grade {
+            case .good?: cue = focus.praise(shots.count)
+            case .ok?: cue = "Closer. \(focus.cue)"
+            case .needsWork?:
+                cue = Self.improved(focus, from: previous, to: result) ? "Better that time. \(focus.cue)" : focus.cue
+            case nil: cue = result.cue
+            }
+            if let other = Self.outranksFocus(focus, in: result),
+               flaggedOutsideFocus[other].map({ shots.count - $0 >= Self.reflagEvery }) ?? true {
+                flaggedOutsideFocus[other] = shots.count
+                cue += ". Also, your \(other.title.lowercased()): \(other.cue.prefix(1).lowercased() + other.cue.dropFirst())"
+            }
+        } else if let fix = result.focus, Self.improved(fix, from: previous, to: result) {
+            cue = "Better. \(result.cue)"
+        } else if let prev = previous?.focus, prev != result.focus,
+                  result.areas.first(where: { $0.area == prev })?.grade == .good {
+            cue = "\(prev.title) fixed. Now: \(result.cue.prefix(1).lowercased() + result.cue.dropFirst())"
+        } else {
+            cue = result.cue
+            let repeats = spokenLog.reversed().prefix { $0.text.hasSuffix(result.cue) }.count
+            if repeats >= 2, let area = result.focus {
+                cue = repeats % 2 == 0 ? "Still your \(area.title.lowercased()). \(result.cue)" : "Stay with it. \(result.cue)"
+            }
+        }
+        if let focus, shots.count == targetShots, let r = summary.focusResult {
+            cue += ". Set done: \(r.good) of \(r.measured) good on your \(focus.title.lowercased()). Keep going or tap End"
+        }
+        return cue
+    }
+
+    /// Shots between reminders about a flaw outside the focus that is still the top fix.
+    nonisolated static let reflagEvery = 5
+
+    /// The shot's top fix when it isn't the focus and matters more: a beginner hears about a bad set point
+    /// even in a legs set, at least once.
+    nonisolated static func outranksFocus(_ focus: FormArea, in result: ShotResult) -> FormArea? {
+        guard let top = result.focus, top != focus,
+              result.areas.first(where: { $0.area == top })?.grade == .needsWork else { return nil }
+        let focusGrade = result.areas.first { $0.area == focus }?.grade
+        return focusGrade != .needsWork || top.coachingPriority < focus.coachingPriority ? top : nil
+    }
+
+    /// The area still needs work but is clearly less off than on the last shot.
+    nonisolated static func improved(_ area: FormArea, from previous: ShotResult?, to result: ShotResult) -> Bool {
+        guard let before = previous?.areas.first(where: { $0.area == area }),
+              let now = result.areas.first(where: { $0.area == area }) else { return false }
+        if now.grade > before.grade { return false }
+        if now.grade < before.grade { return true }
+        return before.severity > 0 && now.severity < before.severity * 0.75
+    }
+
+    /// Marks the latest shot made or missed (live buttons, or "made it" / "missed it"); nil clears it.
+    func markLastShot(made: Bool?) {
+        guard !shots.isEmpty else { return }
+        let i = shots.count - 1
+        shots[i].made = made
+        Self.log.notice("shot #\(self.shots.count, privacy: .public) marked \(String(describing: self.shots[i].made), privacy: .public)")
+    }
+
     func dismissReplay(_ id: ShotReplay.ID) {
         if replay?.id == id { replay = nil }
     }
 
     /// Answers "how am I doing": a spoken summary of the session so far, even when the coach is muted.
+    /// Before the first shot: say how to fix the camera until the whole player is in the picture, then "Got you".
+    private func checkFraming(_ frame: PoseFrame) {
+        let check = FramingCheck(frame: frame, handedness: handedness)
+        framing = check
+        guard let advice = check.advice else {
+            announcedVisible = true
+            framing = nil
+            let ready = focus.map { "Got you. Focus on your \($0.title.lowercased()). Shoot when ready" } ?? "Got you. Shoot when ready"
+            bannerText = ready
+            speak(ready)
+            return
+        }
+        bannerText = advice
+        if adviceSince?.text != advice { adviceSince = (advice, frame.timestamp) }
+        // Speak advice once it has held for a second, and repeat it at most every 6 s.
+        guard let since = adviceSince, frame.timestamp - since.time >= 1 else { return }
+        if let last = lastAdviceSpoken, last.text == advice, frame.timestamp - last.time < 6 { return }
+        if let last = lastAdviceSpoken, frame.timestamp - last.time < 3 { return }
+        lastAdviceSpoken = (advice, frame.timestamp)
+        speak(advice)
+    }
+
     func speakStatus() {
         let text = summary.spokenStatus
         statusUntil = Date().addingTimeInterval(max(2, Double(text.split(separator: " ").count) * 0.4))
