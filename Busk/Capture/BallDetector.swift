@@ -95,7 +95,8 @@ final class BallDetector {
                 found.append((score, Ball(center: CGPoint(x: center.x / W, y: center.y / H), radius: radius / s / H)))
             }
         }
-        let best = found.min { $0.score < $1.score }
+        // A blob far from both hands, off-size and ragged is a guess, not the ball: better no ball than that one.
+        let best = found.filter { $0.score <= 1 }.min { $0.score < $1.score }
         if let ball = best?.ball { last = (ball, t) }
         return best?.ball
     }
