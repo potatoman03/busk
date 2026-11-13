@@ -78,7 +78,8 @@ final class BallDetector {
         let toImage = { (x: CGFloat, y: CGFloat) in CGPoint(x: area.minX + x / s, y: area.minY + y / s) }
         var found: [(score: Double, ball: Ball)] = []
         for saturation in Self.saturations {
-            for b in Self.blobs(Self.orangeMask(rgba, width: w, height: h, saturation: saturation), width: w, height: h) {
+            let mask = Self.orangeMask(rgba, width: w, height: h, saturation: saturation)
+            for b in Self.blobs(mask, width: w, height: h).flatMap({ Self.split($0, width: w, height: h, expected: expected) }) {
                 let (x0, x1, y0, y1) = Self.extent(of: b, width: w)
                 let bw = CGFloat(x1 - x0 + 1), bh = CGFloat(y1 - y0 + 1)
                 let radius = max(bw, bh) / 2
@@ -203,7 +204,20 @@ final class BallDetector {
     }
 
     /// Connected orange regions. Neighbours are joined across a one-pixel gap, so the seams don't split the ball.
-    static func blobs(_ mask: [Bool], width w: Int, height h: Int) -> [Blob] {
+    /// A ragged blob is often the ball joined to an edge of skin or shirt beside it by one stray pixel across the
+    /// gap, which colour noise puts there on one decoder and not on another: such a blob is also tried in pieces
+    /// joined only to their touching neighbours.
+    static func split(_ b: Blob, width w: Int, height h: Int, expected: CGFloat) -> [Blob] {
+        let bw = CGFloat(b.maxX - b.minX + 1), bh = CGFloat(b.maxY - b.minY + 1), radius = max(bw, bh) / 2
+        let fill = Double(b.count) / (Double.pi * Double(radius * radius))
+        guard fill < 0.35 || min(bw, bh) / max(bw, bh) < 0.45 || radius > 1.3 * expected else { return [b] }
+        var mask = [Bool](repeating: false, count: w * h)
+        for i in b.pixels { mask[i] = true }
+        let pieces = blobs(mask, width: w, height: h, gap: 1)
+        return pieces.count > 1 ? [b] + pieces : [b]
+    }
+
+    static func blobs(_ mask: [Bool], width w: Int, height h: Int, gap: Int = 2) -> [Blob] {
         var label = [Int32](repeating: -1, count: w * h)
         var out: [Blob] = []
         var stack: [Int] = []
@@ -217,8 +231,8 @@ final class BallDetector {
                 blob.count += 1; blob.sumX += x; blob.sumY += y; blob.pixels.append(i)
                 blob.minX = min(blob.minX, x); blob.maxX = max(blob.maxX, x)
                 blob.minY = min(blob.minY, y); blob.maxY = max(blob.maxY, y)
-                for dy in -2...2 {
-                    for dx in -2...2 where dx != 0 || dy != 0 {
+                for dy in -gap...gap {
+                    for dx in -gap...gap where dx != 0 || dy != 0 {
                         let nx = x + dx, ny = y + dy
                         guard nx >= 0, ny >= 0, nx < w, ny < h else { continue }
                         let j = ny * w + nx
