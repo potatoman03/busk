@@ -118,7 +118,7 @@ struct FormEvaluator {
         func grade(_ v: Double) -> Grade {
             bad > ok ? (v > bad ? .needsWork : v > ok ? .ok : .good) : (v < bad ? .needsWork : v < ok ? .ok : .good)
         }
-        func severity(_ v: Double) -> Double { max(0, (v - bad) / (worst - bad)) }
+        func severity(_ v: Double) -> Double { max(0, (v - ok) / (worst - ok)) }
         func isClear(_ v: Double) -> Bool { bad > ok ? v >= (clear ?? bad) : v <= (clear ?? bad) }
     }
 

@@ -170,7 +170,7 @@ final class BallDetector {
 
     /// Basketball orange: red the strongest channel, hue between a little past red and orange, clearly saturated
     /// (skin, wooden floors and sand-coloured courts are paler or yellower), neither black nor blown out.
-    static let saturations = [38, 50, 62]
+    static let saturations = [38, 50, 62, 74]
 
     static func orangeMask(_ rgba: [UInt8], width w: Int, height h: Int, saturation: Int = 38) -> [Bool] {
         var mask = [Bool](repeating: false, count: w * h)
