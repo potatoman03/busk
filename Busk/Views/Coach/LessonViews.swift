@@ -105,10 +105,9 @@ struct DrillView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(drill.title).font(.largeTitle.bold()).accessibilityIdentifier("drillTitle")
                     Text(drill.summary).foregroundStyle(.secondary)
-                    HStack {
-                        Pill(text: drill.needsBall ? "Needs a ball" : "No ball needed",
-                             systemImage: drill.needsBall ? "basketball" : "figure.run")
-                        Pill(text: drill.dose, systemImage: "repeat")
+                    ViewThatFits(in: .horizontal) {
+                        HStack { pills() }
+                        VStack(alignment: .leading, spacing: 8) { pills(wrap: true) }
                     }
                 }
 
@@ -116,6 +115,7 @@ struct DrillView: View {
                     Card {
                         Label("Where to stand", systemImage: "figure.stand").font(.headline)
                         WallFlickPicture().frame(height: 170)
+                            .dynamicTypeSize(...DynamicTypeSize.xxLarge)
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityIdentifier("wallFlickPicture")
@@ -162,6 +162,12 @@ struct DrillView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.visible, for: .navigationBar)
         .onAppear { done = WorkoutChecklist.done().contains("drill-\(drill.id)") }
+    }
+
+    @ViewBuilder private func pills(wrap: Bool = false) -> some View {
+        Pill(text: drill.needsBall ? "Needs a ball" : "No ball needed",
+             systemImage: drill.needsBall ? "basketball" : "figure.run", wraps: wrap)
+        Pill(text: drill.dose, systemImage: "repeat", wraps: wrap)
     }
 
     private static let warmUps: Set<String> = ["shadow", "formShooting"]
@@ -251,8 +257,12 @@ struct BallPositionsPicture: View {
               style: .lowSet, time: 0.70, good: false),
     ]
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .center, spacing: 16)) : AnyLayout(HStackLayout(alignment: .top, spacing: 10))
+        layout {
             ForEach(Self.panels) { panel in
                 VStack(spacing: 6) {
                     PoseFigure(pose: Self.pose(panel), color: panel.good ? .white : .red.opacity(0.85))

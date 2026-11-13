@@ -245,6 +245,44 @@ final class BuskUITests: XCTestCase {
 
     /// Hands-free flow: the simulator has no microphone, so the on-screen voice buttons inject each phrase into the
     /// same parser the speech recognizer feeds on a device.
+    /// At the largest accessibility text size, no lesson or drill page is wider than the screen.
+    func testLessonsAndDrillsFitAtAccessibilityXL() {
+        lessonsAndDrillsFit(size: "AccessibilityXL")
+    }
+
+    /// Accessibility L is the first size where the drill pills stack one per row.
+    func testLessonsAndDrillsFitAtAccessibilityL() {
+        lessonsAndDrillsFit(size: "AccessibilityL")
+    }
+
+    private func lessonsAndDrillsFit(size: String) {
+        relaunch(["-ui-testing", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategory\(size)"])
+        let coach = app.buttons["coachCard"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 10))
+        coach.tap()
+        let library = app.buttons["libraryLink"]
+        for _ in 0..<8 where !library.isHittable { app.swipeUp() }
+        library.tap()
+        let lessons = ["overview", "legs", "balance", "setPoint", "elbow", "guideHand", "rhythm", "releaseTiming", "arc", "followThrough"]
+        let drills = ["shadow", "dipRise", "landOnX", "setFreeze", "mirrorL", "guideOff", "oneCount", "peakRelease", "wallFlick",
+                      "formShooting", "oneHandForm", "arcOverHand", "oneStepBack", "freeThrows"]
+        let width = app.windows.firstMatch.frame.width
+        for (id, title) in lessons.map({ ("lesson-\($0)", "lessonTitle") }) + drills.map({ ("libraryDrill-\($0)", "drillTitle") }) {
+            let row = app.buttons[id]
+            for _ in 0..<40 where !row.isHittable { app.swipeUp(velocity: .fast) }
+            XCTAssertTrue(row.isHittable, id)
+            row.tap()
+            XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 5), id)
+            for text in app.scrollViews.firstMatch.staticTexts.allElementsBoundByIndex {
+                let f = text.frame
+                XCTAssertTrue(f.minX >= -1 && f.maxX <= width + 1, "\(id): \"\(text.label)\" spans \(f.minX)...\(f.maxX) of \(width)")
+            }
+            if id == "libraryDrill-wallFlick" || id == "lesson-setPoint" || id == "libraryDrill-dipRise" || id == "libraryDrill-oneStepBack" { snapshot("\(size)-\(id)") }
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            XCTAssertTrue(row.waitForExistence(timeout: 5), id)
+        }
+    }
+
     /// Drills Busk can't watch say so, and the wall flick shows where to stand.
     func testDrillInstructions() {
         relaunch(["-ui-testing"])

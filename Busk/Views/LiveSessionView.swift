@@ -315,12 +315,14 @@ struct Pill: View {
     let systemImage: String
     /// Long labels shorten in the middle instead of widening the layout.
     var truncates = false
+    /// Wraps onto more lines instead, for pills stacked one per row.
+    var wraps = false
     var body: some View {
         Label(text, systemImage: systemImage)
             .font(.caption.bold())
-            .lineLimit(1)
+            .lineLimit(wraps ? nil : 1)
             .truncationMode(.middle)
-            .fixedSize(horizontal: !truncates, vertical: true)
+            .fixedSize(horizontal: !truncates && !wraps, vertical: true)
             .padding(.horizontal, 10).padding(.vertical, 6)
             .background(.ultraThinMaterial, in: Capsule())
     }
