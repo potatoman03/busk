@@ -31,6 +31,8 @@ final class VoiceControl {
     private(set) var lastHeard: String?
     /// The latest command. Screens react with `onChange(of:)`.
     private(set) var event: VoiceEvent?
+    /// Set up screens on display. While one is up it owns "start session", so Home doesn't open another on top.
+    @ObservationIgnored var setupScreens = 0
 
     @ObservationIgnored private let simulateInput: Bool
     @ObservationIgnored private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))

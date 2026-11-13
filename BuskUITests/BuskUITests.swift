@@ -40,8 +40,43 @@ final class BuskUITests: XCTestCase {
         XCTAssertTrue(app.buttons["settingsButton"].exists)
         XCTAssertTrue(app.buttons["historyButton"].exists)
         XCTAssertTrue(app.staticTexts["Elbow"].exists)
+        XCTAssertTrue(app.staticTexts["Balance"].exists)
         XCTAssertTrue(app.staticTexts["Legs"].exists)
         snapshot("01-home")
+    }
+
+    func testFirstRunGuide() {
+        relaunch(["-ui-testing", "-show-guide"])
+        let next = app.buttons["guideNextButton"]
+        XCTAssertTrue(next.waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Set your phone up"].exists)
+        snapshot("00a-guide-phone")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["Pick an angle"].waitForExistence(timeout: 5))
+        snapshot("00b-guide-angle")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["While you shoot"].waitForExistence(timeout: 5))
+        snapshot("00c-guide-live")
+        next.tap()
+        XCTAssertTrue(app.staticTexts["Your coach"].waitForExistence(timeout: 5))
+        snapshot("00d-guide-coach")
+        next.tap()
+        XCTAssertTrue(app.buttons["startButton"].waitForExistence(timeout: 5))
+    }
+
+    func testFramingCheckBeforeFirstShot() {
+        relaunch(["-ui-testing", "-demo-walk-in"])
+        app.buttons["startButton"].tap()
+        XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+        app.buttons["goLiveButton"].tap()
+        let check = app.descendants(matching: .any)["framingCheck"]
+        XCTAssertTrue(check.waitForExistence(timeout: 8))
+        snapshot("framing-check")
+        let banner = app.staticTexts["cueBanner"]
+        XCTAssertFalse(banner.label.hasPrefix("Got you"), banner.label)
+        expectation(for: NSPredicate(format: "label BEGINSWITH 'Got you'"), evaluatedWith: banner)
+        waitForExpectations(timeout: 30)
+        XCTAssertFalse(check.exists)
     }
 
     func testPracticeProgress() {
@@ -208,6 +243,74 @@ final class BuskUITests: XCTestCase {
 
     /// Hands-free flow: the simulator has no microphone, so the on-screen voice buttons inject each phrase into the
     /// same parser the speech recognizer feeds on a device.
+    /// Drills Busk can't watch say so, and the wall flick shows where to stand.
+    func testDrillInstructions() {
+        relaunch(["-ui-testing"])
+        let coach = app.buttons["coachCard"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 10))
+        coach.tap()
+        app.swipeUp()
+        app.buttons["libraryLink"].tap()
+        XCTAssertTrue(app.buttons["lesson-legs"].waitForExistence(timeout: 5))
+        let lesson = app.buttons["lesson-followThrough"]
+        for _ in 0..<4 where !lesson.isHittable { app.swipeUp() }
+        lesson.tap()
+        let drill = app.buttons["drill-wallFlick"]
+        for _ in 0..<3 where !drill.isHittable { app.swipeUp() }
+        drill.tap()
+        XCTAssertTrue(app.descendants(matching: .any)["wallFlickPicture"].waitForExistence(timeout: 5))
+        snapshot("17-wall-flick")
+        app.swipeUp()
+        let note = app.staticTexts["drillTrackingNote"]
+        XCTAssertTrue(note.waitForExistence(timeout: 5))
+        XCTAssertTrue(note.label.contains("Mark done"), note.label)
+        snapshot("18-wall-flick-note")
+        for (lessonID, drillID) in [("legs", "dipRise"), ("guideHand", "guideOff")] {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            let next = app.buttons["lesson-\(lessonID)"]
+            for _ in 0..<4 where !next.isHittable { app.swipeDown() }
+            for _ in 0..<4 where !next.isHittable { app.swipeUp() }
+            next.tap()
+            let d = app.buttons["drill-\(drillID)"]
+            for _ in 0..<3 where !d.isHittable { app.swipeUp() }
+            d.tap()
+            XCTAssertTrue(app.staticTexts["drillTitle"].waitForExistence(timeout: 5))
+            snapshot("19-drill-\(drillID)")
+        }
+    }
+
+    /// "Start session" said on a focus set's Setup goes live there, after a session has already been shot.
+    func testVoiceStartFromFocusSetSetup() {
+        relaunch(["-ui-testing", "-voiceCommands", "YES"])
+        for _ in 0..<2 {
+            let coach = app.buttons["coachCard"]
+            XCTAssertTrue(coach.waitForExistence(timeout: 10))
+            coach.tap()
+            app.swipeUp()
+            app.buttons["libraryLink"].tap()
+            let legs = app.buttons["lesson-legs"]
+            XCTAssertTrue(legs.waitForExistence(timeout: 5))
+            legs.tap()
+            let practise = app.buttons["practiseLessonButton"]
+            XCTAssertTrue(practise.waitForExistence(timeout: 5))
+            practise.tap()
+            XCTAssertTrue(app.buttons["goLiveButton"].waitForExistence(timeout: 5))
+            app.buttons["simulateVoice-start"].firstMatch.tap()
+            let count = app.staticTexts["shotCount"]
+            XCTAssertTrue(count.waitForExistence(timeout: 10))
+            expectation(for: NSPredicate(format: "label.integerValue >= 1"), evaluatedWith: count)
+            waitForExpectations(timeout: 30)
+            app.buttons["endSessionButton"].tap()
+            let done = app.buttons["summaryDoneButton"]
+            if done.waitForExistence(timeout: 5) { done.tap() }
+            // Back to Home for the next round.
+            while app.navigationBars.buttons.count > 0 && !app.buttons["coachCard"].isHittable {
+                app.navigationBars.buttons.element(boundBy: 0).tap()
+            }
+        }
+    }
+
     func testHandsFreeVoiceCommands() {
         relaunch(["-ui-testing", "-voiceCommands", "YES"])
         let status = app.staticTexts["voiceStatus"].firstMatch
@@ -372,5 +475,75 @@ final class BuskUITests: XCTestCase {
         expectation(for: NSPredicate(format: "label.integerValue >= 1"), evaluatedWith: count)
         waitForExpectations(timeout: 60)
         XCTAssertFalse(app.descendants(matching: .any)["ghostReplayLegend"].exists)
+    }
+
+    func testCoachPlanAndLessons() {
+        let coach = app.buttons["coachCard"]
+        XCTAssertTrue(coach.waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["homeCoachFocus"].label, "Find your first focus")
+        coach.tap()
+        XCTAssertTrue(app.staticTexts["coachFocus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["coachFocus"].label, "Let's find your first focus")
+        XCTAssertTrue(app.buttons["step-baseline"].exists)
+        XCTAssertTrue(app.staticTexts["Baseline: 15 shadow shots"].exists)
+        snapshot("09-coach-start")
+
+        app.segmentedControls["hasBallPicker"].buttons["I have a ball"].tap()
+        XCTAssertTrue(app.staticTexts["Baseline: 15 shots"].waitForExistence(timeout: 5))
+        app.segmentedControls["hasBallPicker"].buttons["No ball"].tap()
+
+        app.buttons["step-lesson-overview"].tap()
+        XCTAssertTrue(app.staticTexts["lessonTitle"].waitForExistence(timeout: 5))
+        snapshot("10-lesson-overview")
+        XCTAssertTrue(app.descendants(matching: .any)["ballPosition-setPoint"].exists)
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertEqual(app.staticTexts["workoutProgress"].label, "1/2")
+
+        app.swipeUp()
+        app.buttons["libraryLink"].tap()
+        let elbow = app.buttons["lesson-elbow"]
+        XCTAssertTrue(elbow.waitForExistence(timeout: 5))
+        snapshot("11-library")
+        elbow.tap()
+        XCTAssertTrue(app.staticTexts["lessonTitle"].label.hasPrefix("Elbow"))
+        snapshot("12-lesson-elbow")
+        app.swipeUp()
+        let drill = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'drill-'")).firstMatch
+        XCTAssertTrue(drill.waitForExistence(timeout: 5))
+        drill.tap()
+        XCTAssertTrue(app.staticTexts["drillTitle"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["drillDoneButton"].exists)
+        snapshot("13-drill")
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        // A focus set from the lesson: Busk only coaches the elbow and the plan keeps it as the focus.
+        let practise = app.buttons["practiseLessonButton"]
+        XCTAssertTrue(practise.waitForExistence(timeout: 5))
+        practise.tap()
+        XCTAssertTrue(app.otherElements["setupFocusCard"].waitForExistence(timeout: 5) || app.staticTexts["Focus set"].exists)
+        snapshot("14-focus-setup")
+        app.buttons["goLiveButton"].tap()
+        let pill = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Elbow '")).firstMatch
+        let count = app.staticTexts["shotCount"]
+        XCTAssertTrue(count.waitForExistence(timeout: 5))
+        expectation(for: NSPredicate(format: "label.integerValue >= 2"), evaluatedWith: count)
+        waitForExpectations(timeout: 60)
+        XCTAssertTrue(pill.waitForExistence(timeout: 5))
+        snapshot("15-focus-live")
+        app.buttons["endSessionButton"].tap()
+        XCTAssertTrue(app.staticTexts["summaryFocusResult"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["summaryFocusResult"].label.hasPrefix("Elbow"))
+        snapshot("16-focus-summary")
+        app.buttons["summaryDoneButton"].tap()
+
+        while app.navigationBars.buttons.count > 0 && !app.navigationBars["Busk"].exists {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+        XCTAssertTrue(app.staticTexts["homeCoachFocus"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["homeCoachFocus"].label, "Focus: Elbow")
+        app.buttons["coachCard"].tap()
+        XCTAssertEqual(app.staticTexts["coachFocus"].label, "Elbow")
+        XCTAssertTrue(app.buttons["step-focus-elbow"].exists)
+        snapshot("17-coach-focus")
     }
 }

@@ -9,12 +9,15 @@ final class SessionRecord {
     var handednessRaw: String
     var isDemo: Bool
     var shotsData: Data
+    /// The form area a focus set worked on (nil for a regular session).
+    var focusRaw: String?
     /// Shots that went in, when the player counted the whole session on the summary. Nil falls back to the shots marked
     /// Made or Missed live.
     var makes: Int?
 
     init(date: Date, duration: TimeInterval, view: CameraView, handedness: Handedness, isDemo: Bool, shots: [ShotResult],
-         makes: Int? = nil) {
+         focus: FormArea? = nil, makes: Int? = nil) {
+        self.focusRaw = focus?.rawValue
         self.date = date
         self.duration = duration
         self.viewRaw = view.rawValue
@@ -38,7 +41,9 @@ final class SessionRecord {
 
     var shots: [ShotResult] { (try? JSONDecoder().decode([ShotResult].self, from: shotsData)) ?? [] }
     var view: CameraView { CameraView(rawValue: viewRaw) ?? .side }
-    var summary: SessionSummary { SessionSummary(shots: shots, makes: makes) }
+    var focus: FormArea? { focusRaw.flatMap(FormArea.init(rawValue:)) }
+    var summary: SessionSummary { SessionSummary(shots: shots, focus: focus, makes: makes) }
+    var practice: PracticeSession { PracticeSession(date: date, focus: focus, shots: shots) }
 
     /// "12 min", or "<1 min" for a quick one.
     var durationText: String {
@@ -46,13 +51,31 @@ final class SessionRecord {
     }
 }
 
+extension Sequence where Element == SessionRecord {
+    /// The sessions the coaching plan learns from: demo shooter sessions are not the player's shots.
+    var coachingSessions: [PracticeSession] {
+        filter { !$0.isDemo || AppEnvironment.demoCountsForPlan }.map(\.practice)
+    }
+}
+
 /// Aggregates a set of shots for the summary screen.
 struct SessionSummary {
     let shots: [ShotResult]
+    /// The area a focus set worked on.
+    let focus: FormArea?
+
+    /// Focus set: shots where the focus area was measured, and how many of those were good.
+    var focusResult: (good: Int, measured: Int)? {
+        guard let focus else { return nil }
+        let grades = shots.compactMap { $0.areas.first { $0.area == focus }?.grade }
+        return (grades.filter { $0 == .good }.count, grades.count)
+    }
+
     private let loggedMakes: Int?
 
-    init(shots: [ShotResult], makes: Int? = nil) {
+    init(shots: [ShotResult], focus: FormArea? = nil, makes: Int? = nil) {
         self.shots = shots
+        self.focus = focus
         loggedMakes = makes
     }
 
@@ -102,7 +125,10 @@ struct SessionSummary {
                 parts.append("Last three dipped to \(recentAverage).")
             }
         }
-        if let focus = topFocus {
+        if let focus, let r = focusResult {
+            parts.append(r.measured == 0 ? "Busk can't see your \(focus.title.lowercased()) from this angle yet."
+                         : "\(focus.title): \(r.good) of \(r.measured) good.")
+        } else if let focus = topFocus {
             parts.append("Main thing: \(focus.title.lowercased()). \(focus.cue).")
         } else {
             parts.append("Form looks clean. Keep it going.")

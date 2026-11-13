@@ -87,6 +87,7 @@ struct LiveSessionView: View {
                             .frame(maxWidth: .infinity, alignment: .topLeading)
                             VStack(spacing: 12) {
                                 Spacer(minLength: 0)
+                                framingCard
                                 feedback(compact: true)
                             }
                             .frame(width: hudWidth)
@@ -95,6 +96,7 @@ struct LiveSessionView: View {
                         .frame(maxHeight: .infinity)
                     } else {
                         replayPanel
+                        framingCard
                         feedback(compact: false)
                             .onGeometryChange(for: CGFloat.self) { $0.size.height + 12 } action: { feedbackHeight = $0 }
                     }
@@ -155,7 +157,8 @@ struct LiveSessionView: View {
             record.update(duration: duration, shots: session.shots)
         } else {
             let new = SessionRecord(date: session.startDate, duration: duration, view: session.cameraView,
-                                    handedness: session.handedness, isDemo: session.isDemo, shots: session.shots)
+                                    handedness: session.handedness, isDemo: session.isDemo, shots: session.shots,
+                                    focus: session.focus)
             modelContext.insert(new)
             record = new
         }
@@ -210,8 +213,15 @@ struct LiveSessionView: View {
     }
 
     private var phasePill: some View {
-        Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
-            .accessibilityIdentifier("phaseLabel")
+        HStack(spacing: 8) {
+            Pill(text: session.phase.rawValue, systemImage: session.bodyVisible ? "figure.stand" : "person.slash")
+                .accessibilityIdentifier("phaseLabel")
+            if let focus = session.focus, let r = session.summary.focusResult {
+                Pill(text: "\(focus.title) \(r.good)/\(r.measured)" + (session.targetShots.map { session.shots.count >= $0 ? " · set done" : " · set \(session.shots.count)/\($0)" } ?? ""),
+                     systemImage: "scope")
+                    .accessibilityIdentifier("focusPill")
+            }
+        }
     }
 
     private func topBar(landscape: Bool) -> some View {
@@ -264,6 +274,24 @@ struct LiveSessionView: View {
                 phasePill
                 if let badges { badges }
             }
+        }
+    }
+
+    /// Before the first shot: what the camera can and can't see, so the player can fix the setup.
+    @ViewBuilder private var framingCard: some View {
+        if let f = session.framing {
+            HStack(spacing: 14) {
+                ForEach([("Head", f.head), ("Shooting arm", f.arm), ("Feet", f.feet), ("Centred", f.centred)], id: \.0) { item in
+                    Label(item.0, systemImage: item.1 ? "checkmark.circle.fill" : "xmark.circle")
+                        .foregroundStyle(item.1 ? Color.green : Color.yellow)
+                }
+            }
+            .font(.caption.weight(.semibold))
+            .labelStyle(.titleAndIcon)
+            .padding(.horizontal, 12).padding(.vertical, 8)
+            .background(.ultraThinMaterial, in: Capsule())
+            .accessibilityElement(children: .combine)
+            .accessibilityIdentifier("framingCheck")
         }
     }
 
@@ -349,7 +377,7 @@ struct ShotCard: View {
             if let worst = shot.areas.max(by: { $0.grade < $1.grade }) {
                 Circle().fill(Theme.color(for: worst.grade)).frame(width: 8, height: 8)
                 Text(worst.area.title).font(.caption.bold())
-                Text(worst.detail).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                Text(worst.plain).font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
             markButtons
@@ -373,7 +401,7 @@ struct ShotCard: View {
                     HStack(spacing: 6) {
                         Circle().fill(Theme.color(for: a.grade)).frame(width: 8, height: 8)
                         Text(a.area.title).font(.caption.bold())
-                        Text(a.detail).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
+                        Text(a.plain).font(.caption).foregroundStyle(.secondary).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: !compact)
                     }
                 }
             }
