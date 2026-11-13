@@ -221,14 +221,14 @@ struct SummaryContent: View {
                 Spacer()
                 // Makes come from one place at a time, so the count and the shot marks never disagree.
                 if summary.countedWhole || summary.marked == 0 {
-                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 }),
+                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 == 0 && summary.marked == 0 ? nil : $0 }),
                             in: 0...max(summary.count, summary.makes ?? 0))
                         .labelsHidden()
                         .accessibilityIdentifier("makesStepper")
                 }
             }
-            if summary.countedWhole, summary.marked > 0 {
-                Button("Use shot marks instead") { record.makes = nil }
+            if summary.countedWhole {
+                Button(summary.marked > 0 ? "Use shot marks instead" : "Mark each shot instead") { record.makes = nil }
                     .font(.subheadline.bold())
                     .accessibilityIdentifier("useShotMarksButton")
             } else if !summary.countedWhole, summary.marked > 0 {
