@@ -13,6 +13,7 @@ struct SummaryView: View {
 
 struct SummaryContent: View {
     @Bindable var record: SessionRecord
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \SessionRecord.date) private var records: [SessionRecord]
     @AppStorage(SettingsKey.dailyShotGoal) private var goal = PracticeGoal.defaultShots
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -221,18 +222,18 @@ struct SummaryContent: View {
                 Spacer()
                 // Makes come from one place at a time, so the count and the shot marks never disagree.
                 if summary.countedWhole || summary.marked == 0 {
-                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { record.makes = $0 == 0 && summary.marked == 0 ? nil : $0 }),
+                    Stepper("Makes", value: Binding(get: { summary.makes ?? 0 }, set: { setMakes($0 == 0 && summary.marked == 0 ? nil : $0) }),
                             in: 0...max(summary.count, summary.makes ?? 0))
                         .labelsHidden()
                         .accessibilityIdentifier("makesStepper")
                 }
             }
             if summary.countedWhole {
-                Button(summary.marked > 0 ? "Use shot marks instead" : "Mark each shot instead") { record.makes = nil }
+                Button(summary.marked > 0 ? "Use shot marks instead" : "Mark each shot instead") { setMakes(nil) }
                     .font(.subheadline.bold())
                     .accessibilityIdentifier("useShotMarksButton")
             } else if !summary.countedWhole, summary.marked > 0 {
-                Button("Count the whole session instead") { record.makes = summary.makes }
+                Button("Count the whole session instead") { setMakes(summary.makes) }
                     .font(.subheadline.bold())
                     .accessibilityIdentifier("countWholeButton")
             }
@@ -246,10 +247,17 @@ struct SummaryContent: View {
         return "Tap a shot's mark below to change it." + left
     }
 
+    // Saved right away so an edit survives the app being closed straight after.
+    private func setMakes(_ makes: Int?) {
+        record.makes = makes
+        try? modelContext.save()
+    }
+
     /// Made, then Missed, then not marked.
     private func markButton(_ made: Bool?, index: Int) -> some View {
         Button {
             record.mark(shot: index, made: made == nil ? true : made == true ? false : nil)
+            try? modelContext.save()
         } label: {
             Image(systemName: made == true ? "checkmark.circle.fill" : made == false ? "xmark.circle.fill" : "circle.dashed")
                 .font(.title3)
