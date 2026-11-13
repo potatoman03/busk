@@ -72,7 +72,7 @@ struct Lesson: Identifiable, Hashable, Sendable {
             why: "Stiff legs make your arms do all the work, so tired arms push the ball flat and short. A real dip turns your whole body into the spring.",
             steps: [
                 "Start with a slight knee bend, weight on the balls of your feet.",
-                "Dip until your thighs are about a third of the way to a squat.",
+                "Dip as if you were about to sit on a tall bar stool: knees bent, hips back a little, heels down.",
                 "Rise straight up and let the ball travel up with you; legs and arms move together.",
                 "Finish on your toes, then land softly.",
             ],
@@ -290,8 +290,8 @@ struct Drill: Identifiable, Hashable, Sendable {
         Drill(id: "wallFlick", title: "Wall flick", summary: "Grooves a high finish and a wrist snap, no ball needed.",
               needsBall: false, areas: [.followThrough, .arc], dose: "3 sets of 15",
               steps: [
-                  "Stand with your shooting side to a wall. Hold your arm straight out sideways: your fingertips should just touch it.",
-                  "From the set point, push up so your fingertips brush the wall high above your head.",
+                  "Stand with your shooting side to a wall, close in: your shooting shoulder about a hand's width from it.",
+                  "From the set point, push straight up so your fingertips brush the wall high above your head. If you can't reach it, step closer.",
                   "Snap your wrist so your fingers point down. Hold for two seconds.",
                   "With a ball: lie on your back and flick the ball straight up a metre, catch, repeat.",
               ], tracked: false),
