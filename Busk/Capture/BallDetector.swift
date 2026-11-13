@@ -84,7 +84,8 @@ final class BallDetector {
                 let radius = max(bw, bh) / 2
                 let size = Double(radius / expected)
                 let fill = Double(b.count) / (Double.pi * Double(radius * radius))
-                guard size >= 0.45, size <= 2, fill >= 0.35, min(bw, bh) / max(bw, bh) >= 0.45 else { continue }
+                // A sliver at the edge of a hand, of the ball or of an orange shirt, is smaller than any whole ball.
+                guard size >= 0.6, size <= 2, fill >= 0.35, min(bw, bh) / max(bw, bh) >= 0.45 else { continue }
                 if let followed, radius > 1.3 * followed { continue }
                 let center = toImage(CGFloat(x0 + x1 + 1) / 2, CGFloat(y0 + y1 + 1) / 2)
                 let reach = hands.map { Double(Geometry.distance($0, center) / r0) }.min()!
