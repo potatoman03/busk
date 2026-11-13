@@ -2,11 +2,18 @@ import AVFoundation
 
 /// Speaks short coaching cues with on-device speech synthesis.
 @MainActor
-final class CoachVoice: NSObject {
-    private let synth = AVSpeechSynthesizer()
-    var enabled = true
-    var rate: Float = AVSpeechUtteranceDefaultSpeechRate * 1.05
-    private(set) var spoken: [String] = []
+@Observable
+final class CoachVoice: NSObject, AVSpeechSynthesizerDelegate {
+    @ObservationIgnored private let synth = AVSpeechSynthesizer()
+    @ObservationIgnored var enabled = true
+    @ObservationIgnored var rate: Float = AVSpeechUtteranceDefaultSpeechRate * 1.05
+    @ObservationIgnored private(set) var spoken: [String] = []
+    /// Keeps each cue in progress instead of playing it, until `stop()`, so UI tests can see the speaking state on
+    /// a slow simulator.
+    @ObservationIgnored var holdsSpeech = false
+    /// Cues said but not yet finished, including ones still waiting for the voice lookup.
+    private var inFlight: Set<ObjectIdentifier> = []
+    var isSpeaking: Bool { !inFlight.isEmpty }
 
     /// Set while voice commands are listening, so speaking cues doesn't close the microphone.
     static var keepsMicrophoneOpen = false
@@ -17,6 +24,7 @@ final class CoachVoice: NSObject {
 
     override init() {
         super.init()
+        synth.delegate = self
         _ = Self.voiceLookup
     }
 
@@ -58,8 +66,8 @@ final class CoachVoice: NSObject {
     }
     private struct VoiceBox: @unchecked Sendable { let voice: AVSpeechSynthesisVoice? }
     /// Cues wait their turn behind the voice lookup, so they still play in the order they were said.
-    private var queue: Task<Void, Never>?
-    private var generation = 0
+    @ObservationIgnored private var queue: Task<Void, Never>?
+    @ObservationIgnored private var generation = 0
 
     /// `force` speaks even when the coach is muted, for answers the player asked for.
     func say(_ text: String, interrupt: Bool = true, force: Bool = false) {
@@ -67,12 +75,15 @@ final class CoachVoice: NSObject {
         guard enabled || force else { return }
         let u = AVSpeechUtterance(string: text)
         u.rate = rate
+        let id = ObjectIdentifier(u)
+        inFlight.insert(id)
         let previous = queue
         let run = generation
         queue = Task {
             await previous?.value
             u.voice = await Self.voiceLookup.value.voice
             guard run == generation else { return }
+            guard !holdsSpeech else { return }
             if interrupt && synth.isSpeaking { synth.stopSpeaking(at: .word) }
             synth.speak(u)
         }
@@ -80,6 +91,19 @@ final class CoachVoice: NSObject {
 
     func stop() {
         generation += 1
+        inFlight.removeAll()
         synth.stopSpeaking(at: .immediate)
+    }
+
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        finished(ObjectIdentifier(utterance))
+    }
+
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        finished(ObjectIdentifier(utterance))
+    }
+
+    private nonisolated func finished(_ id: ObjectIdentifier) {
+        Task { @MainActor in inFlight.remove(id) }
     }
 }
